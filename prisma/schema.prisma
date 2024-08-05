@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  ADMIN
+  USER
+}
+
+model Users {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String           @unique
+  password       String
+  image          String?
+  type           UserType         @default(USER)
+  isVerified     Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  Notifications  Notifications[]
+  OTPs           OTPs[]
+  Businesses     Businesses?
+  Payments       Payments[]
+  Reviews        Reviews[]
+  Communications Communications[]
+}
+
+model Notifications {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  message   String
+  userId    String   @db.ObjectId
+  user      Users    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model OTPs {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      Users    @relation(fields: [userId], references: [id])
+  code      String
+  expiredAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Subscriptions {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  price        Float
+  minimumStart Int
+  Benefits     String[]
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Payments     Payments[]
+}
+
+model Businesses {
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String           @unique @db.ObjectId
+  user              Users            @relation(fields: [userId], references: [id])
+  name              String
+  website           String
+  abn               String
+  license           String
+  openHour          Int
+  services          String[]
+  about             String
+  priorityIndex     Int              @default(0)
+  subscriptionEndAt DateTime
+  suburbId          String           @db.ObjectId
+  suburb            Suburbs          @relation(fields: [suburbId], references: [id])
+  mainServiceId     String           @db.ObjectId
+  mainService       Services         @relation(fields: [mainServiceId], references: [id])
+  Portfolios        Portfolios[]
+  Reviews           Reviews[]
+  Communications    Communications[]
+}
+
+model Suburbs {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  postCode   String
+  Businesses Businesses[]
+
+  @@unique([name, postCode])
+}
+
+model Services {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String       @unique
+  description String
+  image       String
+  isDeleted   Boolean      @default(false)
+  Businesses  Businesses[]
+}
+
+model Payments {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String        @db.ObjectId
+  user           Users         @relation(fields: [userId], references: [id])
+  amount         Float
+  transactionId  String
+  expireAt       DateTime
+  subscriptionId String        @db.ObjectId
+  subscription   Subscriptions @relation(fields: [subscriptionId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Portfolios {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  businessId String     @db.ObjectId
+  business   Businesses @relation(fields: [businessId], references: [id])
+  name       String
+  image      String
+}
+
+model Reviews {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  businessId String     @db.ObjectId
+  business   Businesses @relation(fields: [businessId], references: [id])
+  userId     String     @db.ObjectId
+  user       Users      @relation(fields: [userId], references: [id])
+  rating     Int
+  message    String
+}
+
+enum CommunicationType {
+  CALL
+  MESSAGE
+}
+
+model Communications {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String            @db.ObjectId
+  user       Users             @relation(fields: [userId], references: [id])
+  businessId String            @db.ObjectId
+  business   Businesses        @relation(fields: [businessId], references: [id])
+  type       CommunicationType
+  isReviewed Boolean           @default(false)
+}
