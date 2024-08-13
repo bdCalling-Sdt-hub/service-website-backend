@@ -6,7 +6,6 @@ import responseBuilder from "./utils/responseBuilder";
 const app = express();
 
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
 
 app.use(routes);
 
@@ -23,13 +22,14 @@ const errorMessages = [
 
 app.use(
   (error: CustomError, _: Request, response: Response, next: NextFunction) => {
+    console.error(error);
     if (error.status) {
       return response
         .status(error.status)
         .json(responseBuilder(false, error.status, error.message));
     } else {
-      const randomMessage =
-        errorMessages[Math.floor(Math.random() * errorMessages.length)];
+      const randomMessage = "Internal Server Error";
+        // errorMessages[Math.floor(Math.random() * errorMessages.length)];
 
       return response
         .status(500)
@@ -39,7 +39,11 @@ app.use(
 );
 
 app.get("/", (_: Request, response: Response) => {
-  response.send("Local Sound");
+  response.send("BASP API");
+});
+
+app.get("/health", (_: Request, response: Response) => {
+  response.send("OK");
 });
 
 export default app;

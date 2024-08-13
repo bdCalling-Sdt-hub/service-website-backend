@@ -7,16 +7,22 @@ export function createUser({
   name,
   email,
   password,
+  mobile,
+  type,
 }: {
   name: string;
   email: string;
+  type: "CUSTOMER" | "PROVIDER";
   password: string;
+  mobile?: string;
 }) {
   return prisma.users.create({
     data: {
       name,
       email,
       password,
+      mobile,
+      type,
     },
     select: {
       id: true,

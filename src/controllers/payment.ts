@@ -51,7 +51,7 @@ export async function createPaymentController(
     }
 
     const expireAt = new Date(
-      Date.now() + subscription.duration * 30 * 24 * 60 * 60 * 1000
+      Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
     );
 
     await createPayment({
@@ -70,7 +70,6 @@ export async function createPaymentController(
 
     return response.json(responseBuilder(true, 200, "Payment successful"));
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }

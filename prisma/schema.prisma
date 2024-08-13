@@ -9,7 +9,8 @@ datasource db {
 
 enum UserType {
   ADMIN
-  USER
+  CUSTOMER
+  PROVIDER
 }
 
 model Users {
@@ -17,8 +18,9 @@ model Users {
   name           String
   email          String           @unique
   password       String
+  type           UserType
   image          String?
-  type           UserType         @default(USER)
+  mobile         String?
   isVerified     Boolean          @default(false)
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -44,6 +46,7 @@ model OTPs {
   user      Users    @relation(fields: [userId], references: [id])
   code      String
   expiredAt DateTime
+  tryCount  Int      @default(0)
   createdAt DateTime @default(now())
 }
 
@@ -64,6 +67,7 @@ model Businesses {
   userId            String           @unique @db.ObjectId
   user              Users            @relation(fields: [userId], references: [id])
   name              String
+  mobile            String
   website           String
   abn               String
   license           String

@@ -47,7 +47,6 @@ export async function userNotificationsController(
       )
     );
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }

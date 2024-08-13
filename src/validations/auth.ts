@@ -10,6 +10,8 @@ export function registerValidation(request: Request): {
   name: string;
   email: string;
   password: string;
+  type:"CUSTOMER" | "PROVIDER";
+  mobile?: string;
 } {
   const data = request.body;
 
@@ -27,6 +29,16 @@ export function registerValidation(request: Request): {
   if (typeof data.password !== "string")
     throw error("Password must be a string", 400);
 
+  if(data.name.length < 3) throw error("Name must be at least 3 characters", 400);
+
+  if(data.name.length > 55) throw error("Name must be at most 55 characters", 400);
+
+  if(data.type !== "CUSTOMER" && data.type !== "PROVIDER") throw error("Invalid type", 400);
+
+  if(data.type==="CUSTOMER" && !data.mobile) throw error("Mobile is required", 400);
+
+  if(data.mobile && typeof data.mobile !== "string") throw error("Mobile must be a string", 400);
+
   validateEmail(data.email);
 
   validatePassword(data.password);
@@ -35,6 +47,8 @@ export function registerValidation(request: Request): {
     name: data.name,
     email: data.email,
     password: data.password,
+    type: data.type,
+    mobile: data.mobile,
   };
 }
 

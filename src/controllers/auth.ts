@@ -18,7 +18,6 @@ import { hashPassword, comparePassword } from "../services/hash";
 import { sentOtpByEmail } from "../services/mail";
 import { generateToken } from "../services/jwt";
 import { createNotification } from "../services/notification";
-import { User } from "../types/user";
 import { TokenData } from "../types/token";
 
 export async function registerController(
@@ -27,7 +26,7 @@ export async function registerController(
   next: NextFunction
 ) {
   try {
-    const { name, email, password } = registerValidation(request);
+    const { name, email, password, type, mobile } = registerValidation(request);
 
     const existingUser = await getUserByEmail(email);
 
@@ -42,6 +41,8 @@ export async function registerController(
     const user = await createUser({
       name,
       email,
+      type,
+      mobile,
       password: hashedPassword,
     });
 
@@ -58,7 +59,6 @@ export async function registerController(
       responseBuilder(true, 201, "A OTP sent to your email", user)
     );
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }
@@ -86,9 +86,33 @@ export async function loginController(
     }
 
     if (!user.isVerified) {
-      request.query.userId = user.id;
-      resendOTPController(request, response, next);
-      return;
+      const prevuesOtp = await getLastOtpByUserId(user.id);
+
+      if (!prevuesOtp) {
+        const otp = await createOtp(user.id);
+        sentOtpByEmail(user.email, otp.code);
+
+        return response.json(
+          responseBuilder(false, 401, "Please verify your email", {
+            id: user.id,
+          })
+        );
+      }
+
+      if (prevuesOtp.createdAt > new Date(new Date().getTime() - 120000)) {
+        return response.json(
+          responseBuilder(false, 401, "Please verify your email", {
+            id: user.id,
+          })
+        );
+      }
+
+      const otp = await createOtp(user.id);
+      sentOtpByEmail(user.email, otp.code);
+
+      return response.json(
+        responseBuilder(true, 401, "Please verify your email", { id: user.id })
+      );
     }
 
     const token = generateToken({
@@ -116,7 +140,6 @@ export async function loginController(
       })
     );
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }
@@ -165,7 +188,6 @@ export async function verifyOtpController(
 
     return response.json(responseBuilder(false, 400, "Invalid OTP"));
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }
@@ -219,7 +241,6 @@ export async function resendOTPController(
       })
     );
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }
@@ -263,7 +284,6 @@ export async function forgotController(
       responseBuilder(true, 200, "A OTP sent to your email", { id: user.id })
     );
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }
@@ -283,7 +303,6 @@ export async function getSessionController(
     }
     return response.json(responseBuilder(true, 200, "User found", user));
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }
