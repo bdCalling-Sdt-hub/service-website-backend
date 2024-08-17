@@ -1,31 +1,25 @@
+import { Response } from "express";
+
 export default function responseBuilder(
-  ok: boolean,
-  statusCode: number,
-  message: string,
-  data?: Object | Array<any>,
-  pagination?: {
-    totalPage: number;
-    currentPage: number;
-    prevPage: number | null;
-    nextPage: number | null;
-    totalData: number;
-  }
-) {
-  if (!ok) {
-    return {
-      status: "failed",
-      statusCode,
-      message,
-      data: data || {},
-      pagination: pagination || {},
+  response: Response,
+  json: {
+    ok: boolean;
+    statusCode: number;
+    message: string;
+    data?: Object | Array<any>;
+    pagination?: {
+      totalPage: number;
+      currentPage: number;
+      prevPage: number | null;
+      nextPage: number | null;
+      totalData: number;
     };
   }
-
-  return {
-    status: "success",
-    statusCode,
-    message,
-    data: data || {},
-    pagination: pagination || {},
-  };
+) {
+  response.status(json.statusCode).json({
+    ok: json.ok,
+    message: json.message,
+    data: json.data || {},
+    pagination: json.pagination || {},
+  });
 }

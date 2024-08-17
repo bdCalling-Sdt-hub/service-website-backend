@@ -13,23 +13,10 @@ export async function userNotificationsController(
   next: NextFunction
 ) {
   try {
-    const { tokenData, userId, limit, page } =
-      await userNotificationsValidation(request);
+    const user = request.user;
+    const { limit, page } = await userNotificationsValidation(request);
 
-    if (tokenData.id !== userId) {
-      return response.json(
-        responseBuilder(
-          false,
-          401,
-          "unauthorized"
-        )
-      );
-    }
-
-    const skip = (page - 1) * limit;
-
-    const totalNotifications = await countNotifications(userId);
-    const notifications = await getNotificationsByUserId(userId, limit, skip);
+    const totalNotifications = await countNotifications(user.id);
 
     const pagination = paginationBuilder({
       currentPage: page,
@@ -37,15 +24,24 @@ export async function userNotificationsController(
       totalData: totalNotifications,
     });
 
-    return response.json(
-      responseBuilder(
-        true,
-        200,
-        "Notifications retrieved",
-        notifications,
-        pagination
-      )
-    );
+    if (page > pagination.totalPage) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
+    }
+
+    const skip = (page - 1) * limit;
+    const notifications = await getNotificationsByUserId(user.id, limit, skip);
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Notifications found",
+      data: notifications,
+      pagination,
+    });
   } catch (error) {
     next(error);
   }

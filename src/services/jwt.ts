@@ -1,17 +1,21 @@
 import { sign, verify } from "jsonwebtoken";
 import { TokenData } from "../types/token";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const secret = process.env.JWT_SECRET as string;
 if (!secret) throw new Error("JWT_SECRET is not defined");
 
 export function generateToken({
   id,
-  name,
+  firstName,
+  lastName,
   email,
   image,
   type,
 }: TokenData) {
-  return sign({ id, name, email, image, type }, secret);
+  return sign({ id, firstName, lastName, email, image, type }, secret);
 }
 
 export function verifyToken(token: string) {

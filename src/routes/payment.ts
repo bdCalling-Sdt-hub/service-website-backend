@@ -1,12 +1,9 @@
 import express from "express";
-import { allRegisteredUser, onlyArtist } from "../middlewares/isAllowedUser";
-import isValidToken from "../middlewares/isValidToken";
 import { createPaymentController } from "../controllers/payment";
+import authenticate from "../middlewares/authenticate";
 
 const router = express.Router();
 
-router
-  .route("/")
-  .post(isValidToken, allRegisteredUser, createPaymentController);
+router.route("/").post(authenticate("PROVIDER"), createPaymentController);
 
 export default router;

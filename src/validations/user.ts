@@ -1,12 +1,10 @@
 import { Request } from "express";
 import error from "../utils/error";
-import type { TokenData } from "../types/token";
 import { UpdateUser } from "../types/user";
 import { isValidObjectId, validatePassword } from "../utils/validators";
 
 export function getUserValidation(request: Request): {
   userId: string;
-  tokenData: TokenData;
 } {
   const userId = request.params.userId;
 
@@ -18,20 +16,18 @@ export function getUserValidation(request: Request): {
 
   return {
     userId,
-    tokenData: request.tokenData,
   };
 }
 
 export function updateUserValidation(request: Request): {
   userId: string;
   userData: Omit<UpdateUser, "isVerified" | "password">;
-  tokenData: TokenData;
 } {
   const userId = request.params.userId;
   const body = JSON.parse(JSON.stringify(request.body));
 
   if (!userId) {
-    throw error("User ID is required",400);
+    throw error("User ID is required", 400);
   }
 
   if (!isValidObjectId(userId)) throw error("Invalid user ID", 400);
@@ -40,8 +36,12 @@ export function updateUserValidation(request: Request): {
 
   const userData: UpdateUser = {};
 
-  if (body?.name) {
-    userData.name = body.name;
+  if (body?.firstName) {
+    userData.firstName = body.firstName;
+  }
+
+  if (body?.lastName) {
+    userData.lastName = body.lastName;
   }
   if (body?.dateOfBirth) {
     userData.dateOfBirth = body.dateOfBirth;
@@ -59,7 +59,6 @@ export function updateUserValidation(request: Request): {
   return {
     userId,
     userData,
-    tokenData: request.tokenData,
   };
 }
 
@@ -67,13 +66,12 @@ export function changePasswordValidation(request: Request): {
   oldPassword?: string;
   newPassword: string;
   userId: string;
-  tokenData: TokenData;
 } {
   const body = request.body;
   const userId = request.params.userId;
 
   if (!userId) {
-    throw error("User ID is required",400);
+    throw error("User ID is required", 400);
   }
 
   if (!isValidObjectId(userId)) throw error("Invalid user ID", 400);
@@ -87,7 +85,6 @@ export function changePasswordValidation(request: Request): {
   return {
     oldPassword: body.oldPassword,
     newPassword: body.newPassword,
-    tokenData: request.tokenData,
     userId,
   };
 }

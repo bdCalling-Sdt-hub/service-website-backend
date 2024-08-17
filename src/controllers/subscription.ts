@@ -31,10 +31,10 @@ export async function createSubscriptionController(
       Benefits,
     });
 
-    return response.json({
-      success: true,
-      status: 200,
-      message: "Subscription created successfully",
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 201,
+      message: "Subscription created",
       data: subscription,
     });
   } catch (error) {
@@ -59,17 +59,23 @@ export async function getSubscriptionsController(
     });
 
     if (page > pagination.totalPage) {
-      return response.json(
-        responseBuilder(false, 404, "No subscriptions found")
-      );
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
     }
 
     const skip = (page - 1) * limit;
     const subscriptions = await getSubscriptions({ limit, skip });
 
-    return response.json(
-      responseBuilder(true, 200, "Subscriptions fetched", subscriptions)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Subscriptions fetched",
+      data: subscriptions,
+      pagination,
+    });
   } catch (error) {
     next(error);
   }
@@ -91,9 +97,12 @@ export async function updateSubscriptionController(
       price,
     });
 
-    return response.json(
-      responseBuilder(true, 200, "Subscription updated", subscription)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Subscription updated",
+      data: subscription,
+    });
   } catch (error) {
     next(error);
   }
@@ -109,9 +118,12 @@ export async function deleteSubscriptionController(
 
     const subscription = await deleteSubscription(subscriptionId);
 
-    return response.json(
-      responseBuilder(true, 200, "Subscription deleted", subscription)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Subscription deleted",
+      data: subscription,
+    });
   } catch (error) {
     next(error);
   }

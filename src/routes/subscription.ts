@@ -1,22 +1,22 @@
 import express from "express";
-import { onlyAdmin } from "../middlewares/isAllowedUser";
-import isValidToken from "../middlewares/isValidToken";
 import {
   createSubscriptionController,
   deleteSubscriptionController,
   getSubscriptionsController,
   updateSubscriptionController,
 } from "../controllers/subscription";
+import authenticate from "../middlewares/authenticate";
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(createSubscriptionController)
+  .post(authenticate("ADMIN"), createSubscriptionController)
   .get(getSubscriptionsController);
 
 router
   .route("/:id")
+  .all(authenticate("ADMIN"))
   .put(updateSubscriptionController)
   .delete(deleteSubscriptionController);
 

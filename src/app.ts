@@ -2,10 +2,13 @@ import express, { Request, Response, NextFunction } from "express";
 import { CustomError } from "./utils/error";
 import routes from "./routes";
 import responseBuilder from "./utils/responseBuilder";
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
+app.use(express.static("public"));
 
 app.use(routes);
 
@@ -24,16 +27,20 @@ app.use(
   (error: CustomError, _: Request, response: Response, next: NextFunction) => {
     console.error(error);
     if (error.status) {
-      return response
-        .status(error.status)
-        .json(responseBuilder(false, error.status, error.message));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: error.status,
+        message: error.message,
+      });
     } else {
       const randomMessage = "Internal Server Error";
-        // errorMessages[Math.floor(Math.random() * errorMessages.length)];
+      // errorMessages[Math.floor(Math.random() * errorMessages.length)];
 
-      return response
-        .status(500)
-        .json(responseBuilder(false, 500, randomMessage));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 500,
+        message: randomMessage,
+      });
     }
   }
 );

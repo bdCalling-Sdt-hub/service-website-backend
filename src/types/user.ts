@@ -1,5 +1,6 @@
 export type UpdateUser = {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   password?: string;
   dateOfBirth?: string;
   address?: string;

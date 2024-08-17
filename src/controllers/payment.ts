@@ -6,6 +6,9 @@ import Stripe from "stripe";
 import responseBuilder from "../utils/responseBuilder";
 import { createNotification } from "../services/notification";
 import { getAdmin } from "../services/user";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const stripe_secret_key = process.env.STRIPE_SECRET_KEY;
 
@@ -24,12 +27,20 @@ export async function createPaymentController(
     const { stripeToken, subscriptionId } = createPaymentValidation(request);
     const user = request.user;
 
+    if (!user.business?.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Register as a business to subscribe to a plan",
+      });
+    }
+
     const subscription = await getSubscriptionById(subscriptionId);
 
     if (!subscription) {
-      return response.json({
-        success: false,
-        status: 404,
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
         message: "Subscription not found",
       });
     }
@@ -47,7 +58,11 @@ export async function createPaymentController(
     });
 
     if (charge.status !== "succeeded") {
-      return response.json(responseBuilder(false, 400, "Payment failed"));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Payment failed",
+      });
     }
 
     const expireAt = new Date(
@@ -55,7 +70,7 @@ export async function createPaymentController(
     );
 
     await createPayment({
-      userId: user.id,
+      businessId: user.business.id,
       subscriptionId,
       amount: subscription.price,
       transactionId: charge.id,
@@ -68,7 +83,11 @@ export async function createPaymentController(
       userName: user.name,
     });
 
-    return response.json(responseBuilder(true, 200, "Payment successful"));
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Payment successful",
+    });
   } catch (error) {
     next(error);
   }

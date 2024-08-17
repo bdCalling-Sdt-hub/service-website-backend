@@ -35,8 +35,18 @@ export function getServices({
     where: {
       name: {
         startsWith: name,
+        mode: "insensitive",
       },
       isDeleted: false,
+    },
+    select: {
+      id: true,
+      description: true,
+      name: true,
+      image: true,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 }
@@ -82,6 +92,14 @@ export function deleteService(id: string) {
     },
     data: {
       isDeleted: true,
+    },
+  });
+}
+
+export function getServiceById(id: string) {
+  return prisma.services.findUnique({
+    where: {
+      id,
     },
   });
 }

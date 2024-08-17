@@ -29,9 +29,12 @@ export async function createServiceController(
       image,
     });
 
-    return response.json(
-      responseBuilder(true, 201, "Service created", service)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 201,
+      message: "Service created",
+      data: service,
+    });
   } catch (error) {
     next(error);
   }
@@ -43,26 +46,34 @@ export async function getServicesController(
   next: NextFunction
 ) {
   try {
-    const { take, page, name } = getServicesValidation(request);
+    const { limit, page, name } = getServicesValidation(request);
 
     const totalServices = await countServices({ name });
 
     const pagination = paginationBuilder({
       currentPage: page,
-      limit: take,
+      limit,
       totalData: totalServices,
     });
 
     if (page > pagination.totalPage) {
-      return response.json(responseBuilder(false, 404, "No services found"));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
     }
 
-    const skip = (page - 1) * take;
-    const services = await getServices({ take, skip, name });
+    const skip = (page - 1) * limit;
+    const services = await getServices({ take: limit, skip, name });
 
-    return response.json(
-      responseBuilder(true, 200, "Services fetched", services)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Services found",
+      data: services,
+      pagination,
+    });
   } catch (error) {
     next(error);
   }
@@ -83,9 +94,12 @@ export async function updateServiceController(
       image,
     });
 
-    return response.json(
-      responseBuilder(true, 200, "Service updated", service)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Service updated",
+      data: service,
+    });
   } catch (error) {
     next(error);
   }
@@ -101,9 +115,12 @@ export async function deleteServiceController(
 
     const service = await deleteService(serviceId);
 
-    return response.json(
-      responseBuilder(true, 200, "Service deleted", service)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Service deleted",
+      data: service,
+    });
   } catch (error) {
     next(error);
   }

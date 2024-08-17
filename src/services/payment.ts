@@ -3,13 +3,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export function createPayment({
-  userId,
+  businessId,
   amount,
   subscriptionId,
   transactionId,
   expireAt,
 }: {
-  userId: string;
+  businessId: string;
   amount: number;
   subscriptionId: string;
   transactionId: string;
@@ -17,7 +17,7 @@ export function createPayment({
 }) {
   return prisma.payments.create({
     data: {
-      userId,
+      businessId,
       amount,
       subscriptionId,
       transactionId,
@@ -26,9 +26,9 @@ export function createPayment({
   });
 }
 
-export function getLastPaymentByUserId(userId: string) {
+export function getLastPaymentByUserId(businessId: string) {
   return prisma.payments.findFirst({
-    where: { userId },
+    where: { businessId },
     orderBy: { createdAt: "desc" },
   });
 }

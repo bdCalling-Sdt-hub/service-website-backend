@@ -4,12 +4,9 @@ import { isValidObjectId } from "../utils/validators";
 import { TokenData } from "../types/token";
 
 export async function userNotificationsValidation(request: Request): Promise<{
-  userId: string;
-  tokenData: TokenData;
   limit: number;
   page: number;
 }> {
-  const params = request.params;
   const query = request.query;
 
   let page = parseInt(query.page as string) || 1;
@@ -22,13 +19,7 @@ export async function userNotificationsValidation(request: Request): Promise<{
 
   if (limit < 1) limit = 1;
 
-  if (!params.userId) throw error("User ID is required", 400);
-
-  if (!isValidObjectId(params.userId)) throw error("Invalid user ID", 400);
-
   return {
-    userId: params.userId,
-    tokenData: request.tokenData,
     limit,
     page,
   };

@@ -120,7 +120,7 @@ export function updateSubscriptionValidation(request: Request): {
     throw error("Name should not be empty", 400);
 
   if (!body.name && !body.minimumStart && !body.price && !body.Benefits) {
-    throw error("No data provided", 400);
+    throw error("No valid data provided to update", 400);
   }
 
   return {

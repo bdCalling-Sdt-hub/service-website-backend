@@ -14,22 +14,22 @@ enum UserType {
 }
 
 model Users {
-  id             String           @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  email          String           @unique
-  password       String
-  type           UserType
-  image          String?
-  mobile         String?
-  isVerified     Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  Notifications  Notifications[]
-  OTPs           OTPs[]
-  Businesses     Businesses?
-  Payments       Payments[]
-  Reviews        Reviews[]
-  Communications Communications[]
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  firstName     String
+  lastName      String
+  email         String          @unique
+  password      String
+  type          UserType
+  image         String?
+  mobile        String?
+  isVerified    Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  notifications Notifications[]
+  oTPs          OTPs[]
+  business      Businesses?
+  reviews       Reviews[]
+  messages      messages[]
 }
 
 model Notifications {
@@ -48,6 +48,7 @@ model OTPs {
   expiredAt DateTime
   tryCount  Int      @default(0)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Subscriptions {
@@ -59,39 +60,36 @@ model Subscriptions {
   isDeleted    Boolean    @default(false)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  Payments     Payments[]
+  payments     Payments[]
 }
 
 model Businesses {
-  id                String           @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String           @unique @db.ObjectId
-  user              Users            @relation(fields: [userId], references: [id])
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String       @unique @db.ObjectId
+  user              Users        @relation(fields: [userId], references: [id])
   name              String
+  phone             String?
   mobile            String
-  website           String
   abn               String
-  license           String
-  openHour          Int
+  license           String?
+  openHour          String
+  address           String
+  city              String
+  state             String
+  postalCode        String
   services          String[]
+  website           String?
+  facebook          String?
+  instagram         String?
   about             String
-  priorityIndex     Int              @default(0)
-  subscriptionEndAt DateTime
-  suburbId          String           @db.ObjectId
-  suburb            Suburbs          @relation(fields: [suburbId], references: [id])
-  mainServiceId     String           @db.ObjectId
-  mainService       Services         @relation(fields: [mainServiceId], references: [id])
-  Portfolios        Portfolios[]
-  Reviews           Reviews[]
-  Communications    Communications[]
-}
-
-model Suburbs {
-  id         String       @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  postCode   String
-  Businesses Businesses[]
-
-  @@unique([name, postCode])
+  isDeleted         Boolean      @default(false)
+  priorityIndex     Int          @default(0)
+  subscriptionEndAt DateTime?
+  mainServiceId     String       @db.ObjectId
+  mainService       Services     @relation(fields: [mainServiceId], references: [id])
+  portfolios        Portfolios[]
+  reviews           Reviews[]
+  Payments          Payments[]
 }
 
 model Services {
@@ -100,13 +98,15 @@ model Services {
   description String
   image       String
   isDeleted   Boolean      @default(false)
-  Businesses  Businesses[]
+  business    Businesses[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Payments {
   id             String        @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String        @db.ObjectId
-  user           Users         @relation(fields: [userId], references: [id])
+  businessId     String        @db.ObjectId
+  business       Businesses    @relation(fields: [businessId], references: [id])
   amount         Float
   transactionId  String
   expireAt       DateTime
@@ -122,6 +122,8 @@ model Portfolios {
   business   Businesses @relation(fields: [businessId], references: [id])
   name       String
   image      String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
 model Reviews {
@@ -132,19 +134,15 @@ model Reviews {
   user       Users      @relation(fields: [userId], references: [id])
   rating     Int
   message    String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
-enum CommunicationType {
-  CALL
-  MESSAGE
-}
-
-model Communications {
-  id         String            @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String            @db.ObjectId
-  user       Users             @relation(fields: [userId], references: [id])
-  businessId String            @db.ObjectId
-  business   Businesses        @relation(fields: [businessId], references: [id])
-  type       CommunicationType
-  isReviewed Boolean           @default(false)
+model messages {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  message     String
+  bussniessId String   @db.ObjectId
+  userId      String   @db.ObjectId
+  user        Users    @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
 }

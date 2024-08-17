@@ -7,7 +7,7 @@ export function createServiceValidation(request: Request): {
   description: string;
   image: string;
 } {
-  const body = request.body;
+  const body = JSON.parse(JSON.stringify(request.body));
 
   if (!body.name) throw error("Name is required", 400);
 
@@ -41,7 +41,7 @@ export function createServiceValidation(request: Request): {
 }
 
 export function getServicesValidation(request: Request): {
-  take: number;
+  limit: number;
   page: number;
   name?: string;
 } {
@@ -61,8 +61,8 @@ export function getServicesValidation(request: Request): {
     throw error("Name should be a string", 400);
 
   return {
-    take: Number(query.take),
-    page: Number(query.skip),
+    limit,
+    page,
     name: query.name,
   };
 }
@@ -88,8 +88,8 @@ export function updateServiceValidation(request: Request): {
   if (body.image && typeof body.image !== "string")
     throw error("Image should be a string", 400);
 
-  if(!body.name && !body.description && !body.image)
-    throw error("No data provided", 400);
+  if (!body.name && !body.description && !body.image)
+    throw error("No valid data provided to update", 400);
 
   return {
     serviceId: params.id,

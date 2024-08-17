@@ -18,7 +18,6 @@ import { hashPassword, comparePassword } from "../services/hash";
 import { sentOtpByEmail } from "../services/mail";
 import { generateToken } from "../services/jwt";
 import { createNotification } from "../services/notification";
-import { TokenData } from "../types/token";
 
 export async function registerController(
   request: Request,
@@ -26,20 +25,24 @@ export async function registerController(
   next: NextFunction
 ) {
   try {
-    const { name, email, password, type, mobile } = registerValidation(request);
+    const { firstName, lastName, email, password, type, mobile } =
+      registerValidation(request);
 
     const existingUser = await getUserByEmail(email);
 
     if (existingUser) {
-      return response.json(
-        responseBuilder(false, 400, "User already exists with this email")
-      );
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "User already exists with this email",
+      });
     }
 
     const hashedPassword = await hashPassword(password);
 
     const user = await createUser({
-      name,
+      firstName,
+      lastName,
       email,
       type,
       mobile,
@@ -52,12 +55,15 @@ export async function registerController(
 
     await createNotification({
       userId: user.id,
-      message: `Hello ${name}, welcome to our platform`,
+      message: `Hello ${firstName} ${lastName}, welcome to our platform`,
     });
 
-    return response.json(
-      responseBuilder(true, 201, "A OTP sent to your email", user)
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 201,
+      message: "User created successfully",
+      data: user,
+    });
   } catch (error) {
     next(error);
   }
@@ -74,15 +80,21 @@ export async function loginController(
     const user = await getUserByEmail(email);
 
     if (!user) {
-      return response.json(
-        responseBuilder(false, 400, "User not found with this email")
-      );
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "User not found with this email",
+      });
     }
 
     const passwordMatch = await comparePassword(password, user.password);
 
     if (!passwordMatch) {
-      return response.json(responseBuilder(false, 400, "Invalid password"));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Invalid password",
+      });
     }
 
     if (!user.isVerified) {
@@ -92,53 +104,73 @@ export async function loginController(
         const otp = await createOtp(user.id);
         sentOtpByEmail(user.email, otp.code);
 
-        return response.json(
-          responseBuilder(false, 401, "Please verify your email", {
-            id: user.id,
-          })
-        );
+        return responseBuilder(response, {
+          ok: false,
+          statusCode: 401,
+          message: "Please verify your email",
+          data: { id: user.id },
+        });
       }
 
       if (prevuesOtp.createdAt > new Date(new Date().getTime() - 120000)) {
-        return response.json(
-          responseBuilder(false, 401, "Please verify your email", {
-            id: user.id,
-          })
-        );
+        return responseBuilder(response, {
+          ok: false,
+          statusCode: 400,
+          message: "Please wait 120 seconds before sending another OTP",
+          data: { timeLeft: 120 },
+        });
       }
 
       const otp = await createOtp(user.id);
       sentOtpByEmail(user.email, otp.code);
 
-      return response.json(
-        responseBuilder(true, 401, "Please verify your email", { id: user.id })
-      );
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 401,
+        message: "Please verify your email",
+        data: { id: user.id },
+      });
     }
 
     const token = generateToken({
       id: user.id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       image: user.image,
       type: user.type,
     });
 
-    const { id, name, type, image, isVerified, Businesses } = user;
+    const {
+      id,
+      firstName,
+      lastName,
+      type,
+      image,
+      isVerified,
+      mobile,
+      business,
+    } = user;
 
-    return response.json(
-      responseBuilder(true, 200, "Login successful", {
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Login successful",
+      data: {
         token,
         user: {
           id,
-          name,
+          firstName,
+          lastName,
           email,
           type,
+          mobile,
           image,
           isVerified,
-          Businesses,
+          business,
         },
-      })
-    );
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -155,19 +187,29 @@ export async function verifyOtpController(
     const user = await getUserById(userId);
 
     if (!user) {
-      return response.json(responseBuilder(false, 400, "User not found"));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "User not found",
+      });
     }
 
     const otp = await getLastOtpByUserId(userId);
 
     if (!otp) {
-      return response.json(
-        responseBuilder(false, 400, "No OTP found for user")
-      );
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "No OTP found for user",
+      });
     }
 
     if (otp.expiredAt < new Date()) {
-      return response.json(responseBuilder(false, 400, "OTP expired"));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "OTP expired",
+      });
     }
 
     if (otp.code === code) {
@@ -175,18 +217,50 @@ export async function verifyOtpController(
 
       const token = generateToken({
         id: user.id,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         image: user.image,
         type: user.type,
       });
 
-      return response.json(
-        responseBuilder(true, 200, "OTP verified successfully", { token, user })
-      );
+      const {
+        id,
+        firstName,
+        lastName,
+        type,
+        image,
+        isVerified,
+        mobile,
+        business,
+      } = user;
+
+      return responseBuilder(response, {
+        ok: true,
+        statusCode: 200,
+        message: "OTP verified successfully",
+        data: {
+          token,
+          user: {
+            id,
+            firstName,
+            lastName,
+            email: user.email,
+            type,
+            mobile,
+            image,
+            isVerified,
+            business,
+          },
+        },
+      });
     }
 
-    return response.json(responseBuilder(false, 400, "Invalid OTP"));
+    return responseBuilder(response, {
+      ok: false,
+      statusCode: 400,
+      message: "Invalid OTP",
+    });
   } catch (error) {
     next(error);
   }
@@ -203,7 +277,11 @@ export async function resendOTPController(
     const user = await getUserById(userId);
 
     if (!user) {
-      return response.json(responseBuilder(false, 400, "User not found"));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "User not found",
+      });
     }
 
     const prevuesOtp = await getLastOtpByUserId(userId);
@@ -212,9 +290,12 @@ export async function resendOTPController(
       const otp = await createOtp(userId);
       sentOtpByEmail(user.email, otp.code);
 
-      return response.json(
-        responseBuilder(true, 200, "A OTP sent to your email", { id: user.id })
-      );
+      return responseBuilder(response, {
+        ok: true,
+        statusCode: 200,
+        message: "A OTP sent to your email",
+        data: { id: user.id },
+      });
     }
 
     if (prevuesOtp.createdAt > new Date(new Date().getTime() - 120000)) {
@@ -222,24 +303,23 @@ export async function resendOTPController(
         (prevuesOtp.createdAt.getTime() + 120000 - new Date().getTime()) / 1000
       );
 
-      return response.json(
-        responseBuilder(
-          false,
-          400,
-          `Please wait ${timeLeft} seconds before sending another OTP`,
-          { timeLeft }
-        )
-      );
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: `Please wait ${timeLeft} seconds before sending another OTP`,
+        data: { timeLeft },
+      });
     }
 
     const otp = await createOtp(userId);
     sentOtpByEmail(user.email, otp.code);
 
-    return response.json(
-      responseBuilder(true, 200, "A new OTP sent to your email", {
-        id: user.id,
-      })
-    );
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "A new OTP sent to your email",
+      data: { id: user.id },
+    });
   } catch (error) {
     next(error);
   }
@@ -254,7 +334,11 @@ export async function forgotController(
     const { email } = forgotPasswordValidation(request);
     const user = await getUserByEmail(email);
     if (!user) {
-      return response.json(responseBuilder(false, 400, "User not found"));
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "User not found",
+      });
     }
 
     const prevuesOtp = await getLastOtpByUserId(user.id);
@@ -267,22 +351,24 @@ export async function forgotController(
         (prevuesOtp.createdAt.getTime() + 120000 - new Date().getTime()) / 1000
       );
 
-      return response.json(
-        responseBuilder(
-          false,
-          400,
-          `Please wait ${timeLeft} seconds before sending another OTP`,
-          timeLeft
-        )
-      );
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: `Please wait ${timeLeft} seconds before sending another OTP`,
+        data: { timeLeft },
+      });
     }
 
     const otp = await createOtp(user.id);
 
     sentOtpByEmail(email, otp.code);
-    return response.json(
-      responseBuilder(true, 200, "A OTP sent to your email", { id: user.id })
-    );
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "A OTP sent to your email",
+      data: { id: user.id },
+    });
   } catch (error) {
     next(error);
   }
@@ -293,16 +379,10 @@ export async function getSessionController(
   response: Response,
   next: NextFunction
 ) {
-  try {
-    const tokenData = request.tokenData as TokenData;
-
-    const user = await getUserById(tokenData.id);
-
-    if (!user) {
-      return response.json(responseBuilder(false, 400, "User not found"));
-    }
-    return response.json(responseBuilder(true, 200, "User found", user));
-  } catch (error) {
-    next(error);
-  }
+  return responseBuilder(response, {
+    ok: true,
+    statusCode: 200,
+    message: "Session found",
+    data: request.user,
+  });
 }

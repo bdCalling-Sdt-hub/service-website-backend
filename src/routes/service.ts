@@ -6,13 +6,19 @@ import {
   deleteServiceController,
   updateServiceController,
 } from "../controllers/service";
+import authenticate from "../middlewares/authenticate";
+import upload from "../middlewares/upload";
 
 const router = express.Router();
 
-router.route("/").get(getServicesController).post(createServiceController);
+router
+  .route("/")
+  .get(getServicesController)
+  .post(authenticate("ADMIN"),upload.single("image"), createServiceController);
 
 router
   .route("/:id")
+  .all(authenticate("ADMIN"))
   .put(updateServiceController)
   .delete(deleteServiceController);
 

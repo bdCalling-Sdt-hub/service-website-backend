@@ -4,13 +4,15 @@ import { UpdateUser } from "../types/user";
 const prisma = new PrismaClient();
 
 export function createUser({
-  name,
+  firstName,
+  lastName,
   email,
   password,
   mobile,
   type,
 }: {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   type: "CUSTOMER" | "PROVIDER";
   password: string;
@@ -18,7 +20,8 @@ export function createUser({
 }) {
   return prisma.users.create({
     data: {
-      name,
+      firstName,
+      lastName,
       email,
       password,
       mobile,
@@ -36,7 +39,7 @@ export function getUserByEmail(email: string) {
       email,
     },
     include: {
-      Businesses: {
+      business: {
         select: {
           id: true,
         },
@@ -52,16 +55,14 @@ export function getUserById(id: string, takePassword = false) {
     },
     select: {
       id: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       email: true,
+      mobile: true,
       type: true,
       image: true,
       isVerified: true,
-      Businesses: {
-        select: {
-          id: true,
-        },
-      },
+      business: true,
       password: takePassword,
     },
   });
@@ -75,12 +76,14 @@ export function updateUserById(id: string, data: UpdateUser) {
     data,
     select: {
       id: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       email: true,
+      mobile: true,
       type: true,
       image: true,
       isVerified: true,
-      Businesses: {
+      business: {
         select: {
           id: true,
         },
