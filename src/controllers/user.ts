@@ -1,12 +1,19 @@
 import { NextFunction, Request, Response } from "express";
-import { getUserById, updateUserById } from "../services/user";
+import {
+  countUsers,
+  getUserById,
+  getUsers,
+  updateUserById,
+} from "../services/user";
 import {
   getUserValidation,
   updateUserValidation,
   changePasswordValidation,
+  getUsersValidation,
 } from "../validations/user";
 import responseBuilder from "../utils/responseBuilder";
 import { comparePassword, hashPassword } from "../services/hash";
+import paginationBuilder from "../utils/paginationBuilder";
 
 // export async function getUserController(
 //   request: Request,
@@ -121,6 +128,44 @@ export async function changePasswordController(
       ok: true,
       statusCode: 200,
       message: "Password updated",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getUsersController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { limit, page, type } = getUsersValidation(request);
+
+    const totalUsers = await countUsers(type);
+
+    const pagination = paginationBuilder({
+      currentPage: page,
+      limit,
+      totalData: totalUsers,
+    });
+
+    if (page > pagination.totalPage) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
+    }
+    const skip = (page - 1) * limit;
+
+    const users = await getUsers({ limit, skip, type });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Users retrieved",
+      data: users,
     });
   } catch (error) {
     next(error);

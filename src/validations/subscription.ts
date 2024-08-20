@@ -6,25 +6,25 @@ export function createSubscriptionValidation(request: Request): {
   name: string;
   minimumStart: number;
   price: number;
-  Benefits: string[];
+  benefits: string[];
 } {
   const body = request.body;
 
   if (!body.name) throw error("Name is required", 400);
 
-  if (!body.duration) throw error("Duration is required", 400);
+  if (!body.minimumStart) throw error("Minimum Start is required", 400);
 
   if (!body.price) throw error("Price is required", 400);
 
-  if (!body.Benefits) throw error("Benefits is required", 400);
+  if (!body.benefits) throw error("Benefits is required", 400);
 
-  if (!Array.isArray(body.Benefits))
+  if (!Array.isArray(body.benefits))
     throw error("Benefits should be an array", 400);
 
-  if (body.Benefits.length === 0)
+  if (body.benefits.length === 0)
     throw error("At least one benefit is required", 400);
 
-  body.Benefits.forEach((benefit: string) => {
+  body.benefits.forEach((benefit: string) => {
     if (typeof benefit !== "string")
       throw error("Benefits should be an array of strings", 400);
   });
@@ -55,7 +55,7 @@ export function createSubscriptionValidation(request: Request): {
     name: body.name,
     minimumStart: body.minimumStart,
     price: Number(body.price.toFixed(2)),
-    Benefits: body.Benefits,
+    benefits: body.benefits,
   };
 }
 
@@ -131,7 +131,6 @@ export function updateSubscriptionValidation(request: Request): {
     Benefits: body.Benefits,
   };
 }
-
 
 export function deleteSubscriptionValidation(request: Request): {
   subscriptionId: string;

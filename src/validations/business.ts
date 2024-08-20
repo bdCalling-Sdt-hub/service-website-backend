@@ -3,7 +3,7 @@ import error from "../utils/error";
 import { isValidObjectId } from "../utils/validators";
 
 export function createBusinessValidation(request: Request): {
-  abn: string;
+  abn: number;
   about: string;
   license: string | undefined;
   mainServiceId: string;
@@ -74,7 +74,7 @@ export function createBusinessValidation(request: Request): {
   if (typeof body.openHour !== "string")
     throw error("Open Hour should be a string", 400);
 
-  if (typeof body.abn !== "string") throw error("ABN should be a string", 400);
+  if (typeof body.abn !== "number") throw error("ABN should be a number", 400);
 
   if (typeof body.about !== "string")
     throw error("About should be a string", 400);
@@ -154,7 +154,7 @@ export function getBusinessesValidation(request: Request): {
 
 export function updateBusinessValidation(request: Request): {
   businessId: string;
-  abn?: string;
+  abn?: number;
   about?: string;
   license?: string;
   mobile?: string;

@@ -115,7 +115,7 @@ export async function loginController(
       if (prevuesOtp.createdAt > new Date(new Date().getTime() - 120000)) {
         return responseBuilder(response, {
           ok: false,
-          statusCode: 400,
+          statusCode: 401,
           message: "Please wait 120 seconds before sending another OTP",
           data: { timeLeft: 120 },
         });

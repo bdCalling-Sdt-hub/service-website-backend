@@ -62,8 +62,33 @@ export function getUserById(id: string, takePassword = false) {
       type: true,
       image: true,
       isVerified: true,
-      business: true,
       password: takePassword,
+      business: {
+        select: {
+          id: true,
+          abn: true,
+          about: true,
+          license: true,
+          name: true,
+          openHour: true,
+          mobile: true,
+          phone: true,
+          facebook: true,
+          instagram: true,
+          website: true,
+          address: true,
+          city: true,
+          postalCode: true,
+          state: true,
+          services: true,
+          mainService: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
+        },
+      },
     },
   });
 }
@@ -96,6 +121,50 @@ export function getAdmin() {
   return prisma.users.findFirst({
     where: {
       type: "ADMIN",
+    },
+  });
+}
+
+export function getUsers({
+  limit,
+  skip,
+  type,
+}: {
+  limit: number;
+  skip: number;
+  type?: "CUSTOMER" | "PROVIDER";
+}) {
+  return prisma.users.findMany({
+    take: limit,
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      mobile: true,
+      type: true,
+      image: true,
+      isVerified: true,
+      business: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    skip,
+    where: {
+      type,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+
+export function countUsers(type?: "CUSTOMER" | "PROVIDER") {
+  return prisma.users.count({
+    where: {
+      type,
     },
   });
 }

@@ -88,3 +88,33 @@ export function changePasswordValidation(request: Request): {
     userId,
   };
 }
+
+export function getUsersValidation(request: Request): {
+  limit: number;
+  page: number;
+  type?: "CUSTOMER" | "PROVIDER";
+} {
+  const query = request.query;
+
+  let page = parseInt(query.page as string) || 1;
+
+  if (page < 1) page = 1;
+
+  let limit = parseInt(query.limit as string) || 10;
+
+  if (limit > 100) limit = 100;
+
+  if (limit < 1) limit = 1;
+
+  if (query.type && typeof query.type !== "string")
+    throw error("Type should be a string", 400);
+
+  if (query.type && query.type !== "CUSTOMER" && query.type !== "PROVIDER")
+    throw error("Invalid type", 400);
+
+  return {
+    limit,
+    page,
+    type: query.type as "CUSTOMER" | "PROVIDER",
+  };
+}

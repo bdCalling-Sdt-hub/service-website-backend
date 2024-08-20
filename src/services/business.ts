@@ -21,7 +21,7 @@ export function createBusiness({
   state,
   services,
 }: {
-  abn: string;
+  abn: number;
   mobile: string;
   about: string;
   license: string | undefined;
@@ -84,6 +84,9 @@ export function getBusinesses({
         startsWith: address,
       },
     },
+    orderBy: {
+      priorityIndex: "asc",
+    },
   });
 }
 
@@ -121,7 +124,7 @@ export function updateBusiness(
     website,
     subscriptionEndAt,
   }: {
-    abn?: string;
+    abn?: number;
     mobile?: string;
     about?: string;
     license?: string;

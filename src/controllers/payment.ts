@@ -24,7 +24,8 @@ export async function createPaymentController(
   next: NextFunction
 ) {
   try {
-    const { stripeToken, subscriptionId } = createPaymentValidation(request);
+    const { account_number, bsb_number, priceId } =
+      createPaymentValidation(request);
     const user = request.user;
 
     if (!user.business?.id) {
@@ -35,9 +36,9 @@ export async function createPaymentController(
       });
     }
 
-    const subscription = await getSubscriptionById(subscriptionId);
+    const price = await stripe.prices.retrieve(priceId);
 
-    if (!subscription) {
+    if (!price) {
       return responseBuilder(response, {
         ok: false,
         statusCode: 404,
@@ -46,39 +47,42 @@ export async function createPaymentController(
     }
 
     const customer = await stripe.customers.create({
-      source: stripeToken,
+      name: user.name,
       email: user.email,
     });
 
-    const charge = await stripe.charges.create({
-      amount: subscription.price * 100,
-      currency: "usd",
-      customer: customer.id,
-      description: `Payment for ${subscription.name} subscription`,
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: "au_becs_debit",
+      au_becs_debit: {
+        bsb_number,
+        account_number,
+      },
+      billing_details: {
+        name: "Customer Name",
+        email: "customer@example.com",
+      },
     });
 
-    if (charge.status !== "succeeded") {
-      return responseBuilder(response, {
-        ok: false,
-        statusCode: 400,
-        message: "Payment failed",
-      });
-    }
+    await stripe.paymentMethods.attach(paymentMethod.id, {
+      customer: customer.id,
+    });
+    await stripe.customers.update(customer.id, {
+      invoice_settings: {
+        default_payment_method: paymentMethod.id,
+      },
+    });
 
-    const expireAt = new Date(
-      Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
-    );
-
-    await createPayment({
-      businessId: user.business.id,
-      subscriptionId,
-      amount: subscription.price,
-      transactionId: charge.id,
-      expireAt,
+    const subscription = await stripe.subscriptions.create({
+      customer: customer.id,
+      items: [{ price: price.id }],
+      payment_settings: {
+        payment_method_types: ["au_becs_debit"], // Specify BECS as the payment method
+      },
+      expand: ["latest_invoice.payment_intent"],
     });
 
     sendNotifications({
-      subscriptionName: subscription.name,
+      subscriptionName: price.metadata.name,
       userId: user.id,
       userName: user.name,
     });
@@ -114,5 +118,41 @@ async function sendNotifications({
       userId: admin.id,
       message: `${userName} has successfully subscribed to ${subscriptionName} subscription`,
     });
+  }
+}
+
+export async function webhookController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const sig = request.headers["stripe-signature"] as string;
+    const endpointSecret = "your-webhook-signing-secret";
+
+    const event = stripe.webhooks.constructEvent(
+      request.body,
+      sig,
+      endpointSecret
+    );
+
+    // Handle the event
+    switch (event.type) {
+      case "invoice.payment_succeeded":
+        const invoice = event.data.object as Stripe.Invoice;
+        console.log(`Invoice payment succeeded for ${invoice.customer}`);
+        // Update your database to mark the subscription as active, etc.
+        break;
+      case "invoice.payment_failed":
+        const failedInvoice = event.data.object as Stripe.Invoice;
+        console.log(`Invoice payment failed for ${failedInvoice.customer}`);
+        // Handle the failed payment (e.g., notify the customer, retry payment)
+        break;
+      // Add more event types as needed
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+    }
+  } catch (error) {
+    next(error);
   }
 }

@@ -18,6 +18,7 @@ export default function responseBuilder(
 ) {
   response.status(json.statusCode).json({
     ok: json.ok,
+    statusCode: json.statusCode,
     message: json.message,
     data: json.data || {},
     pagination: json.pagination || {},
