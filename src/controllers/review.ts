@@ -78,6 +78,7 @@ export async function getReviewsController(
       statusCode: 200,
       message: "Reviews found",
       data: reviews,
+      pagination,
     });
   } catch (error) {
     next(error);

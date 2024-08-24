@@ -14,12 +14,12 @@ const router = express.Router();
 router
   .route("/")
   .get(getServicesController)
-  .post(authenticate("ADMIN"),upload.single("image"), createServiceController);
+  .post(authenticate("ADMIN"), upload.single("image"), createServiceController);
 
 router
   .route("/:id")
   .all(authenticate("ADMIN"))
-  .put(updateServiceController)
+  .put(upload.single("image"), updateServiceController)
   .delete(deleteServiceController);
 
 export default router;

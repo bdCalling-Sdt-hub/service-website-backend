@@ -4,15 +4,23 @@ import paginationBuilder from "../utils/paginationBuilder";
 import {
   countBusinesses,
   createBusiness,
+  getBusinessById,
   getBusinesses,
   updateBusiness,
 } from "../services/business";
 import {
   createBusinessValidation,
   getBusinessesValidation,
+  getBusinessValidation,
   updateBusinessValidation,
 } from "../validations/business";
 import { getServiceById } from "../services/service";
+import DOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
+import { createPayment } from "../services/payment";
+
+const window = new JSDOM("").window;
+const purify = DOMPurify(window);
 
 export async function createBusinessController(
   request: Request,
@@ -32,21 +40,14 @@ export async function createBusinessController(
 
     const {
       abn,
-      about,
-      license,
+      address,
+      suburb,
       mainServiceId,
       mobile,
       name,
-      openHour,
-      website,
-      address,
-      city,
-      facebook,
-      instagram,
-      phone,
       postalCode,
       state,
-      services,
+      phone,
     } = createBusinessValidation(request);
 
     const service = await getServiceById(mainServiceId);
@@ -59,24 +60,25 @@ export async function createBusinessController(
     }
 
     const business = await createBusiness({
+      userId: user.id,
       abn,
-      about,
-      license,
+      address,
+      suburb,
+      mainServiceId,
       mobile,
       name,
-      openHour,
-      website,
-      address,
-      mainServiceId,
-      userId: user.id,
-      city,
-      facebook,
-      instagram,
-      phone,
       postalCode,
       state,
-      services,
+      phone,
     });
+
+    await createPayment({
+      businessId: business.id,
+      amount:710,
+      expireAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      subscriptionId: service.id,
+      transactionId: "",
+    })
 
     return responseBuilder(response, {
       ok: true,
@@ -141,36 +143,80 @@ export async function updateBusinessController(
 ) {
   try {
     const {
-      businessId,
       abn,
+      businessId,
       about,
-      license,
-      name,
-      openHour,
-      mobile,
-      phone,
       facebook,
       instagram,
+      license,
+      mobile,
+      name,
+      openHour,
+      phone,
       website,
+      services,
+      address,
+      mainServiceId,
+      postalCode,
+      state,
+      suburb
     } = updateBusinessValidation(request);
+    let cleanAbout = about;
+
+    if (about) cleanAbout = purify.sanitize(about);
 
     const business = await updateBusiness(businessId, {
       abn,
-      about,
+      about: cleanAbout,
+      facebook,
+      instagram,
       license,
       mobile,
       name,
       openHour,
       phone,
-      facebook,
-      instagram,
       website,
+      services,
+      address,
+      mainServiceId,
+      postalCode,
+      state,
+      suburb,
     });
 
     return responseBuilder(response, {
       ok: true,
       statusCode: 200,
       message: "Business updated",
+      data: business,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getBusinessController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = getBusinessValidation(request);
+
+    const business = await getBusinessById(id);
+
+    if (!business) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Business not found",
+      });
+    }
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Business found",
       data: business,
     });
   } catch (error) {

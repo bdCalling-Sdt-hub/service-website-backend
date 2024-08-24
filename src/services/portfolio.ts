@@ -52,3 +52,12 @@ export function deletePortfolio(id: string) {
     },
   });
 }
+
+
+export function getPortfolioById(id: string) {
+  return prisma.portfolios.findUnique({
+    where: {
+      id,
+    },
+  });
+}

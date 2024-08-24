@@ -49,7 +49,8 @@ export async function updateUserController(
   next: NextFunction
 ) {
   try {
-    const { userData, userId } = updateUserValidation(request);
+    const { userId, firstName, image, lastName, mobile, password } =
+      updateUserValidation(request);
 
     if (request.user.id !== userId) {
       return responseBuilder(response, {
@@ -59,15 +60,13 @@ export async function updateUserController(
       });
     }
 
-    if (Object.keys(userData).length === 0) {
-      return responseBuilder(response, {
-        ok: false,
-        statusCode: 400,
-        message: "Provide data not allowed to update",
-      });
-    }
-
-    const user = await updateUserById(userId, userData);
+    const user = await updateUserById(userId, {
+      firstName,
+      image,
+      lastName,
+      mobile,
+      password,
+    });
 
     return responseBuilder(response, {
       ok: true,
@@ -166,6 +165,26 @@ export async function getUsersController(
       statusCode: 200,
       message: "Users retrieved",
       data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getTotalCustomerAndProviderController(
+  _: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const totalCustomer = await countUsers("CUSTOMER");
+    const totalProvider = await countUsers("PROVIDER");
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Total customer and provider retrieved",
+      data: { totalCustomer, totalProvider },
     });
   } catch (error) {
     next(error);

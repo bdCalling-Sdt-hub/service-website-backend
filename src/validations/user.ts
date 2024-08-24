@@ -1,6 +1,5 @@
 import { Request } from "express";
 import error from "../utils/error";
-import { UpdateUser } from "../types/user";
 import { isValidObjectId, validatePassword } from "../utils/validators";
 
 export function getUserValidation(request: Request): {
@@ -21,7 +20,11 @@ export function getUserValidation(request: Request): {
 
 export function updateUserValidation(request: Request): {
   userId: string;
-  userData: Omit<UpdateUser, "isVerified" | "password">;
+  firstName?: string;
+  lastName?: string;
+  mobile?: string;
+  image?: string;
+  password?: string;
 } {
   const userId = request.params.userId;
   const body = JSON.parse(JSON.stringify(request.body));
@@ -32,33 +35,40 @@ export function updateUserValidation(request: Request): {
 
   if (!isValidObjectId(userId)) throw error("Invalid user ID", 400);
 
-  if (Object.keys(body).length === 0) throw error("No data provided", 400);
+  if (body.firstName && typeof body.firstName !== "string")
+    throw error("First name should be a string", 400);
 
-  const userData: UpdateUser = {};
+  if (body.lastName && typeof body.lastName !== "string")
+    throw error("Last name should be a string", 400);
 
-  if (body?.firstName) {
-    userData.firstName = body.firstName;
-  }
+  if (body.mobile && typeof body.mobile !== "string")
+    throw error("Mobile should be a string", 400);
 
-  if (body?.lastName) {
-    userData.lastName = body.lastName;
-  }
-  if (body?.dateOfBirth) {
-    userData.dateOfBirth = body.dateOfBirth;
-  }
-  if (body?.address) {
-    userData.address = body.address;
-  }
-  if (body?.number) {
-    userData.number = body.number;
-  }
-  if (body?.image) {
-    userData.image = body.image;
+  if (body.image && typeof body.image !== "string")
+    throw error("Image should be a string", 400);
+
+  if (body.password && typeof body.password !== "string")
+    throw error("Password should be a string", 400);
+
+  if (body.password) validatePassword(body.password);
+
+  if (
+    !body.firstName &&
+    !body.lastName &&
+    !body.mobile &&
+    !body.image &&
+    !body.password
+  ) {
+    throw error("No valid data to update", 400);
   }
 
   return {
     userId,
-    userData,
+    firstName: body.firstName,
+    lastName: body.lastName,
+    mobile: body.mobile,
+    image: body.image,
+    password: body.password,
   };
 }
 

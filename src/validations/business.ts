@@ -3,30 +3,21 @@ import error from "../utils/error";
 import { isValidObjectId } from "../utils/validators";
 
 export function createBusinessValidation(request: Request): {
-  abn: number;
-  about: string;
-  license: string | undefined;
+  name: string;
   mainServiceId: string;
   mobile: string;
-  name: string;
-  openHour: string;
-  website: string;
+  phone?: string;
+  abn: number;
   address: string;
-  city: string;
-  facebook: string | undefined;
-  instagram: string | undefined;
-  phone: string | undefined;
-  postalCode: string;
+  suburb: string;
   state: string;
-  services: string[];
+  postalCode: string;
 } {
   const body = request.body;
 
   if (!body.abn) throw error("ABN is required", 400);
 
-  if (!body.about) throw error("About is required", 400);
-
-  if (!body.mainServiceId) throw error("Main Service is required", 400);
+  if (!body.mainServiceId) throw error("Main Service ID is required", 400);
 
   if (!body.mobile) throw error("Mobile is required", 400);
 
@@ -34,53 +25,13 @@ export function createBusinessValidation(request: Request): {
 
   if (!body.address) throw error("Address is required", 400);
 
-  if (!body.city) throw error("City is required", 400);
+  if (!body.suburb) throw error("Suburb is required", 400);
 
   if (!body.postalCode) throw error("Postal Code is required", 400);
 
   if (!body.state) throw error("State is required", 400);
 
-  if (!body.services) throw error("Services is required", 400);
-
-  if (!Array.isArray(body.services))
-    throw error("Services should be an array", 400);
-
-  if (body.services.length === 0)
-    throw error("Services should not be empty", 400);
-
-  if (body.services.some((service: any) => typeof service !== "string"))
-    throw error("Services should be an array of strings", 400);
-
-  if (body.website && typeof body.website !== "string")
-    throw error("Website should be a string", 400);
-
-  if (body.website && body.website.trim().length === 0)
-    throw error("Website should not be empty", 400);
-
-  if (body.phone && typeof body.phone !== "string")
-    throw error("Phone should be a string", 400);
-
-  if (body.facebook && typeof body.facebook !== "string")
-    throw error("Facebook should be a string", 400);
-
-  if (body.instagram && typeof body.instagram !== "string")
-    throw error("Instagram should be a string", 400);
-
-  if (body.license && typeof body.license !== "string")
-    throw error("License should be a string", 400);
-
-  if (!body.openHour) throw error("Open Hour is required", 400);
-
-  if (typeof body.openHour !== "string")
-    throw error("Open Hour should be a string", 400);
-
   if (typeof body.abn !== "number") throw error("ABN should be a number", 400);
-
-  if (typeof body.about !== "string")
-    throw error("About should be a string", 400);
-
-  if (typeof body.mainServiceId !== "string")
-    throw error("Main Service should be a string", 400);
 
   if (typeof body.mobile !== "string")
     throw error("Mobile should be a string", 400);
@@ -88,32 +39,42 @@ export function createBusinessValidation(request: Request): {
   if (typeof body.name !== "string")
     throw error("Name should be a string", 400);
 
+  if (typeof body.address !== "string")
+    throw error("Address should be a string", 400);
+
+  if (typeof body.suburb !== "string")
+    throw error("Suburb should be a string", 400);
+
+  if (typeof body.postalCode !== "string")
+    throw error("Postal Code should be a string", 400);
+
+  if (typeof body.state !== "string")
+    throw error("State should be a string", 400);
+
   if (body.name.trim().length === 0)
     throw error("Name should not be empty", 400);
 
-  if (typeof body.address !== "string")
-    throw error("Suburb should be a string", 400);
+  if (body.address.trim().length === 0)
+    throw error("Address should not be empty", 400);
 
-  if (!isValidObjectId(body.mainServiceId))
-    throw error("Invalid Main Service ID", 400);
+  if (body.suburb.trim().length === 0)
+    throw error("Suburb should not be empty", 400);
+
+  if (body.postalCode.trim().length === 0)
+    throw error("Postal Code should not be empty", 400);
+
+  if (body.state.trim().length === 0)
+    throw error("State should not be empty", 400);
 
   return {
     abn: body.abn,
-    about: body.about,
-    license: body.license,
     mainServiceId: body.mainServiceId,
     mobile: body.mobile,
     name: body.name,
-    openHour: body.openHour,
-    website: body.website,
     address: body.address,
-    city: body.city,
-    facebook: body.facebook,
-    instagram: body.instagram,
-    phone: body.phone,
+    suburb: body.suburb,
     postalCode: body.postalCode,
     state: body.state,
-    services: body.services,
   };
 }
 
@@ -121,6 +82,8 @@ export function getBusinessesValidation(request: Request): {
   limit: number;
   page: number;
   name?: string;
+  serviceId?: string;
+  suburb?: string;
   address?: string;
 } {
   const query = request.query;
@@ -155,15 +118,21 @@ export function getBusinessesValidation(request: Request): {
 export function updateBusinessValidation(request: Request): {
   businessId: string;
   abn?: number;
+  name?: string;
+  mobile?: string;
+  phone?: string;
   about?: string;
   license?: string;
-  mobile?: string;
-  name?: string;
   openHour?: string;
   website?: string;
-  phone?: string;
   facebook?: string;
   instagram?: string;
+  address?: string;
+  mainServiceId?: string;
+  postalCode?: string;
+  state?: string;
+  suburb?: string;
+  services?: string[];
 } {
   const params = request.params;
   const body = request.body;
@@ -171,8 +140,14 @@ export function updateBusinessValidation(request: Request): {
   if (!params.id) throw error("Business ID is required", 400);
   if (!isValidObjectId(params.id)) throw error("Invalid Business ID", 400);
 
-  if (body.abn && typeof body.abn !== "string")
-    throw error("ABN should be a string", 400);
+  if (body.mobile && typeof body.mobile !== "string")
+    throw error("Mobile should be a string", 400);
+
+  if (body.phone && typeof body.phone !== "string")
+    throw error("Phone should be a string", 400);
+
+  if (body.name && typeof body.name !== "string")
+    throw error("Name should be a string", 400);
 
   if (body.about && typeof body.about !== "string")
     throw error("About should be a string", 400);
@@ -180,29 +155,11 @@ export function updateBusinessValidation(request: Request): {
   if (body.license && typeof body.license !== "string")
     throw error("License should be a string", 400);
 
-  if (body.mobile && typeof body.mobile !== "string")
-    throw error("Mobile should be a string", 400);
-
-  if (body.name && typeof body.name !== "string")
-    throw error("Name should be a string", 400);
-
-  if (body.name && body.name.trim().length === 0)
-    throw error("Name should not be empty", 400);
-
   if (body.openHour && typeof body.openHour !== "string")
     throw error("Open Hour should be a string", 400);
 
-  if (body.openHour && body.openHour <= 0)
-    throw error("Open Hour should be greater than 0", 400);
-
   if (body.website && typeof body.website !== "string")
     throw error("Website should be a string", 400);
-
-  if (body.website && body.website.trim().length === 0)
-    throw error("Website should not be empty", 400);
-
-  if (body.phone && typeof body.phone !== "string")
-    throw error("Phone should be a string", 400);
 
   if (body.facebook && typeof body.facebook !== "string")
     throw error("Facebook should be a string", 400);
@@ -210,31 +167,86 @@ export function updateBusinessValidation(request: Request): {
   if (body.instagram && typeof body.instagram !== "string")
     throw error("Instagram should be a string", 400);
 
+  if (body.services && !Array.isArray(body.services))
+    throw error("Services should be an array", 400);
+
+  if (body.services && body.services.length === 0)
+    throw error("Services should not be empty", 400);
+
+  if (
+    body.services &&
+    body.services.some((service: unknown) => typeof service !== "string")
+  )
+    throw error("Services should be an array of strings", 400);
+
+  if (body.abn && typeof body.abn !== "number")
+    throw error("ABN should be a number", 400);
+
+  if (body.address && typeof body.address !== "string")
+    throw error("Address should be a string", 400);
+
+  if (body.suburb && typeof body.suburb !== "string")
+    throw error("Suburb should be a string", 400);
+
+  if (body.postalCode && typeof body.postalCode !== "string")
+    throw error("Postal Code should be a string", 400);
+
+  if (body.state && typeof body.state !== "string")
+    throw error("State should be a string", 400);
+
+  if(body.mainServiceId && typeof body.mainServiceId !== "string")
+    throw error("Main Service ID should be a string", 400);
+
+  if (body.mainServiceId && !isValidObjectId(body.mainServiceId))
+    throw error("Invalid Main Service ID", 400);
+
+
   if (
     !body.abn &&
+    !body.name &&
+    !body.mobile &&
+    !body.phone &&
     !body.about &&
     !body.license &&
-    !body.mobile &&
-    !body.name &&
     !body.openHour &&
     !body.website &&
-    !body.phone &&
     !body.facebook &&
-    !body.instagram
-  )
+    !body.instagram &&
+    !body.services
+  ) {
     throw error("No valid data to update", 400);
+  }
 
   return {
     businessId: params.id,
-    abn: body.abn,
+    name: body.name,
+    mobile: body.mobile,
+    phone: body.phone,
     about: body.about,
     license: body.license,
-    mobile: body.mobile,
-    name: body.name,
     openHour: body.openHour,
     website: body.website,
-    phone: body.phone,
     facebook: body.facebook,
     instagram: body.instagram,
+    services: body.services,
+    address: body.address,
+    mainServiceId: body.mainServiceId,
+    postalCode: body.postalCode,
+    state: body.state,
+    suburb: body.suburb,
+    abn: body.abn,
+  };
+}
+
+export function getBusinessValidation(request: Request): {
+  id: string;
+} {
+  const params = request.params;
+
+  if (!params.id) throw error("Business ID is required", 400);
+  if (!isValidObjectId(params.id)) throw error("Invalid Business ID", 400);
+
+  return {
+    id: params.id,
   };
 }

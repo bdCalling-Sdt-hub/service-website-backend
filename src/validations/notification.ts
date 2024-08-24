@@ -1,7 +1,5 @@
 import { Request } from "express";
 import error from "../utils/error";
-import { isValidObjectId } from "../utils/validators";
-import { TokenData } from "../types/token";
 
 export async function userNotificationsValidation(request: Request): Promise<{
   limit: number;

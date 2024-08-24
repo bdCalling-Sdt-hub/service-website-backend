@@ -1,8 +1,14 @@
 import { sign, verify } from "jsonwebtoken";
-import { TokenData } from "../types/token";
-import dotenv from "dotenv";
+import "dotenv/config";
 
-dotenv.config();
+type TokenData = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  image: string | null;
+  type: string;
+};
 
 const secret = process.env.JWT_SECRET as string;
 if (!secret) throw new Error("JWT_SECRET is not defined");

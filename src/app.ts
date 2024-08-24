@@ -3,10 +3,16 @@ import { CustomError } from "./utils/error";
 import routes from "./routes";
 import responseBuilder from "./utils/responseBuilder";
 import cors from "cors";
+import morgan from "morgan";
+import { createManyAddress, getAddresses } from "./services/address";
+import suburbs from "./suburbs.json";
 
 const app = express();
 
 app.use(express.json());
+
+app.use(morgan("combined"));
+
 app.use(cors());
 app.use(express.static("public"));
 
@@ -51,6 +57,12 @@ app.get("/", (_: Request, response: Response) => {
 
 app.get("/health", (_: Request, response: Response) => {
   response.send("OK");
+});
+
+getAddresses({ limit: 1, skip: 0 }).then((addresses) => {
+  if (addresses.length === 0) {
+    createManyAddress(suburbs).then(console.log).catch(console.error);
+  }
 });
 
 export default app;

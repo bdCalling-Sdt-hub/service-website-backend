@@ -35,14 +35,15 @@ export async function createSubscriptionController(
   try {
     const { name, minimumStart, price, benefits } =
       createSubscriptionValidation(request);
-
+  
+    // Create a Stripe product
     const product = await stripe.products.create({
       name,
     });
-
+  
     // Create a price for the product
     const priceData = await stripe.prices.create({
-      unit_amount: price * 100,
+      unit_amount: price * 100, // Convert to cents
       currency: "aud",
       recurring: {
         interval: "month",
@@ -55,14 +56,7 @@ export async function createSubscriptionController(
         benefits: JSON.stringify(benefits),
       },
     });
-
-    // const subscription = await createSubscription({
-    //   name,
-    //   minimumStart,
-    //   price,
-    //   Benefits,
-    // });
-
+  
     return responseBuilder(response, {
       ok: true,
       statusCode: 201,
@@ -72,7 +66,6 @@ export async function createSubscriptionController(
         ...priceData.metadata,
         benefits: JSON.parse(priceData.metadata.benefits),
       },
-      // data: subscription,
     });
   } catch (error) {
     next(error);

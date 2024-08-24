@@ -29,7 +29,7 @@ model Users {
   oTPs          OTPs[]
   business      Businesses?
   reviews       Reviews[]
-  messages      messages[]
+  messages      Messages[]
 }
 
 model Notifications {
@@ -72,24 +72,25 @@ model Businesses {
   mobile            String
   abn               Int
   license           String?
-  openHour          String
+  openHour          String?
   address           String
-  city              String
+  suburb            String
   state             String
   postalCode        String
   services          String[]
   website           String?
   facebook          String?
   instagram         String?
-  about             String
-  isDeleted         Boolean      @default(false)
+  about             String?
   priorityIndex     Int          @default(0)
   subscriptionEndAt DateTime?
   mainServiceId     String       @db.ObjectId
   mainService       Services     @relation(fields: [mainServiceId], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
   portfolios        Portfolios[]
   reviews           Reviews[]
-  Payments          Payments[]
+  payments          Payments[]
 }
 
 model Services {
@@ -138,11 +139,18 @@ model Reviews {
   updatedAt  DateTime   @updatedAt
 }
 
-model messages {
+model Messages {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   message     String
   bussniessId String   @db.ObjectId
   userId      String   @db.ObjectId
   user        Users    @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
+}
+
+model Addresses {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  state      String
+  suburb     String
+  postalCode String
 }

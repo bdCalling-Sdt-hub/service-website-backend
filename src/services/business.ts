@@ -3,61 +3,40 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export function createBusiness({
-  abn,
-  about,
-  license,
-  name,
-  openHour,
-  mainServiceId,
-  address,
   userId,
+  name,
+  mainServiceId,
   mobile,
-  city,
-  facebook,
-  instagram,
-  website,
   phone,
-  postalCode,
+  abn,
+  address,
+  suburb,
   state,
-  services,
+  postalCode,
 }: {
   abn: number;
-  mobile: string;
-  about: string;
-  license: string | undefined;
   name: string;
-  openHour: string;
-  mainServiceId: string;
   address: string;
-  userId: string;
-  city: string;
+  suburb: string;
+  mobile: string;
+  phone?: string;
   postalCode: string;
   state: string;
-  phone: string | undefined;
-  facebook: string | undefined;
-  instagram: string | undefined;
-  website: string | undefined;
-  services: string[];
+  userId: string;
+  mainServiceId: string;
 }) {
   return prisma.businesses.create({
     data: {
       abn,
-      mobile,
-      about,
-      license,
-      name,
-      openHour,
-      mainServiceId,
       address,
-      userId,
-      city,
+      suburb,
+      mobile,
+      name,
+      phone,
       postalCode,
       state,
-      phone,
-      services,
-      facebook,
-      instagram,
-      website,
+      userId,
+      mainServiceId,
     },
   });
 }
@@ -86,6 +65,19 @@ export function getBusinesses({
     },
     orderBy: {
       priorityIndex: "asc",
+    },
+    include: {
+      mainService: {
+        select: {
+          name: true,
+        },
+      },
+      user: {
+        select: {
+          image: true,
+          email: true,
+        },
+      },
     },
   });
 }
@@ -122,7 +114,13 @@ export function updateBusiness(
     facebook,
     instagram,
     website,
+    services,
     subscriptionEndAt,
+    address,
+    mainServiceId,
+    state,
+    suburb,
+    postalCode,
   }: {
     abn?: number;
     mobile?: string;
@@ -134,7 +132,13 @@ export function updateBusiness(
     facebook?: string;
     instagram?: string;
     website?: string;
+    services?: string[];
     subscriptionEndAt?: Date;
+    address?: string;
+    mainServiceId?: string;
+    state?: string;
+    suburb?: string;
+    postalCode?: string;
   }
 ) {
   return prisma.businesses.update({
@@ -153,6 +157,12 @@ export function updateBusiness(
       instagram,
       website,
       subscriptionEndAt,
+      services,
+      address,
+      mainServiceId,
+      state,
+      suburb,
+      postalCode,
     },
   });
 }
@@ -161,6 +171,19 @@ export function getBusinessById(id: string) {
   return prisma.businesses.findUnique({
     where: {
       id,
+    },
+    include: {
+      mainService: {
+        select: {
+          name: true,
+        },
+      },
+      user: {
+        select: {
+          image: true,
+          email: true,
+        },
+      },
     },
   });
 }

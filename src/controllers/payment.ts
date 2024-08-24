@@ -1,6 +1,13 @@
 import type { Request, Response, NextFunction } from "express";
-import { createPaymentValidation } from "../validations/payment";
-import { createPayment } from "../services/payment";
+import {
+  createPaymentValidation,
+  getPaymentChartValidation,
+} from "../validations/payment";
+import {
+  createPayment,
+  getPaymentsByYear,
+  totalEarnings,
+} from "../services/payment";
 import { getSubscriptionById } from "../services/subscription";
 import Stripe from "stripe";
 import responseBuilder from "../utils/responseBuilder";
@@ -46,11 +53,16 @@ export async function createPaymentController(
       });
     }
 
+    // Create a Stripe customer
     const customer = await stripe.customers.create({
-      name: user.name,
       email: user.email,
+      metadata: {
+        userId: user.id,
+        businessId: user.business.id,
+      },
     });
 
+    // Create a BECS Direct Debit payment method
     const paymentMethod = await stripe.paymentMethods.create({
       type: "au_becs_debit",
       au_becs_debit: {
@@ -58,29 +70,42 @@ export async function createPaymentController(
         account_number,
       },
       billing_details: {
-        name: "Customer Name",
-        email: "customer@example.com",
+        name: user.firstName + " " + user.lastName, // Make sure this is provided
+        email: user.email,
+        address: {
+          city: "Sydney",
+          country: "AU",
+          line1: "123 Main Street",
+          postal_code: "2000",
+          state: "NSW",
+        },
+        phone: user.business?.mobile,
       },
     });
 
+    // Attach the payment method to the customer
     await stripe.paymentMethods.attach(paymentMethod.id, {
       customer: customer.id,
     });
+
+    //payment_intent.succeeded
+
+    // Set the payment method as default
     await stripe.customers.update(customer.id, {
       invoice_settings: {
         default_payment_method: paymentMethod.id,
       },
     });
 
+    // Create a subscription with BECS Direct Debit as the payment method
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [{ price: price.id }],
-      payment_settings: {
-        payment_method_types: ["au_becs_debit"], // Specify BECS as the payment method
-      },
+      // payment_behavior: 'default_incomplete',
       expand: ["latest_invoice.payment_intent"],
     });
 
+    // Notify the user of successful subscription
     sendNotifications({
       subscriptionName: price.metadata.name,
       userId: user.id,
@@ -90,7 +115,7 @@ export async function createPaymentController(
     return responseBuilder(response, {
       ok: true,
       statusCode: 200,
-      message: "Payment successful",
+      message: "Subscription created and payment method set up successfully",
     });
   } catch (error) {
     next(error);
@@ -152,6 +177,77 @@ export async function webhookController(
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getTotalEarningsController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const earnings = await totalEarnings();
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Total earnings fetched",
+      data: earnings._sum,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getPaymentChartController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { year } = getPaymentChartValidation(request);
+
+    const payments = await getPaymentsByYear(year);
+
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    const chartData = months.map((month) => {
+      const monthPayments = payments.filter(
+        (payment) => payment.createdAt.getMonth() === months.indexOf(month)
+      );
+
+      const totalAmount = monthPayments.reduce(
+        (total, payment) => total + payment.amount,
+        0
+      );
+
+      return {
+        month,
+        totalAmount,
+      };
+    });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Payment chart fetched",
+      data: chartData,
+    });
   } catch (error) {
     next(error);
   }

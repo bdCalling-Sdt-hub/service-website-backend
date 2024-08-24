@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { UpdateUser } from "../types/user";
 
 const prisma = new PrismaClient();
 
@@ -77,10 +76,11 @@ export function getUserById(id: string, takePassword = false) {
           instagram: true,
           website: true,
           address: true,
-          city: true,
+          suburb: true,
           postalCode: true,
           state: true,
           services: true,
+          mainServiceId: true,
           mainService: {
             select: {
               name: true,
@@ -93,12 +93,36 @@ export function getUserById(id: string, takePassword = false) {
   });
 }
 
-export function updateUserById(id: string, data: UpdateUser) {
+export function updateUserById(
+  id: string,
+  {
+    image,
+    firstName,
+    lastName,
+    mobile,
+    isVerified,
+    password,
+  }: {
+    image?: string;
+    firstName?: string;
+    lastName?: string;
+    mobile?: string;
+    isVerified?: boolean;
+    password?: string;
+  }
+) {
   return prisma.users.update({
     where: {
       id,
     },
-    data,
+    data: {
+      image,
+      firstName,
+      lastName,
+      mobile,
+      isVerified,
+      password,
+    },
     select: {
       id: true,
       firstName: true,
@@ -108,11 +132,6 @@ export function updateUserById(id: string, data: UpdateUser) {
       type: true,
       image: true,
       isVerified: true,
-      business: {
-        select: {
-          id: true,
-        },
-      },
     },
   });
 }
@@ -136,21 +155,6 @@ export function getUsers({
 }) {
   return prisma.users.findMany({
     take: limit,
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      mobile: true,
-      type: true,
-      image: true,
-      isVerified: true,
-      business: {
-        select: {
-          id: true,
-        },
-      },
-    },
     skip,
     where: {
       type,

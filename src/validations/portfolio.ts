@@ -4,25 +4,16 @@ import { isValidObjectId } from "../utils/validators";
 
 export function createPortfolioValidation(request: Request): {
   name: string;
-  businessId: string;
   image: string;
 } {
   const body = request.body;
 
   if (!body.name) throw error("Name is required", 400);
 
-  if (!body.businessId) throw error("Business ID is required", 400);
-
   if (!body.image) throw error("Image is required", 400);
 
   if (typeof body.name !== "string")
     throw error("Name should be a string", 400);
-
-  if (typeof body.businessId !== "string")
-    throw error("Business ID should be a string", 400);
-
-  if (!isValidObjectId(body.businessId))
-    throw error("Invalid business ID", 400);
 
   if (typeof body.image !== "string")
     throw error("Image should be a string", 400);
@@ -30,12 +21,8 @@ export function createPortfolioValidation(request: Request): {
   if (body.name.trim().length === 0)
     throw error("Name should not be empty", 400);
 
-  if (!isValidObjectId(body.businessId))
-    throw error("Invalid business ID", 400);
-
   return {
     name: body.name,
-    businessId: body.businessId,
     image: body.image,
   };
 }
@@ -69,5 +56,24 @@ export function getPortfoliosValidation(request: Request): {
     businessId: query.businessId,
     limit,
     page,
+  };
+}
+
+
+export function deletePortfolioValidation(request: Request): {
+  id: string;
+} {
+  const params = request.params;
+
+  if (!params.id) throw error("ID is required", 400);
+
+  if (typeof params.id !== "string")
+    throw error("ID should be a string", 400);
+
+  if (!isValidObjectId(params.id))
+    throw error("Invalid ID", 400);
+
+  return {
+    id: params.id,
   };
 }

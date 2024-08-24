@@ -32,3 +32,22 @@ export function getLastPaymentByUserId(businessId: string) {
     orderBy: { createdAt: "desc" },
   });
 }
+
+export function totalEarnings() {
+  return prisma.payments.aggregate({
+    _sum: {
+      amount: true,
+    },
+  });
+}
+
+export function getPaymentsByYear(year: string) {
+  return prisma.payments.findMany({
+    where: {
+      createdAt: {
+        gte: new Date(`${year}-01-01`),
+        lt: new Date(`${year}-12-31`),
+      },
+    },
+  });
+}

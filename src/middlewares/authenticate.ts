@@ -55,7 +55,7 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
         return responseBuilder(response, {
           ok: false,
           statusCode: 403,
-          message: "Unauthorized",
+          message: "Only " + allowedRoles.join(", ") + " can access this route",
         });
       }
 
