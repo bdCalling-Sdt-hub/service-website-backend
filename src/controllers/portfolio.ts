@@ -13,6 +13,7 @@ import {
   getPortfoliosValidation,
 } from "../validations/portfolio";
 import paginationBuilder from "../utils/paginationBuilder";
+import { getLastPaymentByBusinessId } from "../services/payment";
 
 export async function createPortfolioController(
   request: Request,
@@ -32,15 +33,15 @@ export async function createPortfolioController(
       });
     }
 
-    // const payment = await getLastPaymentByUserId(user.id);
+    const payment = await getLastPaymentByBusinessId(user.business.id)
 
-    // if (!payment) {
-    //   return responseBuilder(response, {
-    //     ok: false,
-    //     statusCode: 400,
-    //     message: "You need to subscribe to a plan to add a portfolio",
-    //   });
-    // }
+    if (!payment) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "You need to subscribe to a plan to add a portfolio",
+      });
+    }
 
     const portfolio = await createPortfolio({
       businessId: user.business.id,

@@ -86,7 +86,7 @@ export function updateSubscriptionValidation(request: Request): {
   name?: string;
   minimumStart?: number;
   price?: number;
-  Benefits?: string[];
+  benefits?: string[];
 } {
   const params = request.params;
   const body = request.body;
@@ -103,14 +103,14 @@ export function updateSubscriptionValidation(request: Request): {
   if (body.price && typeof body.price !== "number")
     throw error("Price should be a number", 400);
 
-  if (body.Benefits && !Array.isArray(body.Benefits))
+  if (body.benefits && !Array.isArray(body.benefits))
     throw error("Benefits should be an array", 400);
 
-  if (body.Benefits) {
-    if (body.Benefits.length === 0)
+  if (body.benefits) {
+    if (body.benefits.length === 0)
       throw error("At least one benefit is required", 400);
 
-    body.Benefits.forEach((benefit: string) => {
+    body.benefits.forEach((benefit: string) => {
       if (typeof benefit !== "string")
         throw error("Benefits should be an array of strings", 400);
     });
@@ -128,7 +128,7 @@ export function updateSubscriptionValidation(request: Request): {
     name: body.name,
     minimumStart: body.minimumStart,
     price: body.price,
-    Benefits: body.Benefits,
+    benefits: body.benefits,
   };
 }
 

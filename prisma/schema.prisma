@@ -56,7 +56,8 @@ model Subscriptions {
   name         String
   price        Float
   minimumStart Int
-  Benefits     String[]
+  benefits     String[]
+  priceId      String
   isDeleted    Boolean    @default(false)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt

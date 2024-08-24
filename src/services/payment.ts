@@ -26,7 +26,7 @@ export function createPayment({
   });
 }
 
-export function getLastPaymentByUserId(businessId: string) {
+export function getLastPaymentByBusinessId(businessId: string) {
   return prisma.payments.findFirst({
     where: { businessId },
     orderBy: { createdAt: "desc" },
@@ -50,4 +50,25 @@ export function getPaymentsByYear(year: string) {
       },
     },
   });
+}
+
+export function getPayments({ limit, skip }: { limit: number; skip: number }) {
+  return prisma.payments.findMany({
+    take: limit,
+    skip,
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      business: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+}
+
+export function countPayments() {
+  return prisma.payments.count();
 }

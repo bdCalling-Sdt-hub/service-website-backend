@@ -56,6 +56,14 @@ export async function createSubscriptionController(
         benefits: JSON.stringify(benefits),
       },
     });
+
+    await createSubscription({
+      name,
+      minimumStart,
+      price,
+      benefits,
+      priceId: priceData.id,  
+    })
   
     return responseBuilder(response, {
       ok: true,
@@ -78,67 +86,68 @@ export async function getSubscriptionsController(
   next: NextFunction
 ) {
   try {
-    // const { limit, page } = getSubscriptionsValidation(request);
+    const { limit, page } = getSubscriptionsValidation(request);
 
-    // const totalSubscriptions = await countSubscriptions();
+    const totalSubscriptions = await countSubscriptions();
 
-    // const pagination = paginationBuilder({
-    //   currentPage: page,
-    //   limit,
-    //   totalData: totalSubscriptions,
+    const pagination = paginationBuilder({
+      currentPage: page,
+      limit,
+      totalData: totalSubscriptions,
+    });
+
+    if (page > pagination.totalPage) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
+    }
+
+    // const prices = await stripe.prices.list({
+    //   active: true,
+    //   expand: ["data.product"],
     // });
 
-    // if (page > pagination.totalPage) {
-    //   return responseBuilder(response, {
-    //     ok: false,
-    //     statusCode: 404,
-    //     message: "Page not found",
-    //   });
-    // }
+    // const subscriptions = prices.data.map((price) => {
+    //   return {
+    //     id: price.id,
+    //     name: price.metadata.name,
+    //     minimumStart: price.metadata.minimumStart,
+    //     price: price.metadata.price,
+    //     benefits: JSON.parse(price.metadata.benefits),
+    //   };
+    // });
 
-    const prices = await stripe.prices.list({
-      active: true,
-      expand: ["data.product"],
-    });
+    // const paymentLink = await stripe.paymentLinks.create({
+    //   line_items: [
+    //     {
+    //       price: subscriptions[0].id,
+    //       quantity: 1,
+    //     },
+    //   ],
+    //   after_completion: {
+    //     type: 'redirect',
+    //     redirect: {
+    //       url: 'https://your-redirect-url.com/thank-you', // Redirect after payment
+    //     },
+    //   },
+    // });
 
-    const subscriptions = prices.data.map((price) => {
-      return {
-        id: price.id,
-        name: price.metadata.name,
-        minimumStart: price.metadata.minimumStart,
-        price: price.metadata.price,
-        benefits: JSON.parse(price.metadata.benefits),
-      };
-    });
-
-    const paymentLink = await stripe.paymentLinks.create({
-      line_items: [
-        {
-          price: subscriptions[0].id,
-          quantity: 1,
-        },
-      ],
-      after_completion: {
-        type: 'redirect',
-        redirect: {
-          url: 'https://your-redirect-url.com/thank-you', // Redirect after payment
-        },
-      },
-    });
-
-    console.log(paymentLink.url);
+    // console.log(paymentLink.url);
 
     // console.log(prices);
     // console.log(prices.data[0].product);
-    // const skip = (page - 1) * limit;
-    // const subscriptions = await getSubscriptions({ limit, skip });
+    
+    const skip = (page - 1) * limit;
+    const subscriptions = await getSubscriptions({ limit, skip });
 
     return responseBuilder(response, {
       ok: true,
       statusCode: 200,
       message: "Subscriptions fetched",
       data: subscriptions,
-      // pagination,
+      pagination,
     });
   } catch (error) {
     next(error);
@@ -151,11 +160,11 @@ export async function updateSubscriptionController(
   next: NextFunction
 ) {
   try {
-    const { subscriptionId, Benefits, minimumStart, name, price } =
+    const { subscriptionId, benefits, minimumStart, name, price } =
       updateSubscriptionValidation(request);
 
     const subscription = await updateSubscription(subscriptionId, {
-      Benefits,
+      benefits,
       minimumStart,
       name,
       price,

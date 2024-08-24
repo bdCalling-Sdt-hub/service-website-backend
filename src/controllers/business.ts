@@ -72,14 +72,6 @@ export async function createBusinessController(
       phone,
     });
 
-    await createPayment({
-      businessId: business.id,
-      amount:710,
-      expireAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      subscriptionId: service.id,
-      transactionId: "",
-    })
-
     return responseBuilder(response, {
       ok: true,
       statusCode: 201,
@@ -97,9 +89,15 @@ export async function getBusinessesController(
   next: NextFunction
 ) {
   try {
-    const { limit, page, name, address } = getBusinessesValidation(request);
+    const { limit, page, name, postalCode, serviceId, suburb } =
+      getBusinessesValidation(request);
 
-    const totalBusinesses = await countBusinesses({ name, address });
+    const totalBusinesses = await countBusinesses({
+      name,
+      postalCode,
+      serviceId,
+      suburb,
+    });
 
     const pagination = paginationBuilder({
       currentPage: page,
@@ -121,7 +119,9 @@ export async function getBusinessesController(
       limit,
       skip,
       name,
-      address,
+      postalCode,
+      serviceId,
+      suburb,
     });
 
     return responseBuilder(response, {
@@ -159,7 +159,7 @@ export async function updateBusinessController(
       mainServiceId,
       postalCode,
       state,
-      suburb
+      suburb,
     } = updateBusinessValidation(request);
     let cleanAbout = about;
 

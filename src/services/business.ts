@@ -45,12 +45,16 @@ export function getBusinesses({
   limit,
   skip,
   name,
-  address,
+  postalCode,
+  serviceId,
+  suburb,
 }: {
   limit: number;
   skip: number;
   name?: string;
-  address?: string;
+  postalCode?: string;
+  serviceId?: string;
+  suburb?: string;
 }) {
   return prisma.businesses.findMany({
     take: limit,
@@ -58,10 +62,11 @@ export function getBusinesses({
     where: {
       name: {
         startsWith: name,
+        mode: "insensitive",
       },
-      address: {
-        startsWith: address,
-      },
+      mainServiceId: serviceId,
+      suburb,
+      postalCode,
     },
     orderBy: {
       priorityIndex: "asc",
@@ -84,19 +89,24 @@ export function getBusinesses({
 
 export function countBusinesses({
   name,
-  address,
+  serviceId,
+  postalCode,
+  suburb,
 }: {
   name?: string;
-  address?: string;
+  postalCode?: string;
+  serviceId?: string;
+  suburb?: string;
 }) {
   return prisma.businesses.count({
     where: {
       name: {
         startsWith: name,
+        mode: "insensitive",
       },
-      address: {
-        startsWith: address,
-      },
+      mainServiceId: serviceId,
+      postalCode,
+      suburb,
     },
   });
 }

@@ -6,19 +6,22 @@ export function createSubscription({
   name,
   minimumStart,
   price,
-  Benefits,
+  benefits,
+  priceId,
 }: {
   name: string;
   minimumStart: number;
   price: number;
-  Benefits: string[];
+  priceId: string;
+  benefits: string[];
 }) {
   return prisma.subscriptions.create({
     data: {
       name,
       minimumStart,
-      Benefits,
+      benefits,
       price,
+      priceId,
     },
   });
 }
@@ -64,12 +67,12 @@ export function updateSubscription(
     name,
     minimumStart,
     price,
-    Benefits,
+    benefits,
   }: {
     name?: string;
     minimumStart?: number;
     price?: number;
-    Benefits?: string[];
+    benefits?: string[];
   }
 ) {
   return prisma.subscriptions.update({
@@ -80,7 +83,7 @@ export function updateSubscription(
       name,
       minimumStart,
       price,
-      Benefits,
+      benefits,
     },
   });
 }

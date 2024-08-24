@@ -2,9 +2,12 @@ import type { Request, Response, NextFunction } from "express";
 import {
   createPaymentValidation,
   getPaymentChartValidation,
+  getPaymentsValidation,
 } from "../validations/payment";
 import {
+  countPayments,
   createPayment,
+  getPayments,
   getPaymentsByYear,
   totalEarnings,
 } from "../services/payment";
@@ -14,6 +17,7 @@ import responseBuilder from "../utils/responseBuilder";
 import { createNotification } from "../services/notification";
 import { getAdmin } from "../services/user";
 import dotenv from "dotenv";
+import paginationBuilder from "../utils/paginationBuilder";
 
 dotenv.config();
 
@@ -31,8 +35,8 @@ export async function createPaymentController(
   next: NextFunction
 ) {
   try {
-    const { account_number, bsb_number, priceId } =
-      createPaymentValidation(request);
+    // const { account_number, bsb_number, priceId } =
+    //   createPaymentValidation(request);
     const user = request.user;
 
     if (!user.business?.id) {
@@ -43,71 +47,79 @@ export async function createPaymentController(
       });
     }
 
-    const price = await stripe.prices.retrieve(priceId);
+    // const price = await stripe.prices.retrieve(priceId);
 
-    if (!price) {
-      return responseBuilder(response, {
-        ok: false,
-        statusCode: 404,
-        message: "Subscription not found",
-      });
-    }
+    // if (!price) {
+    //   return responseBuilder(response, {
+    //     ok: false,
+    //     statusCode: 404,
+    //     message: "Subscription not found",
+    //   });
+    // }
 
-    // Create a Stripe customer
-    const customer = await stripe.customers.create({
-      email: user.email,
-      metadata: {
-        userId: user.id,
-        businessId: user.business.id,
-      },
-    });
+    // // Create a Stripe customer
+    // const customer = await stripe.customers.create({
+    //   email: user.email,
+    //   metadata: {
+    //     userId: user.id,
+    //     businessId: user.business.id,
+    //   },
+    // });
 
-    // Create a BECS Direct Debit payment method
-    const paymentMethod = await stripe.paymentMethods.create({
-      type: "au_becs_debit",
-      au_becs_debit: {
-        bsb_number,
-        account_number,
-      },
-      billing_details: {
-        name: user.firstName + " " + user.lastName, // Make sure this is provided
-        email: user.email,
-        address: {
-          city: "Sydney",
-          country: "AU",
-          line1: "123 Main Street",
-          postal_code: "2000",
-          state: "NSW",
-        },
-        phone: user.business?.mobile,
-      },
-    });
+    // // Create a BECS Direct Debit payment method
+    // const paymentMethod = await stripe.paymentMethods.create({
+    //   type: "au_becs_debit",
+    //   au_becs_debit: {
+    //     bsb_number,
+    //     account_number,
+    //   },
+    //   billing_details: {
+    //     name: user.firstName + " " + user.lastName, // Make sure this is provided
+    //     email: user.email,
+    //     address: {
+    //       city: "Sydney",
+    //       country: "AU",
+    //       line1: "123 Main Street",
+    //       postal_code: "2000",
+    //       state: "NSW",
+    //     },
+    //     phone: user.business?.mobile,
+    //   },
+    // });
 
-    // Attach the payment method to the customer
-    await stripe.paymentMethods.attach(paymentMethod.id, {
-      customer: customer.id,
-    });
+    // // Attach the payment method to the customer
+    // await stripe.paymentMethods.attach(paymentMethod.id, {
+    //   customer: customer.id,
+    // });
 
-    //payment_intent.succeeded
+    // //payment_intent.succeeded
 
-    // Set the payment method as default
-    await stripe.customers.update(customer.id, {
-      invoice_settings: {
-        default_payment_method: paymentMethod.id,
-      },
-    });
+    // // Set the payment method as default
+    // await stripe.customers.update(customer.id, {
+    //   invoice_settings: {
+    //     default_payment_method: paymentMethod.id,
+    //   },
+    // });
 
-    // Create a subscription with BECS Direct Debit as the payment method
-    const subscription = await stripe.subscriptions.create({
-      customer: customer.id,
-      items: [{ price: price.id }],
-      // payment_behavior: 'default_incomplete',
-      expand: ["latest_invoice.payment_intent"],
+    // // Create a subscription with BECS Direct Debit as the payment method
+    // const subscription = await stripe.subscriptions.create({
+    //   customer: customer.id,
+    //   items: [{ price: price.id }],
+    //   // payment_behavior: 'default_incomplete',
+    //   expand: ["latest_invoice.payment_intent"],
+    // });
+
+    createPayment({
+      businessId: user.business.id,
+      amount: 412,
+      subscriptionId: "sdfafj",
+      expireAt: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      transactionId: "sdfafj",
     });
 
     // Notify the user of successful subscription
     sendNotifications({
-      subscriptionName: price.metadata.name,
+      subscriptionName: "price.metadata.name",
       userId: user.id,
       userName: user.name,
     });
@@ -247,6 +259,48 @@ export async function getPaymentChartController(
       statusCode: 200,
       message: "Payment chart fetched",
       data: chartData,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getPaymentsController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { limit, page } = getPaymentsValidation(request);
+
+    const totalPayments = await countPayments();
+
+    const pagination = paginationBuilder({
+      currentPage: page,
+      limit,
+      totalData: totalPayments,
+    });
+
+    if (page > pagination.totalPage) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
+    }
+
+    const skip = (page - 1) * limit;
+    const payments = await getPayments({
+      limit,
+      skip,
+    });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Payments fetched",
+      data: payments,
+      pagination,
     });
   } catch (error) {
     next(error);

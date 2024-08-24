@@ -84,7 +84,7 @@ export function getBusinessesValidation(request: Request): {
   name?: string;
   serviceId?: string;
   suburb?: string;
-  address?: string;
+  postalCode?: string;
 } {
   const query = request.query;
 
@@ -101,17 +101,25 @@ export function getBusinessesValidation(request: Request): {
   if (query.name && typeof query.name !== "string")
     throw error("Name should be a string", 400);
 
-  if (query.address && typeof query.address !== "string")
+  if (query.serviceId && typeof query.serviceId !== "string")
+    throw error("Service ID should be a string", 400);
+
+  if (query.serviceId && !isValidObjectId(query.serviceId))
     throw error("Suburb should be a string", 400);
 
-  if (query.address && !isValidObjectId(query.address))
-    throw error("Invalid Suburb ID", 400);
+  if (query.suburb && typeof query.suburb !== "string")
+    throw error("Suburb should be a string", 400);
+
+  if (query.postalCode && typeof query.postalCode !== "string")
+    throw error("postalCode Should be String", 400);
 
   return {
     limit,
     page,
-    name: query.name,
-    address: query.address,
+    name: query.name || undefined,
+    postalCode: query.postalCode || undefined,
+    serviceId: query.serviceId || undefined,
+    suburb: query.suburb || undefined,
   };
 }
 
@@ -194,12 +202,11 @@ export function updateBusinessValidation(request: Request): {
   if (body.state && typeof body.state !== "string")
     throw error("State should be a string", 400);
 
-  if(body.mainServiceId && typeof body.mainServiceId !== "string")
+  if (body.mainServiceId && typeof body.mainServiceId !== "string")
     throw error("Main Service ID should be a string", 400);
 
   if (body.mainServiceId && !isValidObjectId(body.mainServiceId))
     throw error("Invalid Main Service ID", 400);
-
 
   if (
     !body.abn &&
