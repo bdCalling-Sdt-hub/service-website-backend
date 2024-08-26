@@ -6,11 +6,10 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    // TODO: replace `user` and `pass` values from <https://forwardemail.net>
     user: process.env.SMTP_USERNAME,
     pass: process.env.SMTP_PASSWORD,
   },
-  authMethod: "PLAIN",
+  authMethod: "LOGIN",
 });
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,7 +52,6 @@ const emailWithNodemailer = async ({
     await handleEmailError(error, mailOptions);
   }
 };
-
 
 export function sentOtpByEmail(email: string, otp: string) {
   const subject = "OTP Verification";
