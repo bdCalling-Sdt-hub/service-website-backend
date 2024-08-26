@@ -10,6 +10,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USERNAME,
     pass: process.env.SMTP_PASSWORD,
   },
+  authMethod: "PLAIN",
 });
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
