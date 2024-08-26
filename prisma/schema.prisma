@@ -143,7 +143,7 @@ model Reviews {
 model Messages {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   message     String
-  bussniessId String   @db.ObjectId
+  businessId String   @db.ObjectId
   userId      String   @db.ObjectId
   user        Users    @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
@@ -154,4 +154,13 @@ model Addresses {
   state      String
   suburb     String
   postalCode String
+}
+
+model AppData {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  about     String
+  privacy   String
+  terms     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -11,7 +11,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use(morgan("combined"));
+app.use(morgan("tiny"));
 
 app.use(cors());
 app.use(express.static("public"));

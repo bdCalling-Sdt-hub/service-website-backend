@@ -117,7 +117,7 @@ export async function loginController(
           ok: false,
           statusCode: 401,
           message: "Please wait 120 seconds before sending another OTP",
-          data: { timeLeft: 120 },
+          data: { timeLeft: 120, id: user.id },
         });
       }
 
