@@ -1,15 +1,22 @@
 import nodemailer from "nodemailer";
 import "dotenv/config";
 
+const user = process.env.SMTP_USERNAME;
+const pass = process.env.SMTP_PASSWORD;
+
+if(!user || !pass) {
+  console.error("SMTP_USERNAME and SMTP_PASSWORD are required in .env");
+  process.exit(1);
+}
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
   auth: {
-    user: process.env.SMTP_USERNAME,
-    pass: process.env.SMTP_PASSWORD,
+    user,
+    pass,
   },
-  authMethod: "LOGIN",
 });
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -52,6 +59,7 @@ const emailWithNodemailer = async ({
     await handleEmailError(error, mailOptions);
   }
 };
+
 
 export function sentOtpByEmail(email: string, otp: string) {
   const subject = "OTP Verification";
