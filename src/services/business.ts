@@ -83,6 +83,11 @@ export function getBusinesses({
           email: true,
         },
       },
+      reviews: {
+        where: {
+          rating: 5,
+        },
+      },
     },
   });
 }

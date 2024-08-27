@@ -17,7 +17,6 @@ import {
 import { getServiceById } from "../services/service";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
-import { createPayment } from "../services/payment";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);

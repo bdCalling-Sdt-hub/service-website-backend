@@ -37,7 +37,7 @@ export function getSubscriptions({
     take: limit,
     skip,
     orderBy: {
-      createdAt: "desc",
+      minimumStart: "asc",
     },
     where: {
       isDeleted: false,
@@ -95,6 +95,15 @@ export function deleteSubscription(id: string) {
     },
     data: {
       isDeleted: true,
+    },
+  });
+}
+
+export function getDefaultSubscription() {
+  return prisma.subscriptions.findFirst({
+    where: {
+      minimumStart: 0,
+      isDeleted: false,
     },
   });
 }

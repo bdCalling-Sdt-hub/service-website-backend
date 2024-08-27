@@ -81,3 +81,41 @@ export function getPaymentsValidation(request: Request): {
     limit,
   };
 }
+
+export function createCheckoutSessionValidation(request: Request): {
+  subscriptionId: string;
+  cancelUrl: string;
+  successUrl: string;
+} {
+  const body = request.body;
+
+  if (!body.subscriptionId) {
+    throw error("subscription Id is required", 400);
+  }
+
+  if (!isValidObjectId(body.subscriptionId)) {
+    throw error("subscription Id should be a valid ObjectId", 400);
+  }
+
+  if (!body.cancelUrl) {
+    throw error("cancelUrl is required", 400);
+  }
+
+  if (typeof body.cancelUrl !== "string") {
+    throw error("cancelUrl should be a string", 400);
+  }
+
+  if (!body.successUrl) {
+    throw error("successUrl is required", 400);
+  }
+
+  if (typeof body.successUrl !== "string") {
+    throw error("successUrl should be a string", 400);
+  }
+
+  return {
+    subscriptionId: body.subscriptionId,
+    cancelUrl: body.cancelUrl,
+    successUrl: body.successUrl,
+  };
+}

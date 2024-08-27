@@ -45,10 +45,8 @@ export async function getMessagesController(
       ok: true,
       statusCode: 200,
       message: "Messages",
-      data: {
-        messages,
-        pagination,
-      },
+      data: messages,
+      pagination,
     });
   } catch (error) {
     next(error);

@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import {
+  createCheckoutSessionValidation,
   createPaymentValidation,
   getPaymentChartValidation,
   getPaymentsValidation,
@@ -18,6 +19,13 @@ import { createNotification } from "../services/notification";
 import { getAdmin } from "../services/user";
 import dotenv from "dotenv";
 import paginationBuilder from "../utils/paginationBuilder";
+import {
+  createCheckoutSession,
+  getCustomers,
+  getPriceById,
+  getSubscriptionByCustomerId,
+  // getSubscriptionByUserId,
+} from "../services/stripte";
 
 dotenv.config();
 
@@ -176,8 +184,8 @@ export async function webhookController(
     // Handle the event
     switch (event.type) {
       case "invoice.payment_succeeded":
-        const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Invoice payment succeeded for ${invoice.customer}`);
+        const invoice = event.data.object 
+        console.log(invoice);
         // Update your database to mark the subscription as active, etc.
         break;
       case "invoice.payment_failed":
@@ -195,7 +203,7 @@ export async function webhookController(
 }
 
 export async function getTotalEarningsController(
-  request: Request,
+  _: Request,
   response: Response,
   next: NextFunction
 ) {
@@ -301,6 +309,85 @@ export async function getPaymentsController(
       message: "Payments fetched",
       data: payments,
       pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createCheckoutSessionController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const user = request.user;
+
+    if (!user.business?.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Register as a business to subscribe to a plan",
+      });
+    }
+
+    const { subscriptionId, cancelUrl, successUrl } =
+      createCheckoutSessionValidation(request);
+
+    const subscription = await getSubscriptionById(subscriptionId);
+
+    if (!subscription || subscription.isDeleted) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Subscription not found",
+      });
+    }
+
+    const price = await getPriceById(subscription.priceId);
+
+    if (!price) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Subscription not found",
+      });
+    }
+
+    let customer;
+
+    const existingCustomers = await getCustomers(user.email);
+
+    if (existingCustomers.data.length > 0) {
+      customer = existingCustomers.data[0];
+
+      const subscriptions = await getSubscriptionByCustomerId(customer.id);
+
+      if (subscriptions.data.length > 0) {
+        return responseBuilder(response, {
+          ok: false,
+          statusCode: 409,
+          message: "Customer already has a subscription",
+        });
+      }
+    } else {
+      customer = await stripe.customers.create({
+        email: user.email,
+      });
+    }
+
+    const session = await createCheckoutSession({
+      cancelUrl,
+      successUrl,
+      priceId: price.id,
+      costumerId: customer.id,
+    });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Subscription session created",
+      data: { url: session.url },
     });
   } catch (error) {
     next(error);

@@ -1,6 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
 import responseBuilder from "../utils/responseBuilder";
-import { countReviews, createReview, getReviews } from "../services/review";
+import {
+  countReviews,
+  countTotalStar,
+  createReview,
+  getReviews,
+} from "../services/review";
 import { getBusinessById } from "../services/business";
 import {
   createReviewValidation,
@@ -79,6 +84,35 @@ export async function getReviewsController(
       message: "Reviews found",
       data: reviews,
       pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getTotalStarController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const user = request.user;
+
+    if (!user.businessId) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Create a business first",
+      });
+    }
+
+    const totalReviews = await countTotalStar(user.businessId);
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Total star",
+      data: totalReviews._sum.rating ?? 0,
     });
   } catch (error) {
     next(error);

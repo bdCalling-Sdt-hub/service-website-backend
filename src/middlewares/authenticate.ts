@@ -11,7 +11,7 @@ declare module "express-serve-static-core" {
 
 type UserTypes = "ADMIN" | "CUSTOMER" | "PROVIDER";
 
-export default function authenticate(...allowedRoles: UserTypes[]) {
+export default function authenticate(...allowedRoles: (UserTypes)[]) {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       const bearerToken = request.headers.authorization;

@@ -52,17 +52,24 @@ export function countReviews({ businessId }: { businessId: string }) {
   });
 }
 
-export function overallRating({
-  businessId,
-}: {
-  businessId: string;
-}) {
+export function overallRating({ businessId }: { businessId: string }) {
   return prisma.reviews.aggregate({
     where: {
       businessId,
     },
-    _avg:{
-        rating: true
+    _avg: {
+      rating: true,
+    },
+  });
+}
+
+export function countTotalStar(businessId: string) {
+  return prisma.reviews.aggregate({
+    where: {
+      businessId,
+    },
+    _sum:{
+      rating: true,
     }
   });
 }

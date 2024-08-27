@@ -41,6 +41,28 @@ export function getUserByEmail(email: string) {
       business: {
         select: {
           id: true,
+          abn: true,
+          about: true,
+          license: true,
+          name: true,
+          openHour: true,
+          mobile: true,
+          phone: true,
+          facebook: true,
+          instagram: true,
+          website: true,
+          address: true,
+          suburb: true,
+          postalCode: true,
+          state: true,
+          services: true,
+          mainServiceId: true,
+          mainService: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
         },
       },
     },

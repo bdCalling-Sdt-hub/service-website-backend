@@ -16,6 +16,7 @@ import paginationBuilder from "../utils/paginationBuilder";
 import responseBuilder from "../utils/responseBuilder";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import { createPrice, createProduct } from "../services/stripte";
 
 dotenv.config();
 
@@ -35,26 +36,17 @@ export async function createSubscriptionController(
   try {
     const { name, minimumStart, price, benefits } =
       createSubscriptionValidation(request);
-  
+
     // Create a Stripe product
-    const product = await stripe.products.create({
-      name,
-    });
-  
+    const product = await createProduct(name);
+
     // Create a price for the product
-    const priceData = await stripe.prices.create({
-      unit_amount: price * 100, // Convert to cents
-      currency: "aud",
-      recurring: {
-        interval: "month",
-      },
-      product: product.id,
-      metadata: {
-        name,
-        minimumStart,
-        price,
-        benefits: JSON.stringify(benefits),
-      },
+    const priceData = await createPrice({
+      price,
+      productId: product.id,
+      name,
+      benefits,
+      minimumStart,
     });
 
     await createSubscription({
@@ -62,9 +54,9 @@ export async function createSubscriptionController(
       minimumStart,
       price,
       benefits,
-      priceId: priceData.id,  
-    })
-  
+      priceId: priceData.id,
+    });
+
     return responseBuilder(response, {
       ok: true,
       statusCode: 201,
@@ -74,7 +66,7 @@ export async function createSubscriptionController(
         ...priceData.metadata,
         benefits: JSON.parse(priceData.metadata.benefits),
       },
-    });
+    });    
   } catch (error) {
     next(error);
   }
@@ -138,7 +130,7 @@ export async function getSubscriptionsController(
 
     // console.log(prices);
     // console.log(prices.data[0].product);
-    
+
     const skip = (page - 1) * limit;
     const subscriptions = await getSubscriptions({ limit, skip });
 
