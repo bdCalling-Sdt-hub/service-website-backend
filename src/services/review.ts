@@ -68,8 +68,20 @@ export function countTotalStar(businessId: string) {
     where: {
       businessId,
     },
-    _sum:{
+    _sum: {
       rating: true,
-    }
+    },
+  });
+}
+
+export function totalStartByGroup(businessId: string) {
+  return prisma.reviews.groupBy({
+    by: ["rating"],
+    where: {
+      businessId,
+    },
+    _count: {
+      rating: true,
+    },
   });
 }

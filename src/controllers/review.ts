@@ -5,6 +5,7 @@ import {
   countTotalStar,
   createReview,
   getReviews,
+  totalStartByGroup,
 } from "../services/review";
 import { getBusinessById } from "../services/business";
 import {
@@ -77,12 +78,22 @@ export async function getReviewsController(
     const skip = (page - 1) * limit;
 
     const reviews = await getReviews({ businessId, limit, skip });
+    const groupRatings = await totalStartByGroup(businessId);
+
+    const ratings = [5, 4, 3, 2, 1].map((rating) => {
+      return {
+        star: rating,
+        total:
+          groupRatings.find((group) => group.rating === rating)?._count
+            .rating ?? 0,
+      };
+    });
 
     return responseBuilder(response, {
       ok: true,
       statusCode: 200,
       message: "Reviews found",
-      data: reviews,
+      data: { reviews, ratings },
       pagination,
     });
   } catch (error) {

@@ -107,3 +107,12 @@ export function getDefaultSubscription() {
     },
   });
 }
+
+export function getSubscriptionByPriceId(priceId: string) {
+  return prisma.subscriptions.findFirst({
+    where: {
+      priceId,
+      isDeleted: false,
+    },
+  });
+}

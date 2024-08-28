@@ -6,6 +6,12 @@ if (!stripe_secret_key) {
   throw new Error("Stripe secret key is not provided");
 }
 
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+if (!endpointSecret) {
+  throw new Error("Stripe webhook secret is not provided");
+}
+
 const stripe = new Stripe(stripe_secret_key);
 
 export function createCheckoutSession({
@@ -13,11 +19,15 @@ export function createCheckoutSession({
   costumerId,
   successUrl,
   cancelUrl,
+  businessId,
+  subscriptionId,
 }: {
   priceId: string;
   costumerId: string;
   successUrl: string;
   cancelUrl: string;
+  businessId: string;
+  subscriptionId: string;
 }) {
   return stripe.checkout.sessions.create({
     success_url: successUrl,
@@ -27,6 +37,10 @@ export function createCheckoutSession({
     billing_address_collection: "auto",
     line_items: [{ price: priceId, quantity: 1 }],
     customer: costumerId,
+    metadata: {
+      businessId,
+      subscriptionId,
+    },
   });
 }
 
@@ -67,8 +81,19 @@ export function getCustomers(email: string) {
   return stripe.customers.list({ email });
 }
 
-export function createCustomer(email: string) {
-  return stripe.customers.create({ email });
+export function createCustomer({
+  email,
+  businessId,
+}: {
+  email: string;
+  businessId: string;
+}) {
+  return stripe.customers.create({
+    email,
+    metadata: {
+      businessId,
+    },
+  });
 }
 
 export function createProduct(name: string) {
@@ -77,4 +102,16 @@ export function createProduct(name: string) {
 
 export function getSubscriptionByCustomerId(userId: string) {
   return stripe.subscriptions.list({ customer: userId });
+}
+
+export function eventConstructor(body: Buffer | string, signature: string) {
+  return stripe.webhooks.constructEvent(
+    body,
+    signature,
+    endpointSecret as string
+  );
+}
+
+export function getCustomerById(id: string) {
+  return stripe.customers.retrieve(id);
 }

@@ -21,7 +21,8 @@ router.post(
   authenticate("PROVIDER"),
   createCheckoutSessionController
 );
-router.post("/webhook", webhookController);
+router.post("/webhook");
+
 router.get("/total", authenticate("ADMIN"), getTotalEarningsController);
 router.get("/chart", authenticate("ADMIN"), getPaymentChartController);
 

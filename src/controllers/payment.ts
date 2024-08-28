@@ -17,25 +17,16 @@ import Stripe from "stripe";
 import responseBuilder from "../utils/responseBuilder";
 import { createNotification } from "../services/notification";
 import { getAdmin } from "../services/user";
-import dotenv from "dotenv";
 import paginationBuilder from "../utils/paginationBuilder";
 import {
   createCheckoutSession,
+  createCustomer,
+  eventConstructor,
   getCustomers,
   getPriceById,
   getSubscriptionByCustomerId,
   // getSubscriptionByUserId,
-} from "../services/stripte";
-
-dotenv.config();
-
-const stripe_secret_key = process.env.STRIPE_SECRET_KEY;
-
-if (!stripe_secret_key) {
-  throw new Error("Stripe secret key is not provided");
-}
-
-const stripe = new Stripe(stripe_secret_key);
+} from "../services/stripe";
 
 export async function createPaymentController(
   request: Request,
@@ -173,18 +164,15 @@ export async function webhookController(
 ) {
   try {
     const sig = request.headers["stripe-signature"] as string;
-    const endpointSecret = "your-webhook-signing-secret";
 
-    const event = stripe.webhooks.constructEvent(
-      request.body,
-      sig,
-      endpointSecret
-    );
+    const event = eventConstructor(request.body, sig);
+
+    console.log(event);
 
     // Handle the event
     switch (event.type) {
       case "invoice.payment_succeeded":
-        const invoice = event.data.object 
+        const invoice = event.data.object;
         console.log(invoice);
         // Update your database to mark the subscription as active, etc.
         break;
@@ -371,8 +359,9 @@ export async function createCheckoutSessionController(
         });
       }
     } else {
-      customer = await stripe.customers.create({
+      customer = await createCustomer({
         email: user.email,
+        businessId: user.business.id,
       });
     }
 
@@ -381,6 +370,8 @@ export async function createCheckoutSessionController(
       successUrl,
       priceId: price.id,
       costumerId: customer.id,
+      businessId: user.business.id,
+      subscriptionId,
     });
 
     return responseBuilder(response, {

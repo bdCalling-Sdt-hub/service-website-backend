@@ -16,7 +16,7 @@ import paginationBuilder from "../utils/paginationBuilder";
 import responseBuilder from "../utils/responseBuilder";
 import Stripe from "stripe";
 import dotenv from "dotenv";
-import { createPrice, createProduct } from "../services/stripte";
+import { createPrice, createProduct } from "../services/stripe";
 
 dotenv.config();
 
