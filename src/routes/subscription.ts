@@ -4,6 +4,7 @@ import {
   deleteSubscriptionController,
   getSubscriptionsController,
   updateSubscriptionController,
+  currentSubscriptionController,
 } from "../controllers/subscription";
 import authenticate from "../middlewares/authenticate";
 
@@ -13,6 +14,8 @@ router
   .route("/")
   .post(authenticate("ADMIN"), createSubscriptionController)
   .get(getSubscriptionsController);
+
+router.route("/current").get(currentSubscriptionController);
 
 router
   .route("/:id")

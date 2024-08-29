@@ -17,6 +17,8 @@ import {
 import { getServiceById } from "../services/service";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
+import { createCheckoutSession, createCustomer } from "../services/stripe";
+import { getDefaultSubscription } from "../services/subscription";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
@@ -47,6 +49,11 @@ export async function createBusinessController(
       postalCode,
       state,
       phone,
+      latitude,
+      longitude,
+      cancelUrl,
+      license,
+      successUrl,
     } = createBusinessValidation(request);
 
     const service = await getServiceById(mainServiceId);
@@ -69,13 +76,41 @@ export async function createBusinessController(
       postalCode,
       state,
       phone,
+      license,
+      latitude,
+      longitude,
+    });
+
+    const subscription = await getDefaultSubscription();
+
+    if (!subscription) {
+      return responseBuilder(response, {
+        ok: true,
+        statusCode: 201,
+        message: "Business created",
+        data: { business },
+      });
+    }
+
+    const customer = await createCustomer({
+      email: user.email,
+      businessId: business.id,
+    });
+
+    const session = await createCheckoutSession({
+      cancelUrl,
+      successUrl,
+      priceId: subscription.priceId,
+      costumerId: customer.id,
+      businessId: business.id,
+      subscriptionId: subscription.id,
     });
 
     return responseBuilder(response, {
       ok: true,
       statusCode: 201,
       message: "Business created",
-      data: business,
+      data: { business, url: session.url },
     });
   } catch (error) {
     next(error);
@@ -88,14 +123,14 @@ export async function getBusinessesController(
   next: NextFunction
 ) {
   try {
-    const { limit, page, name, postalCode, serviceId, suburb } =
+    const { limit, page, name, latitude, longitude, serviceId } =
       getBusinessesValidation(request);
 
     const totalBusinesses = await countBusinesses({
       name,
-      postalCode,
+      latitude,
+      longitude,
       serviceId,
-      suburb,
     });
 
     const pagination = paginationBuilder({
@@ -118,9 +153,7 @@ export async function getBusinessesController(
       limit,
       skip,
       name,
-      postalCode,
       serviceId,
-      suburb,
     });
 
     return responseBuilder(response, {
@@ -159,6 +192,8 @@ export async function updateBusinessController(
       postalCode,
       state,
       suburb,
+      latitude,
+      longitude,
     } = updateBusinessValidation(request);
     let cleanAbout = about;
 
@@ -181,6 +216,8 @@ export async function updateBusinessController(
       postalCode,
       state,
       suburb,
+      latitude,
+      longitude,
     });
 
     return responseBuilder(response, {

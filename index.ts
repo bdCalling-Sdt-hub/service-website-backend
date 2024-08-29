@@ -3,6 +3,7 @@ import http from "http";
 import { eventConstructor, getCustomerById } from "./src/services/stripe";
 import { getSubscriptionByPriceId } from "./src/services/subscription";
 import { createPayment } from "./src/services/payment";
+import { updateBusiness } from "./src/services/business";
 
 const PORT = 9000;
 
@@ -53,6 +54,10 @@ server.on("request", (req, res) => {
           amount: subscription.price,
           expireAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           transactionId: (event.data.object as any).payment_intent,
+        });
+
+        await updateBusiness(businessId, {
+          subscriptionEndAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         });
 
         return res.end("Webhook Received");

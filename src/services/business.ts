@@ -13,6 +13,9 @@ export function createBusiness({
   suburb,
   state,
   postalCode,
+  license,
+  latitude,
+  longitude,
 }: {
   abn: number;
   name: string;
@@ -24,6 +27,9 @@ export function createBusiness({
   state: string;
   userId: string;
   mainServiceId: string;
+  latitude: number;
+  longitude: number;
+  license?: string;
 }) {
   return prisma.businesses.create({
     data: {
@@ -37,6 +43,9 @@ export function createBusiness({
       state,
       userId,
       mainServiceId,
+      license,
+      latitude,
+      longitude,
     },
   });
 }
@@ -45,16 +54,16 @@ export function getBusinesses({
   limit,
   skip,
   name,
-  postalCode,
   serviceId,
-  suburb,
+  latitude,
+  longitude,
 }: {
   limit: number;
   skip: number;
   name?: string;
-  postalCode?: string;
   serviceId?: string;
-  suburb?: string;
+  latitude?: number;
+  longitude?: number;
 }) {
   return prisma.businesses.findMany({
     take: limit,
@@ -65,8 +74,8 @@ export function getBusinesses({
         mode: "insensitive",
       },
       mainServiceId: serviceId,
-      suburb,
-      postalCode,
+      latitude,
+      longitude,
     },
     orderBy: {
       priorityIndex: "asc",
@@ -99,13 +108,13 @@ export function getBusinesses({
 export function countBusinesses({
   name,
   serviceId,
-  postalCode,
-  suburb,
+  latitude,
+  longitude,
 }: {
   name?: string;
-  postalCode?: string;
   serviceId?: string;
-  suburb?: string;
+  latitude?: number;
+  longitude?: number;
 }) {
   return prisma.businesses.count({
     where: {
@@ -114,8 +123,8 @@ export function countBusinesses({
         mode: "insensitive",
       },
       mainServiceId: serviceId,
-      postalCode,
-      suburb,
+      latitude,
+      longitude,
     },
   });
 }
@@ -140,6 +149,8 @@ export function updateBusiness(
     state,
     suburb,
     postalCode,
+    latitude,
+    longitude,
   }: {
     abn?: number;
     mobile?: string;
@@ -158,6 +169,8 @@ export function updateBusiness(
     state?: string;
     suburb?: string;
     postalCode?: string;
+    latitude?: number;
+    longitude?: number;
   }
 ) {
   return prisma.businesses.update({
@@ -182,6 +195,8 @@ export function updateBusiness(
       state,
       suburb,
       postalCode,
+      latitude,
+      longitude,
     },
   });
 }

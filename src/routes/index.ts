@@ -11,6 +11,7 @@ import portfolioRouter from "./portfolio";
 import reviewRouter from "./review";
 import addressRouter from "./address";
 import messageRouter from "./message";
+import appDataRouter from "./appData";
 
 // import adRouter from "./ad";
 // import musicRouter from "./music";
@@ -28,6 +29,7 @@ router.use("/portfolios", portfolioRouter);
 router.use("/reviews", reviewRouter);
 router.use("/addresses", addressRouter);
 router.use("/messages", messageRouter);
+router.use("/app-data", appDataRouter);
 
 // router.use("/ads", adRouter);
 // router.use("/musics", musicRouter);

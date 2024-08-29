@@ -11,7 +11,12 @@ export function createBusinessValidation(request: Request): {
   address: string;
   suburb: string;
   state: string;
+  license?: string;
   postalCode: string;
+  latitude: number;
+  longitude: number;
+  cancelUrl: string;
+  successUrl: string;
 } {
   const body = request.body;
 
@@ -66,6 +71,21 @@ export function createBusinessValidation(request: Request): {
   if (body.state.trim().length === 0)
     throw error("State should not be empty", 400);
 
+  if (body.cancelUrl && typeof body.cancelUrl !== "string")
+    throw error("Cancel URL should be a string", 400);
+
+  if (body.successUrl && typeof body.successUrl !== "string")
+    throw error("Success URL should be a string", 400);
+
+  if (body.license && typeof body.license !== "string")
+    throw error("License should be a string", 400);
+
+  if (!body.latitude || typeof body.latitude !== "number")
+    throw error("Latitude should be a number", 400);
+
+  if (!body.longitude || typeof body.longitude !== "number")
+    throw error("Longitude should be a number", 400);
+
   return {
     abn: body.abn,
     mainServiceId: body.mainServiceId,
@@ -75,6 +95,12 @@ export function createBusinessValidation(request: Request): {
     suburb: body.suburb,
     postalCode: body.postalCode,
     state: body.state,
+    phone: body.phone,
+    cancelUrl: body.cancelUrl,
+    successUrl: body.successUrl,
+    license: body.license,
+    latitude: body.latitude,
+    longitude: body.longitude,
   };
 }
 
@@ -83,8 +109,8 @@ export function getBusinessesValidation(request: Request): {
   page: number;
   name?: string;
   serviceId?: string;
-  suburb?: string;
-  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
 } {
   const query = request.query;
 
@@ -107,19 +133,19 @@ export function getBusinessesValidation(request: Request): {
   if (query.serviceId && !isValidObjectId(query.serviceId))
     throw error("Suburb should be a string", 400);
 
-  if (query.suburb && typeof query.suburb !== "string")
-    throw error("Suburb should be a string", 400);
+  if (query.latitude && typeof Number(query.latitude) !== "number")
+    throw error("Latitude should be a number", 400);
 
-  if (query.postalCode && typeof query.postalCode !== "string")
-    throw error("postalCode Should be String", 400);
+  if (query.longitude && typeof Number(query.longitude) !== "number")
+    throw error("Longitude should be a number", 400);
 
   return {
     limit,
     page,
     name: query.name || undefined,
-    postalCode: query.postalCode || undefined,
     serviceId: query.serviceId || undefined,
-    suburb: query.suburb || undefined,
+    latitude: Number(query.latitude) || undefined,
+    longitude: Number    (query.longitude) || undefined,
   };
 }
 
@@ -140,6 +166,8 @@ export function updateBusinessValidation(request: Request): {
   postalCode?: string;
   state?: string;
   suburb?: string;
+  latitude?: number;
+  longitude?: number;
   services?: string[];
 } {
   const params = request.params;
@@ -208,6 +236,12 @@ export function updateBusinessValidation(request: Request): {
   if (body.mainServiceId && !isValidObjectId(body.mainServiceId))
     throw error("Invalid Main Service ID", 400);
 
+  if (body.latitude && typeof body.latitude !== "number")
+    throw error("Latitude should be a number", 400);
+
+  if (body.longitude && typeof body.longitude !== "number")
+    throw error("Longitude should be a number", 400);
+
   if (
     !body.abn &&
     !body.name &&
@@ -219,7 +253,14 @@ export function updateBusinessValidation(request: Request): {
     !body.website &&
     !body.facebook &&
     !body.instagram &&
-    !body.services
+    !body.services &&
+    !body.address &&
+    !body.mainServiceId &&
+    !body.postalCode &&
+    !body.state &&
+    !body.suburb &&
+    !body.latitude &&
+    !body.longitude
   ) {
     throw error("No valid data to update", 400);
   }

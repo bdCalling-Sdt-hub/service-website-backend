@@ -14,22 +14,23 @@ enum UserType {
 }
 
 model Users {
-  id            String          @id @default(auto()) @map("_id") @db.ObjectId
-  firstName     String
-  lastName      String
-  email         String          @unique
-  password      String
-  type          UserType
-  image         String?
-  mobile        String?
-  isVerified    Boolean         @default(false)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  notifications Notifications[]
-  oTPs          OTPs[]
-  business      Businesses?
-  reviews       Reviews[]
-  messages      Messages[]
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  firstName      String
+  lastName       String
+  email          String           @unique
+  password       String
+  type           UserType
+  image          String?
+  mobile         String?
+  isVerified     Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  notifications  Notifications[]
+  oTPs           OTPs[]
+  business       Businesses?
+  reviews        Reviews[]
+  messages       Messages[]
+  Communications Communications[]
 }
 
 model Notifications {
@@ -65,9 +66,9 @@ model Subscriptions {
 }
 
 model Businesses {
-  id                String       @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String       @unique @db.ObjectId
-  user              Users        @relation(fields: [userId], references: [id])
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String           @unique @db.ObjectId
+  user              Users            @relation(fields: [userId], references: [id])
   name              String
   phone             String?
   mobile            String
@@ -78,20 +79,23 @@ model Businesses {
   suburb            String
   state             String
   postalCode        String
+  latitude          Float
+  longitude         Float
   services          String[]
   website           String?
   facebook          String?
   instagram         String?
   about             String?
-  priorityIndex     Int          @default(0)
+  priorityIndex     Int              @default(0)
   subscriptionEndAt DateTime?
-  mainServiceId     String       @db.ObjectId
-  mainService       Services     @relation(fields: [mainServiceId], references: [id])
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  mainServiceId     String           @db.ObjectId
+  mainService       Services         @relation(fields: [mainServiceId], references: [id])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
   portfolios        Portfolios[]
   reviews           Reviews[]
   payments          Payments[]
+  Communications    Communications[]
 }
 
 model Services {
@@ -141,12 +145,12 @@ model Reviews {
 }
 
 model Messages {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  message     String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  message    String
   businessId String   @db.ObjectId
-  userId      String   @db.ObjectId
-  user        Users    @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
+  userId     String   @db.ObjectId
+  user       Users    @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
 }
 
 model Addresses {
@@ -163,4 +167,27 @@ model AppData {
   terms     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum CommunicationType {
+  CALL
+  MESSAGE
+}
+
+enum CommunicationStatus {
+  PENDING
+  SENDED
+  REVIEWED
+}
+
+model Communications {
+  id         String              @id @default(auto()) @map("_id") @db.ObjectId
+  type       CommunicationType
+  status     CommunicationStatus @default(PENDING)
+  message    String?
+  businessId String              @db.ObjectId
+  business   Businesses          @relation(fields: [businessId], references: [id])
+  userId     String?             @db.ObjectId
+  user       Users?              @relation(fields: [userId], references: [id])
+  createdAt  DateTime            @default(now())
 }

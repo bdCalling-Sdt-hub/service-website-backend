@@ -9,6 +9,7 @@ import {
   countSubscriptions,
   createSubscription,
   deleteSubscription,
+  getSubscriptionById,
   getSubscriptions,
   updateSubscription,
 } from "../services/subscription";
@@ -17,6 +18,7 @@ import responseBuilder from "../utils/responseBuilder";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import { createPrice, createProduct } from "../services/stripe";
+import { getLastPaymentByBusinessId } from "../services/payment";
 
 dotenv.config();
 
@@ -66,7 +68,7 @@ export async function createSubscriptionController(
         ...priceData.metadata,
         benefits: JSON.parse(priceData.metadata.benefits),
       },
-    });    
+    });
   } catch (error) {
     next(error);
   }
@@ -187,6 +189,61 @@ export async function deleteSubscriptionController(
       ok: true,
       statusCode: 200,
       message: "Subscription deleted",
+      data: subscription,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function currentSubscriptionController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const user = request.user;
+
+    if (!user.business) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Not a business",
+      });
+    }
+
+    const payment = await getLastPaymentByBusinessId(user.business.id);
+
+    if (!payment) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "No subscription found",
+      });
+    }
+
+    if (payment.expireAt < new Date()) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Subscription expired",
+      });
+    }
+
+    const subscription = await getSubscriptionById(payment.subscriptionId);
+
+    if (!subscription) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Subscription not found",
+      });
+    }
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Current subscription",
       data: subscription,
     });
   } catch (error) {
