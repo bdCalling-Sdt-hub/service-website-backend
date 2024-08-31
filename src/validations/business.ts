@@ -142,10 +142,10 @@ export function getBusinessesValidation(request: Request): {
   return {
     limit,
     page,
-    name: query.name || undefined,
-    serviceId: query.serviceId || undefined,
-    latitude: Number(query.latitude) || undefined,
-    longitude: Number    (query.longitude) || undefined,
+    name: query.name,
+    serviceId: query.serviceId,
+    latitude: Number(query.latitude),
+    longitude: Number(query.longitude),
   };
 }
 
@@ -283,6 +283,8 @@ export function updateBusinessValidation(request: Request): {
     state: body.state,
     suburb: body.suburb,
     abn: body.abn,
+    latitude: body.latitude,
+    longitude: body.longitude,
   };
 }
 

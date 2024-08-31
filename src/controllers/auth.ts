@@ -15,7 +15,7 @@ import {
 import { createOtp, getLastOtpByUserId } from "../services/otp";
 import responseBuilder from "../utils/responseBuilder";
 import { hashPassword, comparePassword } from "../services/hash";
-import { sentOtpByEmail } from "../services/mail";
+import { sendOTPEmail } from "../services/mail";
 import { generateToken } from "../services/jwt";
 import { createNotification } from "../services/notification";
 
@@ -51,7 +51,7 @@ export async function registerController(
 
     const otp = await createOtp(user.id);
 
-    sentOtpByEmail(email, otp.code);
+    sendOTPEmail(email, otp.code, firstName + " " + lastName);
 
     await createNotification({
       userId: user.id,
@@ -102,7 +102,11 @@ export async function loginController(
 
       if (!prevuesOtp) {
         const otp = await createOtp(user.id);
-        sentOtpByEmail(user.email, otp.code);
+        sendOTPEmail(
+          user.email,
+          otp.code,
+          user.firstName + " " + user.lastName
+        );
 
         return responseBuilder(response, {
           ok: false,
@@ -122,7 +126,7 @@ export async function loginController(
       }
 
       const otp = await createOtp(user.id);
-      sentOtpByEmail(user.email, otp.code);
+      sendOTPEmail(user.email, otp.code, user.firstName + " " + user.lastName);
 
       return responseBuilder(response, {
         ok: false,
@@ -288,7 +292,7 @@ export async function resendOTPController(
 
     if (!prevuesOtp) {
       const otp = await createOtp(userId);
-      sentOtpByEmail(user.email, otp.code);
+      sendOTPEmail(user.email, otp.code, user.firstName + " " + user.lastName);
 
       return responseBuilder(response, {
         ok: true,
@@ -312,7 +316,7 @@ export async function resendOTPController(
     }
 
     const otp = await createOtp(userId);
-    sentOtpByEmail(user.email, otp.code);
+    sendOTPEmail(user.email, otp.code, user.firstName + " " + user.lastName);
 
     return responseBuilder(response, {
       ok: true,
@@ -361,7 +365,11 @@ export async function forgotController(
 
     const otp = await createOtp(user.id);
 
-    sentOtpByEmail(email, otp.code);
+    sendOTPEmail(
+      email,
+      otp.code,
+      user.firstName + " " + user.lastName + " " + user.lastName
+    );
 
     return responseBuilder(response, {
       ok: true,

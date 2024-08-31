@@ -13,6 +13,7 @@ import {
   getReviewsValidation,
 } from "../validations/review";
 import paginationBuilder from "../utils/paginationBuilder";
+import { updateCommunication } from "../services/communication";
 
 export async function createReviewController(
   request: Request,
@@ -38,6 +39,12 @@ export async function createReviewController(
       userId: user.id,
       rating,
       message,
+    });
+
+    await updateCommunication({
+      businessId,
+      status: "SENDED",
+      newStatus: "REVIEWED",
     });
 
     return responseBuilder(response, {

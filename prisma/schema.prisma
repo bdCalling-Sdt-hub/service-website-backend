@@ -29,7 +29,6 @@ model Users {
   oTPs           OTPs[]
   business       Businesses?
   reviews        Reviews[]
-  messages       Messages[]
   Communications Communications[]
 }
 
@@ -79,8 +78,7 @@ model Businesses {
   suburb            String
   state             String
   postalCode        String
-  latitude          Float
-  longitude         Float
+  coordinates       Float[]
   services          String[]
   website           String?
   facebook          String?
@@ -96,6 +94,8 @@ model Businesses {
   reviews           Reviews[]
   payments          Payments[]
   Communications    Communications[]
+
+  @@index([coordinates], map: "coordinates_2dsphere")
 }
 
 model Services {
@@ -143,16 +143,6 @@ model Reviews {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
-
-model Messages {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  message    String
-  businessId String   @db.ObjectId
-  userId     String   @db.ObjectId
-  user       Users    @relation(fields: [userId], references: [id])
-  createdAt  DateTime @default(now())
-}
-
 model Addresses {
   id         String @id @default(auto()) @map("_id") @db.ObjectId
   state      String

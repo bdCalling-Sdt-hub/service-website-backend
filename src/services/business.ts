@@ -44,8 +44,7 @@ export function createBusiness({
       userId,
       mainServiceId,
       license,
-      latitude,
-      longitude,
+      coordinates: [longitude, latitude],
     },
   });
 }
@@ -74,8 +73,11 @@ export function getBusinesses({
         mode: "insensitive",
       },
       mainServiceId: serviceId,
-      latitude,
-      longitude,
+      coordinates:{
+
+      }
+      // latitude,
+      // longitude,
     },
     orderBy: {
       priorityIndex: "asc",
@@ -105,7 +107,7 @@ export function getBusinesses({
   });
 }
 
-export function countBusinesses({
+export async function countBusinesses({
   name,
   serviceId,
   latitude,
@@ -123,10 +125,17 @@ export function countBusinesses({
         mode: "insensitive",
       },
       mainServiceId: serviceId,
-      latitude,
-      longitude,
+      // latitude,
+      // longitude,
     },
   });
+
+  // prisma.businesses.aggregateRaw({
+  //   pipeline:[
+
+  //   ]
+  // })
+
 }
 
 export function updateBusiness(
@@ -195,8 +204,7 @@ export function updateBusiness(
       state,
       suburb,
       postalCode,
-      latitude,
-      longitude,
+      coordinates: latitude && longitude ? [longitude, latitude] : undefined,
     },
   });
 }

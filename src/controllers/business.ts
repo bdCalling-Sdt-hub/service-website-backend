@@ -195,6 +195,15 @@ export async function updateBusinessController(
       latitude,
       longitude,
     } = updateBusinessValidation(request);
+
+    if(businessId !== request.user.business.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 403,
+        message: "You are not authorized to update this business",
+      });
+    }
+
     let cleanAbout = about;
 
     if (about) cleanAbout = purify.sanitize(about);
