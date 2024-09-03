@@ -15,6 +15,7 @@ import {
   updateCommunication,
 } from "../services/communication";
 import { sendReviewEmail } from "../services/mail";
+import { getUserById } from "../services/user";
 
 export async function createCommunicationController(
   request: Request,
@@ -22,10 +23,20 @@ export async function createCommunicationController(
   next: NextFunction
 ) {
   try {
-    const user = request?.user ?? undefined;
-
-    const { message, businessId, type } =
+    const { message, businessId, type, userId } =
       createCommunicationValidation(request);
+
+    let user;
+
+    if (userId) user = await getUserById(userId);
+
+    if (type === "MESSAGE" && !user?.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Authorization token is required",
+      });
+    }
 
     await createCommunication({
       message,
@@ -52,7 +63,7 @@ export async function getCommunicationsController(
   try {
     const user = request.user;
 
-    if (user?.role !== "ADMIN" && !user.business.id) {
+    if (user?.type !== "ADMIN" && !user?.business?.id) {
       return responseBuilder(response, {
         ok: false,
         statusCode: 403,
@@ -72,9 +83,10 @@ export async function getCommunicationsController(
       totalData: totalCommunications,
     });
 
+    const skip = (page - 1) * limit;
     const communications = await getCommunications({
       limit,
-      skip: (page - 1) * limit,
+      skip,
       businessId: user?.business?.id ?? undefined,
     });
 
@@ -82,7 +94,8 @@ export async function getCommunicationsController(
       ok: true,
       statusCode: 200,
       message: "Communications fetched",
-      data: { communications, pagination },
+      data: communications,
+      pagination,
     });
   } catch (error) {
     next(error);
@@ -107,7 +120,7 @@ export async function updateCommunicationController(
       });
     }
 
-    if (!communication.user) {
+    if (!communication.user || !communication.userId) {
       return responseBuilder(response, {
         ok: false,
         statusCode: 403,
@@ -124,6 +137,7 @@ export async function updateCommunicationController(
 
     await updateCommunication({
       businessId: communication.businessId,
+      userId: communication.userId,
       status: "PENDING",
       newStatus: "SENDED",
     });

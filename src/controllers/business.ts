@@ -154,6 +154,8 @@ export async function getBusinessesController(
       skip,
       name,
       serviceId,
+      latitude,
+      longitude,
     });
 
     return responseBuilder(response, {
@@ -196,7 +198,7 @@ export async function updateBusinessController(
       longitude,
     } = updateBusinessValidation(request);
 
-    if(businessId !== request.user.business.id) {
+    if (businessId !== request.user.business.id) {
       return responseBuilder(response, {
         ok: false,
         statusCode: 403,

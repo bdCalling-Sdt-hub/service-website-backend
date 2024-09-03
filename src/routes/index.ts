@@ -9,10 +9,9 @@ import businessRouter from "./business";
 import paymentRouter from "./payment";
 import portfolioRouter from "./portfolio";
 import reviewRouter from "./review";
-import addressRouter from "./address";
 import appDataRouter from "./appData";
 import communicationRouter from "./communication";
-
+import suburbRouter from "./suburb";
 // import adRouter from "./ad";
 // import musicRouter from "./music";
 
@@ -27,9 +26,9 @@ router.use("/businesses", businessRouter);
 router.use("/payments", paymentRouter);
 router.use("/portfolios", portfolioRouter);
 router.use("/reviews", reviewRouter);
-router.use("/addresses", addressRouter);
 router.use("/app-data", appDataRouter);
 router.use("/communications", communicationRouter);
+router.use("/suburbs", suburbRouter);
 
 // router.use("/ads", adRouter);
 // router.use("/musics", musicRouter);

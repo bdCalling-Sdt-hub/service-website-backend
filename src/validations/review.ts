@@ -3,14 +3,14 @@ import error from "../utils/error";
 import { isValidObjectId } from "../utils/validators";
 
 export function createReviewValidation(request: Request): {
-  businessId: string;
+  communicationId: string;
   rating: number;
   message: string;
 } {
   const body = request.body;
 
-  if (!body.businessId) {
-    throw error("businessId is required", 400);
+  if (!body.communicationId) {
+    throw error("communicationId is required", 400);
   }
 
   if (!body.rating) {
@@ -37,18 +37,18 @@ export function createReviewValidation(request: Request): {
     throw error("message must be a string", 400);
   }
 
-  if (typeof body.businessId !== "string") {
-    throw error("businessId must be a string", 400);
+  if (typeof body.communicationId !== "string") {
+    throw error("communicationId must be a string", 400);
   }
 
-  if (!isValidObjectId(body.businessId)) {
-    throw error("businessId is invalid", 400);
+  if (!isValidObjectId(body.communicationId)) {
+    throw error("communicationId is invalid", 400);
   }
 
   return {
-    businessId: body.businessId,
     rating: body.rating,
     message: body.message,
+    communicationId: body.communicationId,
   };
 }
 

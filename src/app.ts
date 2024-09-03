@@ -4,8 +4,8 @@ import routes from "./routes";
 import responseBuilder from "./utils/responseBuilder";
 import cors from "cors";
 import morgan from "morgan";
-import { createManyAddress, getAddresses } from "./services/address";
 import suburbs from "./suburbs.json";
+import { createSuburbs, getSuburbs } from "./services/suburb";
 
 const app = express();
 
@@ -59,9 +59,11 @@ app.get("/health", (_: Request, response: Response) => {
   response.send("OK");
 });
 
-getAddresses({ limit: 1, skip: 0 }).then((addresses) => {
-  if (addresses.length === 0) {
-    createManyAddress(suburbs).then(console.log).catch(console.error);
+getSuburbs({ limit: 1, skip: 0 }).then((data) => {
+  if (data.length === 0) {
+    createSuburbs(suburbs).then(() => {
+      console.log("Suburbs created");
+    });
   }
 });
 

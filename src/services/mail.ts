@@ -143,3 +143,49 @@ export function sendOTPEmail(email: string, otp: string, userName: string) {
 </html>`;
   return emailWithNodemailer({ email, subject, html });
 }
+
+export function sendInvoiceEmail(
+  email: string,
+  invoiceUrl: string
+) {
+  const subject = "Your Payment Invoice";
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Payment Invoice</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <table style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;">
+        <tr>
+            <td>
+                <h2 style="color: #333333;">Thank You for Your Payment!</h2>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px; color: #333333;">
+                <p>Dear Customer,</p>
+                <p>We appreciate your prompt payment for [service/product]. We are pleased to inform you that your payment has been successfully processed.</p>
+                <p>For your records, you can view and download your invoice by clicking the link below:</p>
+                <p>
+                    <a href="${invoiceUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        View Invoice
+                    </a>
+                </p>
+                <p>If you have any questions or need further assistance, please feel free to contact us.</p>
+                <p>Thank you for choosing <strong>BASP</strong>.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px;">
+                <p>Best regards,</p>
+                <p><strong>The BASP Team</strong></p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+`;
+  return emailWithNodemailer({ email, subject, html });
+}

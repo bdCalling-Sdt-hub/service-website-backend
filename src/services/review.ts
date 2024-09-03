@@ -41,6 +41,15 @@ export function getReviews({
     orderBy: {
       createdAt: "desc",
     },
+    include: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          image: true,
+        },
+      },
+    },
   });
 }
 

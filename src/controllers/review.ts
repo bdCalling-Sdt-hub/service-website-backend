@@ -13,7 +13,10 @@ import {
   getReviewsValidation,
 } from "../validations/review";
 import paginationBuilder from "../utils/paginationBuilder";
-import { updateCommunication } from "../services/communication";
+import {
+  getCommunicationById,
+  updateCommunication,
+} from "../services/communication";
 
 export async function createReviewController(
   request: Request,
@@ -22,27 +25,53 @@ export async function createReviewController(
 ) {
   try {
     const user = request.user;
-    const { businessId, rating, message } = createReviewValidation(request);
+    const { rating, message, communicationId } =
+      createReviewValidation(request);
 
-    const business = await getBusinessById(businessId);
+    const communication = await getCommunicationById(communicationId);
 
-    if (!business) {
+    if (!communication) {
       return responseBuilder(response, {
         ok: false,
         statusCode: 404,
-        message: "Business not found",
+        message: "Communication not found",
+      });
+    }
+
+    if (user.id !== communication.userId) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 403,
+        message: "You are not allowed to review this communication",
+      });
+    }
+
+    if (communication.status === "PENDING") {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 403,
+        message: "You are not allowed to review this communication now",
+      });
+    }
+
+    if (communication.status === "REVIEWED") {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 403,
+        message: "You are already review this communication",
       });
     }
 
     const review = await createReview({
-      businessId,
+      businessId: communication.businessId,
       userId: user.id,
       rating,
       message,
     });
 
     await updateCommunication({
-      businessId,
+      businessId: communication.businessId,
+      userId: user.id,
       status: "SENDED",
       newStatus: "REVIEWED",
     });

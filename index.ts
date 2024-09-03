@@ -4,6 +4,7 @@ import { eventConstructor, getCustomerById } from "./src/services/stripe";
 import { getSubscriptionByPriceId } from "./src/services/subscription";
 import { createPayment } from "./src/services/payment";
 import { updateBusiness } from "./src/services/business";
+import { sendInvoiceEmail } from "./src/services/mail";
 
 const PORT = 9000;
 
@@ -44,7 +45,7 @@ server.on("request", (req, res) => {
 
         const customerId = (event.data.object as any).customer;
 
-        const stripeCustomer = await getCustomerById(customerId);
+        const stripeCustomer = (await getCustomerById(customerId)) as any;
 
         const businessId = (stripeCustomer as any).metadata.businessId;
 
@@ -60,6 +61,12 @@ server.on("request", (req, res) => {
           subscriptionEndAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         });
 
+        if (event.data.object.hosted_invoice_url) {
+          await sendInvoiceEmail(
+            stripeCustomer.email,
+            event.data.object.hosted_invoice_url
+          );
+        }
         return res.end("Webhook Received");
       } catch (error) {
         console.error(error);
@@ -75,3 +82,9 @@ server.on("request", (req, res) => {
 server.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
 });
+
+
+// import suburbs from "./AUaddresses.json";
+// import fs from "fs";
+
+// fs.writeFileSync("suburbs.json", JSON.stringify((suburbs as any[]).map(({suburb,postcode,lat,lng})=>({name:suburb,postcode:postcode.toString(),latitude:lat,longitude:lng})), null, 2));

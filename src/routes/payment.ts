@@ -14,7 +14,7 @@ const router = express.Router();
 router
   .route("/")
   .post(authenticate("PROVIDER"), createPaymentController)
-  .get(authenticate("ADMIN"), getPaymentsController);
+  .get(authenticate("ADMIN", "PROVIDER"), getPaymentsController);
 
 router.post(
   "/create-checkout-session",

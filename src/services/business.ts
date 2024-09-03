@@ -49,7 +49,7 @@ export function createBusiness({
   });
 }
 
-export function getBusinesses({
+export async function getBusinesses({
   limit,
   skip,
   name,
@@ -64,6 +64,31 @@ export function getBusinesses({
   latitude?: number;
   longitude?: number;
 }) {
+  let businessIds = undefined;
+  if (latitude && longitude) {
+    const nearBusinesses = (await prisma.businesses.aggregateRaw({
+      pipeline: [
+        {
+          $geoNear: {
+            near: {
+              type: "Point",
+              coordinates: [longitude, latitude],
+            },
+            distanceField: "distance",
+            maxDistance: 10000,
+            spherical: true,
+          } as any,
+        },
+        {
+          $project: {
+            _id: 1,
+          },
+        },
+      ],
+    })) as any;
+    businessIds = nearBusinesses.map((business: any) => business._id.$oid);
+  }
+
   return prisma.businesses.findMany({
     take: limit,
     skip,
@@ -73,11 +98,9 @@ export function getBusinesses({
         mode: "insensitive",
       },
       mainServiceId: serviceId,
-      coordinates:{
-
-      }
-      // latitude,
-      // longitude,
+      id: {
+        in: businessIds,
+      },
     },
     orderBy: {
       priorityIndex: "asc",
@@ -118,24 +141,51 @@ export async function countBusinesses({
   latitude?: number;
   longitude?: number;
 }) {
-  return prisma.businesses.count({
-    where: {
-      name: {
-        startsWith: name,
-        mode: "insensitive",
+  const pipeline: any[] = [];
+
+  if (latitude && longitude) {
+    pipeline.push({
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [longitude, latitude],
+        },
+        distanceField: "distance",
+        maxDistance: 10000,
+        spherical: true,
       },
-      mainServiceId: serviceId,
-      // latitude,
-      // longitude,
-    },
+    });
+  }
+
+  if (name || serviceId) {
+    const matchCondition: any = {};
+
+    if (name) {
+      matchCondition.name = {
+        $regex: `^${name}`,
+        $options: "i",
+      };
+    }
+
+    if (serviceId) {
+      matchCondition.mainServiceId = serviceId;
+    }
+
+    pipeline.push({
+      $match: matchCondition,
+    });
+  }
+
+  // Add $count stage
+  pipeline.push({
+    $count: "businessesCount",
   });
 
-  // prisma.businesses.aggregateRaw({
-  //   pipeline:[
+  const businesses = (await prisma.businesses.aggregateRaw({
+    pipeline,
+  })) as any;
 
-  //   ]
-  // })
-
+  return businesses[0]?.businessesCount ?? 0;
 }
 
 export function updateBusiness(

@@ -1,13 +1,29 @@
 import type { Request } from "express";
 import error from "../utils/error";
 import { isValidObjectId } from "../utils/validators";
+import { verifyToken } from "../services/jwt";
 
 export function createCommunicationValidation(request: Request): {
   message?: string;
   type: "CALL" | "MESSAGE";
   businessId: string;
+  userId: string | undefined;
 } {
   const body = request.body;
+  const bearerToken = request.headers.authorization;
+  let userId: string | undefined;
+
+  if (bearerToken) {
+    if (!bearerToken.startsWith("Bearer ")) throw error("Invalid token format", 400);
+
+    const token = bearerToken.split(" ")[1];
+
+    const tokenData = verifyToken(token);
+
+    if (!tokenData) throw error("Invalid token", 400);
+
+    userId = tokenData.id;
+  }
 
   if (!body.businessId) throw error("Business ID is required", 400);
 
@@ -35,6 +51,7 @@ export function createCommunicationValidation(request: Request): {
     message: body.message,
     type: body.type,
     businessId: body.businessId,
+    userId,
   };
 }
 
@@ -60,14 +77,13 @@ export function getCommunicationsValidation(request: Request): {
   };
 }
 
-
 export function updateCommunicationValidation(request: Request): {
   communicationId: string;
 } {
   const params = request.params;
 
-  if (!params.id) throw error("Business ID is required", 400);
-  if (!isValidObjectId(params.id)) throw error("Invalid Business ID", 400);
+  if (!params.id) throw error("Communication ID is required", 400);
+  if (!isValidObjectId(params.id)) throw error("Invalid Communication ID", 400);
 
   return {
     communicationId: params.id,

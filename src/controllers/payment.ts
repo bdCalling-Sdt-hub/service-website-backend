@@ -267,9 +267,21 @@ export async function getPaymentsController(
   next: NextFunction
 ) {
   try {
+    const user = request.user;
+
+    if (user.type !== "ADMIN" && !user.business?.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Register as a business to view payments",
+      });
+    }
+
     const { limit, page } = getPaymentsValidation(request);
 
-    const totalPayments = await countPayments();
+    const totalPayments = await countPayments(
+      user.type === "ADMIN" ? undefined : user.business.id
+    );
 
     const pagination = paginationBuilder({
       currentPage: page,
@@ -289,6 +301,7 @@ export async function getPaymentsController(
     const payments = await getPayments({
       limit,
       skip,
+      businessId: user.type === "ADMIN" ? undefined : user.business.id,
     });
 
     return responseBuilder(response, {

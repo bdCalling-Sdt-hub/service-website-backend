@@ -41,6 +41,22 @@ export function getCommunications({
       businessId,
       // status: "PENDING",
     },
+    include: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+        },
+      },
+      business: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    orderBy:{
+      createdAt: "desc"
+    }
   });
 }
 
@@ -51,7 +67,26 @@ export function countCommunications(businessId?: string) {
 export function getCommunicationById(id: string) {
   return prisma.communications.findUnique({
     where: { id },
-    include: { user: true, business: { include: { user: true } } },
+    include: {
+      user: {
+        select: {
+          email: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
+      business: {
+        select:{
+          name: true,
+          address: true,
+          user:{
+            select:{
+              image: true,
+            }
+          }
+        }
+      },
+    },
   });
 }
 
@@ -59,13 +94,15 @@ export function updateCommunication({
   businessId,
   status,
   newStatus,
+  userId,
 }: {
   businessId: string;
   status: "SENDED" | "PENDING";
-  newStatus?: "SENDED" | "REVIEWED";
+  newStatus: "SENDED" | "REVIEWED";
+  userId: string;
 }) {
   return prisma.communications.updateMany({
-    where: { businessId, status },
+    where: { businessId, status, userId },
     data: {
       status: newStatus,
     },

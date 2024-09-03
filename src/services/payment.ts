@@ -52,10 +52,21 @@ export function getPaymentsByYear(year: string) {
   });
 }
 
-export function getPayments({ limit, skip }: { limit: number; skip: number }) {
+export function getPayments({
+  limit,
+  skip,
+  businessId,
+}: {
+  limit: number;
+  skip: number;
+  businessId?: string;
+}) {
   return prisma.payments.findMany({
     take: limit,
     skip,
+    where: {
+      businessId,
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -65,10 +76,15 @@ export function getPayments({ limit, skip }: { limit: number; skip: number }) {
           name: true,
         },
       },
+      subscription:{
+        select:{
+          name: true
+        }
+      }
     },
   });
 }
 
-export function countPayments() {
-  return prisma.payments.count();
+export function countPayments(businessId?: string) {
+  return prisma.payments.count({ where: { businessId } });
 }

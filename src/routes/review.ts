@@ -10,6 +10,6 @@ const router = express.Router();
 router
   .route("/")
   .get(getReviewsController)
-  .post(authenticate("CUSTOMER"), createReviewController);
+  .post(authenticate("CUSTOMER","PROVIDER"), createReviewController);
 
 export default router;
