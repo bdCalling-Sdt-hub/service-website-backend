@@ -279,3 +279,16 @@ export function getBusinessById(id: string) {
     },
   });
 }
+
+export function increasePriorityIndex(id: string) {
+  return prisma.businesses.update({
+    where: {
+      id,
+    },
+    data: {
+      priorityIndex: {
+        increment: 1,
+      },
+    },
+  });
+}

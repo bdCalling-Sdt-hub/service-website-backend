@@ -359,7 +359,7 @@ export async function forgotController(
         ok: false,
         statusCode: 400,
         message: `Please wait ${timeLeft} seconds before sending another OTP`,
-        data: { timeLeft },
+        data: { timeLeft, id: user.id },
       });
     }
 

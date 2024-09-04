@@ -54,9 +54,9 @@ export function getCommunications({
         },
       },
     },
-    orderBy:{
-      createdAt: "desc"
-    }
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 }
 
@@ -76,15 +76,15 @@ export function getCommunicationById(id: string) {
         },
       },
       business: {
-        select:{
+        select: {
           name: true,
           address: true,
-          user:{
-            select:{
+          user: {
+            select: {
               image: true,
-            }
-          }
-        }
+            },
+          },
+        },
       },
     },
   });
@@ -108,3 +108,18 @@ export function updateCommunication({
     },
   });
 }
+
+export function getLastCommunication({
+  businessId,
+  userId,
+}: {
+  businessId: string;
+  userId?: string;
+}) {
+  return prisma.communications.findFirst({
+    where: { businessId, userId },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}    

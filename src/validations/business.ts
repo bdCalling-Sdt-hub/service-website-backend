@@ -131,7 +131,7 @@ export function getBusinessesValidation(request: Request): {
     throw error("Service ID should be a string", 400);
 
   if (query.serviceId && !isValidObjectId(query.serviceId))
-    throw error("Suburb should be a string", 400);
+    throw error("Invalid Service ID", 400);
 
   if (query.latitude && typeof Number(query.latitude) !== "number")
     throw error("Latitude should be a number", 400);

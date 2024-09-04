@@ -208,7 +208,7 @@ export async function currentSubscriptionController(
       return responseBuilder(response, {
         ok: false,
         statusCode: 400,
-        message: "Not a business",
+        message: "Business not registered",
       });
     }
 

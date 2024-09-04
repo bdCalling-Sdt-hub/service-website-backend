@@ -15,7 +15,9 @@ router
   .post(authenticate("ADMIN"), createSubscriptionController)
   .get(getSubscriptionsController);
 
-router.route("/current").get(currentSubscriptionController);
+router
+  .route("/current")
+  .get(authenticate("PROVIDER"), currentSubscriptionController);
 
 router
   .route("/:id")

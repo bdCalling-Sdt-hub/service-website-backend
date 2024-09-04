@@ -12,10 +12,12 @@ import {
   createCommunication,
   getCommunicationById,
   getCommunications,
+  getLastCommunication,
   updateCommunication,
 } from "../services/communication";
 import { sendReviewEmail } from "../services/mail";
 import { getUserById } from "../services/user";
+import { increasePriorityIndex } from "../services/business";
 
 export async function createCommunicationController(
   request: Request,
@@ -36,6 +38,20 @@ export async function createCommunicationController(
         statusCode: 400,
         message: "Authorization token is required",
       });
+    }
+
+    const lastCommunication = await getLastCommunication({
+      userId: user?.id,
+      businessId,
+    });
+
+    if (lastCommunication) {
+      const oneHourAgo = Date.now() - 60 * 60 * 1000;
+      if (lastCommunication.createdAt.getTime() < oneHourAgo) {
+        await increasePriorityIndex(businessId);
+      }
+    } else {
+      await increasePriorityIndex(businessId);
     }
 
     await createCommunication({
