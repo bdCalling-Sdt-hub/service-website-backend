@@ -27,25 +27,25 @@ export function getCommunications({
   limit,
   skip,
   businessId,
-}: // type,
-{
+}: {
   limit: number;
   skip: number;
   businessId?: string;
-  // type?: "CALL" | "MESSAGE";
 }) {
   return prisma.communications.findMany({
     take: limit,
     skip,
     where: {
       businessId,
-      // status: "PENDING",
+      type: businessId ? "MESSAGE" : undefined,
     },
     include: {
       user: {
         select: {
           firstName: true,
           lastName: true,
+          image: true,
+          mobile: true,
         },
       },
       business: {
@@ -122,4 +122,4 @@ export function getLastCommunication({
       createdAt: "desc",
     },
   });
-}    
+}
