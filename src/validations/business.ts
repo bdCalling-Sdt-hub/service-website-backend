@@ -111,8 +111,12 @@ export function getBusinessesValidation(request: Request): {
   serviceId?: string;
   latitude?: number;
   longitude?: number;
+  startDate?: Date;
+  endDate?: Date;
 } {
   const query = request.query;
+  let startDate = undefined;
+  let endDate = undefined;
 
   let page = parseInt(query.page as string) || 1;
 
@@ -139,6 +143,12 @@ export function getBusinessesValidation(request: Request): {
   if (query.longitude && typeof Number(query.longitude) !== "number")
     throw error("Longitude should be a number", 400);
 
+  if (query.startDate && typeof query.startDate === "string")
+    startDate = new Date(query.startDate);
+
+  if (query.endDate && typeof query.endDate === "string")
+    endDate = new Date(query.endDate);
+
   return {
     limit,
     page,
@@ -146,6 +156,8 @@ export function getBusinessesValidation(request: Request): {
     serviceId: query.serviceId,
     latitude: Number(query.latitude),
     longitude: Number(query.longitude),
+    endDate,
+    startDate,
   };
 }
 

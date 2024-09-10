@@ -11,7 +11,7 @@ declare module "express-serve-static-core" {
 
 type UserTypes = "ADMIN" | "CUSTOMER" | "PROVIDER";
 
-export default function authenticate(...allowedRoles: (UserTypes)[]) {
+export default function authenticate(...allowedRoles: UserTypes[]) {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       const bearerToken = request.headers.authorization;
@@ -48,6 +48,14 @@ export default function authenticate(...allowedRoles: (UserTypes)[]) {
           ok: false,
           statusCode: 404,
           message: "User not found",
+        });
+      }
+
+      if (user.isDeleted) {
+        return responseBuilder(response, {
+          ok: false,
+          statusCode: 404,
+          message: "your account has been blocked",
         });
       }
 

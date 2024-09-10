@@ -103,6 +103,9 @@ export function getUsersValidation(request: Request): {
   limit: number;
   page: number;
   type?: "CUSTOMER" | "PROVIDER";
+  startDate?: Date;
+  endDate?: Date;
+  name?: string;
 } {
   const query = request.query;
 
@@ -122,9 +125,43 @@ export function getUsersValidation(request: Request): {
   if (query.type && query.type !== "CUSTOMER" && query.type !== "PROVIDER")
     throw error("Invalid type", 400);
 
+  if (query.startDate && typeof query.startDate !== "string")
+    throw error("Start date should be a string", 400);
+
+  if (query.endDate && typeof query.endDate !== "string")
+    throw error("End date should be a string", 400);
+
+  let startDate = undefined;
+  let endDate =  undefined;
+
+  if(query.startDate) startDate = new Date(query.startDate);
+  if(query.endDate) endDate = new Date(query.endDate);
+
+  if (query.name && typeof query.name !== "string")
+    throw error("Name should be a string", 400);
+
   return {
     limit,
     page,
+    endDate,
+    startDate,
     type: query.type as "CUSTOMER" | "PROVIDER",
+    name: query.name,
+  };
+}
+
+export function deleteUserValidation(request: Request): {
+  userId: string;
+} {
+  const userId = request.params.userId;
+
+  if (!userId) {
+    throw error("User ID is required", 400);
+  }
+
+  if (!isValidObjectId(userId)) throw error("Invalid user ID", 400);
+
+  return {
+    userId,
   };
 }

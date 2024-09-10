@@ -56,16 +56,24 @@ export function getPayments({
   limit,
   skip,
   businessId,
+  startDate,
+  endDate,
 }: {
   limit: number;
   skip: number;
   businessId?: string;
+  startDate?: Date;
+  endDate?: Date;
 }) {
   return prisma.payments.findMany({
     take: limit,
     skip,
     where: {
       businessId,
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -76,15 +84,31 @@ export function getPayments({
           name: true,
         },
       },
-      subscription:{
-        select:{
-          name: true
-        }
-      }
+      subscription: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 }
 
-export function countPayments(businessId?: string) {
-  return prisma.payments.count({ where: { businessId } });
+export function countPayments({
+  businessId,
+  startDate,
+  endDate,
+}: {
+  businessId?: string;
+  startDate?: Date;
+  endDate?: Date;
+}) {
+  return prisma.payments.count({
+    where: {
+      businessId,
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+  });
 }

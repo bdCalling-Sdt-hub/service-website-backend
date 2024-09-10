@@ -4,6 +4,7 @@ import {
   changePasswordController,
   getUsersController,
   getTotalCustomerAndProviderController,
+  deleteUserController,
 } from "../controllers/user";
 import upload from "../middlewares/upload";
 import authenticate from "../middlewares/authenticate";
@@ -20,8 +21,8 @@ router.get(
 
 router
   .route("/:userId")
-  .all(authenticate())
-  .put(upload.single("image"), updateUserController)
-  .patch(changePasswordController);
+  .put(authenticate(), upload.single("image"), updateUserController)
+  .patch(authenticate(), changePasswordController)
+  .delete(authenticate("ADMIN"), deleteUserController);
 
 export default router;

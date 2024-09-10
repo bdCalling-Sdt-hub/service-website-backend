@@ -1,5 +1,4 @@
 import { Request } from "express";
-import error from "../utils/error";
 
 export async function userNotificationsValidation(request: Request): Promise<{
   limit: number;

@@ -4,7 +4,7 @@ import { isValidObjectId } from "../utils/validators";
 
 export function createSubscriptionValidation(request: Request): {
   name: string;
-  minimumStart: number;
+  minimumStart?: number;
   price: number;
   benefits: string[];
 } {
@@ -12,9 +12,15 @@ export function createSubscriptionValidation(request: Request): {
 
   if (!body.name) throw error("Name is required", 400);
 
-  if (!body.minimumStart) throw error("Minimum Start is required", 400);
+  if(body.minimumStart && typeof body.minimumStart !== "number") {
+    throw error("Minimum star should be a number", 400);
+  }
 
   if (!body.price) throw error("Price is required", 400);
+
+  if(typeof body.price !== "number") {
+    throw error("Price should be a number", 400);
+  }
 
   if (!body.benefits) throw error("Benefits is required", 400);
 
@@ -32,9 +38,6 @@ export function createSubscriptionValidation(request: Request): {
   if (typeof body.name !== "string")
     throw error("Name should be a string", 400);
 
-  if (typeof body.minimumStart !== "number")
-    throw error("Duration should be a number", 400);
-
   if (body.name.trim().length === 0)
     throw error("Name should not be empty", 400);
 
@@ -46,8 +49,8 @@ export function createSubscriptionValidation(request: Request): {
     throw error("Price should have two decimal places", 400);
   }
 
-  if (body.minimumStart <= 0)
-    throw error("Duration should be greater than 0", 400);
+  if (body.minimumStart && body.minimumStart <= 0)
+    throw error("Minimum star should be greater than 0", 400);
 
   if (body.price <= 0) throw error("Price should be greater than 0", 400);
 

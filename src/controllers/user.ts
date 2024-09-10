@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   countUsers,
+  deleteUserById,
   getUserById,
   getUsers,
   updateUserById,
@@ -10,10 +11,14 @@ import {
   updateUserValidation,
   changePasswordValidation,
   getUsersValidation,
+  deleteUserValidation,
 } from "../validations/user";
 import responseBuilder from "../utils/responseBuilder";
 import { comparePassword, hashPassword } from "../services/hash";
 import paginationBuilder from "../utils/paginationBuilder";
+import { getCustomers, getSubscriptionByCustomerId } from "../services/stripe";
+import { deleteSubscription } from "../services/subscription";
+import { updateBusiness } from "../services/business";
 
 // export async function getUserController(
 //   request: Request,
@@ -139,9 +144,10 @@ export async function getUsersController(
   next: NextFunction
 ) {
   try {
-    const { limit, page, type } = getUsersValidation(request);
+    const { limit, page, type, endDate, name, startDate } =
+      getUsersValidation(request);
 
-    const totalUsers = await countUsers(type);
+    const totalUsers = await countUsers({ type, startDate, endDate, name });
 
     const pagination = paginationBuilder({
       currentPage: page,
@@ -158,7 +164,14 @@ export async function getUsersController(
     }
     const skip = (page - 1) * limit;
 
-    const users = await getUsers({ limit, skip, type });
+    const users = await getUsers({
+      limit,
+      skip,
+      type,
+      startDate,
+      endDate,
+      name,
+    });
 
     return responseBuilder(response, {
       ok: true,
@@ -177,14 +190,58 @@ export async function getTotalCustomerAndProviderController(
   next: NextFunction
 ) {
   try {
-    const totalCustomer = await countUsers("CUSTOMER");
-    const totalProvider = await countUsers("PROVIDER");
+    const totalCustomer = await countUsers({ type: "CUSTOMER" });
+    const totalProvider = await countUsers({ type: "PROVIDER" });
 
     return responseBuilder(response, {
       ok: true,
       statusCode: 200,
       message: "Total customer and provider retrieved",
       data: { totalCustomer, totalProvider },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteUserController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { userId } = deleteUserValidation(request);
+    const user = await getUserById(userId);
+
+    if (!user) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "User not found",
+      });
+    }
+
+    const stripeCustomer = await getCustomers(user.email);
+
+    if (stripeCustomer) {
+      const stripeSubscription = await getSubscriptionByCustomerId(
+        stripeCustomer.data[0].id
+      );
+      if (stripeSubscription) {
+        await deleteSubscription(stripeSubscription.data[0].id);
+      }
+    }
+
+    if (user.business) {
+      await updateBusiness(user.business.id, { subscriptionEndAt: new Date() });
+    }
+
+    await deleteUserById(user.id);
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "User deleted",
     });
   } catch (error) {
     next(error);

@@ -59,7 +59,7 @@ export function createPrice({
   productId: string;
   name: string;
   benefits: string[];
-  minimumStart: number;
+  minimumStart?: number;
 }) {
   return stripe.prices.create({
     unit_amount: price * 100, // Convert to cents
@@ -70,8 +70,8 @@ export function createPrice({
     product: productId,
     metadata: {
       name,
-      minimumStart,
       price,
+      minimumStart: minimumStart ?? 0,
       benefits: JSON.stringify(benefits),
     },
   });
@@ -114,4 +114,8 @@ export function eventConstructor(body: Buffer | string, signature: string) {
 
 export function getCustomerById(id: string) {
   return stripe.customers.retrieve(id);
+}
+
+export function cancelSubscription(id: string) {
+  return stripe.subscriptions.cancel(id);
 }

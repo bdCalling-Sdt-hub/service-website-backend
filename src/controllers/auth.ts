@@ -87,6 +87,14 @@ export async function loginController(
       });
     }
 
+    if (user.isDeleted) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Your account has been blocked",
+      });
+    }
+
     const passwordMatch = await comparePassword(password, user.password);
 
     if (!passwordMatch) {
@@ -365,11 +373,7 @@ export async function forgotController(
 
     const otp = await createOtp(user.id);
 
-    sendOTPEmail(
-      email,
-      otp.code,
-      user.firstName + " " + user.lastName + " " + user.lastName
-    );
+    sendOTPEmail(email, otp.code, user.firstName + " " + user.lastName);
 
     return responseBuilder(response, {
       ok: true,

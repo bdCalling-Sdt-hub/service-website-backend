@@ -82,9 +82,3 @@ server.on("request", (req, res) => {
 server.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
 });
-
-
-// import suburbs from "./AUaddresses.json";
-// import fs from "fs";
-
-// fs.writeFileSync("suburbs.json", JSON.stringify((suburbs as any[]).map(({suburb,postcode,lat,lng})=>({name:suburb,postcode:postcode.toString(),latitude:lat,longitude:lng})), null, 2));

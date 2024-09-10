@@ -63,8 +63,13 @@ export function getPaymentChartValidation(request: Request): { year: string } {
 export function getPaymentsValidation(request: Request): {
   page: number;
   limit: number;
+  startDate?: Date;
+  endDate?: Date;
 } {
   const query = request.query;
+
+  let startDate = undefined;
+  let endDate = undefined;
 
   let page = parseInt(query.page as string) || 1;
 
@@ -76,9 +81,19 @@ export function getPaymentsValidation(request: Request): {
 
   if (limit < 1) limit = 1;
 
+  if (query.startDate && typeof query.startDate === "string") {
+    startDate = new Date(query.startDate);
+  }
+
+  if (query.endDate && typeof query.endDate === "string") {
+    endDate = new Date(query.endDate);
+  }
+
   return {
     page,
     limit,
+    startDate,
+    endDate,
   };
 }
 

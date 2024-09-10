@@ -10,7 +10,7 @@ export function createSubscription({
   priceId,
 }: {
   name: string;
-  minimumStart: number;
+  minimumStart?: number;
   price: number;
   priceId: string;
   benefits: string[];
@@ -102,7 +102,7 @@ export function deleteSubscription(id: string) {
 export function getDefaultSubscription() {
   return prisma.subscriptions.findFirst({
     where: {
-      minimumStart: 0,
+      minimumStart: undefined,
       isDeleted: false,
     },
   });

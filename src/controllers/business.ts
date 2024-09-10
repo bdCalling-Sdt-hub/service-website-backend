@@ -123,14 +123,24 @@ export async function getBusinessesController(
   next: NextFunction
 ) {
   try {
-    const { limit, page, name, latitude, longitude, serviceId } =
-      getBusinessesValidation(request);
+    const {
+      limit,
+      page,
+      name,
+      latitude,
+      longitude,
+      serviceId,
+      endDate,
+      startDate,
+    } = getBusinessesValidation(request);
 
     const totalBusinesses = await countBusinesses({
       name,
       latitude,
       longitude,
       serviceId,
+      startDate,
+      endDate,
     });
 
     const pagination = paginationBuilder({
@@ -156,6 +166,8 @@ export async function getBusinessesController(
       serviceId,
       latitude,
       longitude,
+      startDate,
+      endDate,
     });
 
     return responseBuilder(response, {

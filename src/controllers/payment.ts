@@ -277,11 +277,13 @@ export async function getPaymentsController(
       });
     }
 
-    const { limit, page } = getPaymentsValidation(request);
+    const { limit, page, endDate, startDate } = getPaymentsValidation(request);
 
-    const totalPayments = await countPayments(
-      user.type === "ADMIN" ? undefined : user.business.id
-    );
+    const totalPayments = await countPayments({
+      businessId: user.type === "ADMIN" ? undefined : user.business.id,
+      startDate,
+      endDate,
+    });
 
     const pagination = paginationBuilder({
       currentPage: page,
@@ -302,6 +304,8 @@ export async function getPaymentsController(
       limit,
       skip,
       businessId: user.type === "ADMIN" ? undefined : user.business.id,
+      startDate,
+      endDate,
     });
 
     return responseBuilder(response, {

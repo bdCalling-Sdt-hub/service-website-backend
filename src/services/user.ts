@@ -83,6 +83,7 @@ export function getUserById(id: string, takePassword = false) {
       type: true,
       image: true,
       isVerified: true,
+      isDeleted: true,
       password: takePassword,
       business: {
         select: {
@@ -170,16 +171,30 @@ export function getUsers({
   limit,
   skip,
   type,
+  startDate,
+  endDate,
+  name,
 }: {
   limit: number;
   skip: number;
   type?: "CUSTOMER" | "PROVIDER";
+  startDate?: Date;
+  endDate?: Date;
+  name?: string;
 }) {
   return prisma.users.findMany({
     take: limit,
     skip,
     where: {
       type,
+      isDeleted: false,
+      firstName: {
+        contains: name,
+      },
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -187,10 +202,38 @@ export function getUsers({
   });
 }
 
-export function countUsers(type?: "CUSTOMER" | "PROVIDER") {
+export function countUsers({
+  endDate,
+  name,
+  startDate,
+  type,
+}: {
+  type?: "CUSTOMER" | "PROVIDER";
+  startDate?: Date;
+  endDate?: Date;
+  name?: string;
+}) {
   return prisma.users.count({
     where: {
       type,
+      firstName: {
+        contains: name,
+      },
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+  });
+}
+
+export function deleteUserById(id: string) {
+  return prisma.users.update({
+    where: {
+      id,
+    },
+    data: {
+      isDeleted: true,
     },
   });
 }

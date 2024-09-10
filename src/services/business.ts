@@ -56,6 +56,8 @@ export async function getBusinesses({
   serviceId,
   latitude,
   longitude,
+  startDate,
+  endDate,
 }: {
   limit: number;
   skip: number;
@@ -63,6 +65,8 @@ export async function getBusinesses({
   serviceId?: string;
   latitude?: number;
   longitude?: number;
+  startDate?: Date;
+  endDate?: Date;
 }) {
   let businessIds = undefined;
   if (latitude && longitude) {
@@ -101,6 +105,10 @@ export async function getBusinesses({
       id: {
         in: businessIds,
       },
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
     },
     orderBy: {
       priorityIndex: "asc",
@@ -135,11 +143,15 @@ export async function countBusinesses({
   serviceId,
   latitude,
   longitude,
+  endDate,
+  startDate,
 }: {
   name?: string;
   serviceId?: string;
   latitude?: number;
   longitude?: number;
+  startDate?: Date;
+  endDate?: Date;
 }) {
   const pipeline: any[] = [];
 
@@ -157,7 +169,7 @@ export async function countBusinesses({
     });
   }
 
-  if (name || serviceId) {
+  if (name || serviceId || (startDate && endDate)) {
     const matchCondition: any = {};
 
     if (name) {
@@ -169,6 +181,13 @@ export async function countBusinesses({
 
     if (serviceId) {
       matchCondition.mainServiceId = serviceId;
+    }
+
+    if (startDate && endDate) {
+      matchCondition.createdAt = {
+        $gte: startDate,
+        $lte: endDate,
+      };
     }
 
     pipeline.push({
