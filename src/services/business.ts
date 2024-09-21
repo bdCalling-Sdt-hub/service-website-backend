@@ -134,6 +134,20 @@ export async function getBusinesses({
           },
         },
       },
+      payments: {
+        select: {
+          subscription: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
+        },
+        take: 1,
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 }
@@ -307,6 +321,90 @@ export function increasePriorityIndex(id: string) {
     data: {
       priorityIndex: {
         increment: 1,
+      },
+    },
+  });
+}
+
+export function getBusinessReport({
+  endDate,
+  startDate,
+  suburb,
+  active,
+  businessName,
+  serviceId,
+  workStatus,
+  subscriptionId,
+}: {
+  startDate: Date;
+  endDate: Date;
+  businessName?: string;
+  serviceId?: string;
+  suburb?: string;
+  active?: boolean;
+  workStatus?: boolean;
+  subscriptionId?: string;
+}) {
+  return prisma.businesses.findMany({
+    where: {
+      name: businessName,
+      mainServiceId: serviceId,
+      suburb,
+      subscriptionEndAt: active
+        ? {
+            gte: new Date(),
+          }
+        : undefined,
+
+      payments: {
+        some: {
+          subscriptionId,
+        },
+      },
+      Communications:
+        workStatus === undefined
+          ? undefined
+          : {
+              ...(workStatus
+                ? {
+                    some: {
+                      createdAt: {
+                        gte: startDate,
+                        lte: endDate,
+                      },
+                    },
+                  }
+                : {
+                    none: {
+                      createdAt: {
+                        gte: startDate,
+                        lte: endDate,
+                      },
+                    },
+                  }),
+            },
+    },
+    select: {
+      name: true,
+      address: true,
+      suburb: true,
+      mobile: true,
+      mainService: {
+        select: {
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          Communications: {
+            where: {
+              createdAt: {
+                gte: startDate,
+                lte: endDate,
+              },
+            },
+          },
+        },
       },
     },
   });

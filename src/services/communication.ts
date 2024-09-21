@@ -38,6 +38,11 @@ export function getCommunications({
     where: {
       businessId,
       type: businessId ? "MESSAGE" : undefined,
+      status: businessId
+        ? undefined
+        : {
+            not: "REVIEWED",
+          },
     },
     include: {
       user: {

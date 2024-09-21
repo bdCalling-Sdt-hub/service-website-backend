@@ -30,7 +30,7 @@ export function getReviews({
 }: {
   limit: number;
   skip: number;
-  businessId: string;
+  businessId?: string;
 }) {
   return prisma.reviews.findMany({
     take: limit,
@@ -49,11 +49,16 @@ export function getReviews({
           image: true,
         },
       },
+      business: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 }
 
-export function countReviews({ businessId }: { businessId: string }) {
+export function countReviews({ businessId }: { businessId?: string }) {
   return prisma.reviews.count({
     where: {
       businessId,

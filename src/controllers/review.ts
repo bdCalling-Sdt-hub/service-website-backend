@@ -10,6 +10,7 @@ import {
 import { getBusinessById } from "../services/business";
 import {
   createReviewValidation,
+  getAllReviewsValidation,
   getReviewsValidation,
 } from "../validations/review";
 import paginationBuilder from "../utils/paginationBuilder";
@@ -160,6 +161,46 @@ export async function getTotalStarController(
       statusCode: 200,
       message: "Total star",
       data: totalReviews._sum.rating ?? 0,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getAllReviewsController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { limit, page } = getAllReviewsValidation(request);
+
+    const totalReviews = await countReviews({});
+
+    const pagination = paginationBuilder({
+      currentPage: page,
+      limit,
+      totalData: totalReviews,
+    });
+
+    if (page > pagination.totalPage) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
+    }
+
+    const skip = (page - 1) * limit;
+
+    const reviews = await getReviews({ limit, skip });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Reviews found",
+      data: reviews,  
+      pagination,
     });
   } catch (error) {
     next(error);

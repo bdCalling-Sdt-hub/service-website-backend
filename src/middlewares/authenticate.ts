@@ -9,26 +9,29 @@ declare module "express-serve-static-core" {
   }
 }
 
-type UserTypes = "ADMIN" | "CUSTOMER" | "PROVIDER";
+type UserTypes = "ADMIN" | "CUSTOMER" | "PROVIDER" | "OPTIONAL";
 
 export default function authenticate(...allowedRoles: UserTypes[]) {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       const bearerToken = request.headers.authorization;
 
-      if (!bearerToken)
+      if (!bearerToken) {
+        if (allowedRoles.includes("OPTIONAL")) next();
         return responseBuilder(response, {
           ok: false,
           statusCode: 400,
           message: "Authorization token is required",
         });
+      }
 
-      if (!bearerToken.startsWith("Bearer "))
+      if (!bearerToken.startsWith("Bearer ")) {
         return responseBuilder(response, {
           ok: false,
           statusCode: 400,
           message: "Invalid token format",
         });
+      }
 
       const token = bearerToken.split(" ")[1];
 
@@ -59,7 +62,11 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
         });
       }
 
-      if (allowedRoles.length && !allowedRoles.includes(user.type)) {
+      if (
+        allowedRoles.length &&
+        !allowedRoles.includes("OPTIONAL") &&
+        !allowedRoles.includes(user.type)
+      ) {
         return responseBuilder(response, {
           ok: false,
           statusCode: 403,

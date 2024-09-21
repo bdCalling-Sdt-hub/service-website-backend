@@ -6,9 +6,11 @@ import {
   createBusiness,
   getBusinessById,
   getBusinesses,
+  getBusinessReport,
   updateBusiness,
 } from "../services/business";
 import {
+  businessReportValidation,
   createBusinessValidation,
   getBusinessesValidation,
   getBusinessValidation,
@@ -277,6 +279,45 @@ export async function getBusinessController(
       statusCode: 200,
       message: "Business found",
       data: business,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function businessReportController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const {
+      startDate,
+      endDate,
+      businessName,
+      suburb,
+      active,
+      serviceId,
+      subscriptionId,
+      workStatus,
+    } = businessReportValidation(request);
+
+    const report = await getBusinessReport({
+      startDate,
+      endDate,
+      businessName,
+      suburb,
+      active,
+      serviceId,
+      subscriptionId,
+      workStatus,
+    });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Report fetched",
+      data: report,
     });
   } catch (error) {
     next(error);

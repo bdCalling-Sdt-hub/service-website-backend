@@ -16,8 +16,7 @@ import {
 import responseBuilder from "../utils/responseBuilder";
 import { comparePassword, hashPassword } from "../services/hash";
 import paginationBuilder from "../utils/paginationBuilder";
-import { getCustomers, getSubscriptionByCustomerId } from "../services/stripe";
-import { deleteSubscription } from "../services/subscription";
+import { cancelSubscription, getCustomers, getSubscriptionByCustomerId } from "../services/stripe";
 import { updateBusiness } from "../services/business";
 
 // export async function getUserController(
@@ -225,10 +224,10 @@ export async function deleteUserController(
 
     if (stripeCustomer) {
       const stripeSubscription = await getSubscriptionByCustomerId(
-        stripeCustomer.data[0].id
+        stripeCustomer?.data[0]?.id
       );
       if (stripeSubscription) {
-        await deleteSubscription(stripeSubscription.data[0].id);
+        await cancelSubscription(stripeSubscription?.data[0]?.id);
       }
     }
 
