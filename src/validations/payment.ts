@@ -134,3 +134,48 @@ export function createCheckoutSessionValidation(request: Request): {
     successUrl: body.successUrl,
   };
 }
+
+export function paymentReportValidation(request: Request) {
+  const query = request.query;
+
+  let startDate = undefined;
+  let endDate = undefined;
+
+  if(!query.startDate && !query.endDate) {
+    throw error("Start date or end date is required", 400);
+  }
+
+  if (!query.businessId) {
+    throw error("Business ID is required", 400);
+  }
+
+  if (typeof query.startDate === "string") {
+    startDate = new Date(query.startDate);
+  }
+
+  if (!startDate?.getTime()) {
+    throw error("Start date is required", 400);
+  }
+
+  if (typeof query.endDate === "string") {
+    endDate = new Date(query.endDate);
+  }
+
+  if (!endDate?.getTime()) {
+    throw error("End date is required", 400);
+  }
+
+  if (typeof query.businessId !== "string") {
+    throw error("Business ID should be a string", 400);
+  }
+
+  if (!isValidObjectId(query.businessId)) {
+    throw error("Business ID is not valid", 400);
+  }
+
+  return {
+    startDate,
+    endDate,
+    businessId: query.businessId,
+  };
+}

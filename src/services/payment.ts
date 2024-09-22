@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
 
 export function createPayment({
   businessId,
@@ -15,6 +14,7 @@ export function createPayment({
   transactionId: string;
   expireAt: Date;
 }) {
+  const prisma = new PrismaClient();
   return prisma.payments.create({
     data: {
       businessId,
@@ -27,6 +27,7 @@ export function createPayment({
 }
 
 export function getLastPaymentByBusinessId(businessId: string) {
+  const prisma = new PrismaClient();
   return prisma.payments.findFirst({
     where: { businessId },
     orderBy: { createdAt: "desc" },
@@ -34,6 +35,7 @@ export function getLastPaymentByBusinessId(businessId: string) {
 }
 
 export function totalEarnings() {
+  const prisma = new PrismaClient();
   return prisma.payments.aggregate({
     _sum: {
       amount: true,
@@ -42,6 +44,7 @@ export function totalEarnings() {
 }
 
 export function getPaymentsByYear(year: string) {
+  const prisma = new PrismaClient();
   return prisma.payments.findMany({
     where: {
       createdAt: {
@@ -65,6 +68,7 @@ export function getPayments({
   startDate?: Date;
   endDate?: Date;
 }) {
+  const prisma = new PrismaClient();
   return prisma.payments.findMany({
     take: limit,
     skip,
@@ -102,7 +106,32 @@ export function countPayments({
   startDate?: Date;
   endDate?: Date;
 }) {
+  const prisma = new PrismaClient();
   return prisma.payments.count({
+    where: {
+      businessId,
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+  });
+}
+
+export function calculateTotalEarnings({
+  businessId,
+  endDate,
+  startDate,
+}: {
+  businessId?: string;
+  startDate?: Date;
+  endDate?: Date;
+}) {
+  const prisma = new PrismaClient();
+  return prisma.payments.aggregate({
+    _sum: {
+      amount: true,
+    },
     where: {
       businessId,
       createdAt: {

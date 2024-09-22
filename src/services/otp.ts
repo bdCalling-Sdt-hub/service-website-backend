@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
 
 export function createOtp(userId: string) {
+  const prisma = new PrismaClient();
   return prisma.oTPs.create({
     data: {
       userId,
@@ -13,6 +13,7 @@ export function createOtp(userId: string) {
 }
 
 export function getLastOtpByUserId(userId: string) {
+  const prisma = new PrismaClient();
   return prisma.oTPs.findFirst({
     where: {
       userId,

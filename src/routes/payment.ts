@@ -5,7 +5,7 @@ import {
   getPaymentChartController,
   getPaymentsController,
   getTotalEarningsController,
-  webhookController,
+  paymentReportController,
 } from "../controllers/payment";
 import authenticate from "../middlewares/authenticate";
 
@@ -22,6 +22,7 @@ router.post(
   createCheckoutSessionController
 );
 router.post("/webhook");
+router.get("/report", authenticate("ADMIN"), paymentReportController);
 
 router.get("/total", authenticate("ADMIN"), getTotalEarningsController);
 router.get("/chart", authenticate("ADMIN"), getPaymentChartController);

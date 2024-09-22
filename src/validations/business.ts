@@ -323,11 +323,67 @@ export function businessReportValidation(request: Request): {
   workStatus?: boolean;
   subscriptionId?: string;
 } {
+  const query = request.query;
+
+  if (!query.startDate) throw error("Start Date is required", 400);
+  if (!query.endDate) throw error("End Date is required", 400);
+
+  if (typeof query.startDate !== "string")
+    throw error("Start Date should be a string", 400);
+
+  if (typeof query.endDate !== "string")
+    throw error("End Date should be a string", 400);
+
+  if (!new Date(query.startDate).getTime())
+    throw error("Invalid Start Date", 400);
+
+  if (!new Date(query.endDate).getTime()) throw error("Invalid End Date", 400);
+
+  if (query.businessName && typeof query.businessName !== "string")
+    throw error("Business Name should be a string", 400);
+
+  if (query.serviceId && typeof query.serviceId !== "string")
+    throw error("Service ID should be a string", 400);
+
+  if (query.suburb && typeof query.suburb !== "string")
+    throw error("Suburb should be a string", 400);
+
+  if (query.active && typeof query.active !== "boolean")
+    throw error("Active should be a boolean", 400);
+
+  if (query.workStatus && typeof query.workStatus !== "boolean")
+    throw error("Work Status should be a boolean", 400);
+
+  if (query.subscriptionId && typeof query.subscriptionId !== "string")
+    throw error("Subscription ID should be a string", 400);
+
+  if (query.subscriptionId && !isValidObjectId(query.subscriptionId))
+    throw error("Invalid Subscription ID", 400);
+
+  if (query.serviceId && !isValidObjectId(query.serviceId))
+    throw error("Invalid Service ID", 400);
+
+  return {
+    startDate: new Date(query.startDate),
+    endDate: new Date(query.endDate),
+    businessName: query.businessName || undefined,
+    serviceId: query.serviceId || undefined,
+    suburb: query.suburb || undefined,
+    active: query.active === "true" || undefined,
+    workStatus: query.workStatus === "true" || undefined,
+    subscriptionId: query.subscriptionId || undefined,
+  };
+}
+
+export function sendReportValidation(request: Request): {
+  startDate: Date;
+  endDate: Date;
+} {
   const body = request.body;
 
-  if (!body.startDate) throw error("Start Date is required", 400);
-  if (!body.endDate) throw error("End Date is required", 400);
-
+  if (!body.startDate || !body.endDate) {
+    throw error("Start Date and End Date is required", 400);
+  }
   if (typeof body.startDate !== "string")
     throw error("Start Date should be a string", 400);
 
@@ -339,38 +395,8 @@ export function businessReportValidation(request: Request): {
 
   if (!new Date(body.endDate).getTime()) throw error("Invalid End Date", 400);
 
-  if (body.businessName && typeof body.businessName !== "string")
-    throw error("Business Name should be a string", 400);
-
-  if (body.serviceId && typeof body.serviceId !== "string")
-    throw error("Service ID should be a string", 400);
-
-  if (body.suburb && typeof body.suburb !== "string")
-    throw error("Suburb should be a string", 400);
-
-  if (body.active && typeof body.active !== "boolean")
-    throw error("Active should be a boolean", 400);
-
-  if (body.workStatus && typeof body.workStatus !== "boolean")
-    throw error("Work Status should be a boolean", 400);
-
-  if (body.subscriptionId && typeof body.subscriptionId !== "string")
-    throw error("Subscription ID should be a string", 400);
-
-  if (body.subscriptionId && !isValidObjectId(body.subscriptionId))
-    throw error("Invalid Subscription ID", 400);
-
-  if (body.serviceId && !isValidObjectId(body.serviceId))
-    throw error("Invalid Service ID", 400);
-
   return {
     startDate: new Date(body.startDate),
     endDate: new Date(body.endDate),
-    businessName: body.businessName || undefined,
-    serviceId: body.serviceId || undefined,
-    suburb: body.suburb || undefined,
-    active: body.active || undefined,
-    workStatus: body.workStatus || undefined,
-    subscriptionId: body.subscriptionId || undefined,
   };
 }

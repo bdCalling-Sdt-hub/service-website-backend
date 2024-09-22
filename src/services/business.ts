@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 export function createBusiness({
   userId,
   name,
@@ -31,6 +29,8 @@ export function createBusiness({
   longitude: number;
   license?: string;
 }) {
+  const prisma = new PrismaClient();
+
   return prisma.businesses.create({
     data: {
       abn,
@@ -68,6 +68,8 @@ export async function getBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
+  const prisma = new PrismaClient();
+
   let businessIds = undefined;
   if (latitude && longitude) {
     const nearBusinesses = (await prisma.businesses.aggregateRaw({
@@ -167,6 +169,8 @@ export async function countBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
+  const prisma = new PrismaClient();
+
   const pipeline: any[] = [];
 
   if (latitude && longitude) {
@@ -265,6 +269,8 @@ export function updateBusiness(
     longitude?: number;
   }
 ) {
+  const prisma = new PrismaClient();
+
   return prisma.businesses.update({
     where: {
       id,
@@ -293,6 +299,8 @@ export function updateBusiness(
 }
 
 export function getBusinessById(id: string) {
+  const prisma = new PrismaClient();
+
   return prisma.businesses.findUnique({
     where: {
       id,
@@ -314,6 +322,8 @@ export function getBusinessById(id: string) {
 }
 
 export function increasePriorityIndex(id: string) {
+  const prisma = new PrismaClient();
+
   return prisma.businesses.update({
     where: {
       id,
@@ -326,7 +336,7 @@ export function increasePriorityIndex(id: string) {
   });
 }
 
-export function getBusinessReport({
+export function businessReport({
   endDate,
   startDate,
   suburb,
@@ -345,6 +355,8 @@ export function getBusinessReport({
   workStatus?: boolean;
   subscriptionId?: string;
 }) {
+  const prisma = new PrismaClient();
+
   return prisma.businesses.findMany({
     where: {
       name: businessName,
@@ -405,6 +417,54 @@ export function getBusinessReport({
             },
           },
         },
+      },
+    },
+  });
+}
+
+export function businessCommunications({
+  endDate,
+  skip,
+  startDate,
+  take,
+}: {
+  startDate: Date;
+  endDate: Date;
+  take: number;
+  skip: number;
+}) {
+  const prisma = new PrismaClient();
+
+  return prisma.businesses.findMany({
+    take,
+    skip,
+    include: {
+      user: {
+        select: {
+          email: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
+      Communications: {
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+        orderBy:{
+          createdAt: "desc"
+        }
       },
     },
   });

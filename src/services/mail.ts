@@ -144,10 +144,7 @@ export function sendOTPEmail(email: string, otp: string, userName: string) {
   return emailWithNodemailer({ email, subject, html });
 }
 
-export function sendInvoiceEmail(
-  email: string,
-  invoiceUrl: string
-) {
+export function sendInvoiceEmail(email: string, invoiceUrl: string) {
   const subject = "Your Payment Invoice";
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -187,5 +184,97 @@ export function sendInvoiceEmail(
 </body>
 </html>
 `;
+  return emailWithNodemailer({ email, subject, html });
+}
+
+export function sendMonthlyReportEmail({
+  email,
+  businessOwnerName,
+  startDate,
+  endDate,
+  communications,
+}: {
+  email: string;
+  businessOwnerName: string;
+  startDate: Date;
+  endDate: Date;
+  communications: { name: string; type: string; createdAt: Date }[];
+}) {
+  const subject = "Your Monthly Report";
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Communication Summary</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <table style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;">
+        <tr>
+            <td>
+                <h2 style="color: #333333;">Your Monthly Communication Summary</h2>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px; color: #333333;">
+                <p>Dear <strong>${businessOwnerName}</strong>,</p>
+                <p>We are happy to provide you with a summary of your client interactions for <strong>${startDate.toLocaleDateString()}</strong> to <strong>${endDate.toLocaleDateString()}</strong>.</p>
+                <ul>
+                    <li><strong>Total Messages:</strong> ${
+                      communications.filter(
+                        (communication) => communication.type === "MESSAGE"
+                      ).length
+                    }</li>
+                    <li><strong>Total Calls:</strong> ${
+                      communications.filter(
+                        (communication) => communication.type === "CALL"
+                      ).length
+                    }</li>
+                </ul>
+
+                <!-- List of message/call senders -->
+                <p>Here’s a detailed list of who contacted you this month:</p>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; padding: 10px; text-align: left;">Client Name</th>
+                            <th style="border-bottom: 1px solid #dddddd; padding: 10px; text-align: left;">Contact Type</th>
+                            <th style="border-bottom: 1px solid #dddddd; padding: 10px; text-align: left;">Date</th>
+                            <th style="border-bottom: 1px solid #dddddd; padding: 10px; text-align: left;">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${communications
+                          .map(
+                            (communication) => `
+                          <tr>
+                              <td style="padding: 10px; border-bottom: 1px solid #dddddd;">${
+                                communication.name
+                              }</td>
+                              <td style="padding: 10px; border-bottom: 1px solid #dddddd;">${
+                                communication.type
+                              }</td>
+                              <td style="padding: 10px; border-bottom: 1px solid #dddddd;">${communication.createdAt.toLocaleDateString()}</td>
+                              <td style="padding: 10px; border-bottom: 1px solid #dddddd;">${communication.createdAt.toLocaleTimeString()}</td>
+                          </tr>
+                          `
+                          )
+                          .join("")}
+                    </tbody>
+                </table>
+
+                <p>We hope this overview helps you stay informed of your client communications. If you have any questions or need more details, don't hesitate to reach out to us.</p>
+                <p>Thank you for trusting <strong>BASP</strong> with your business communications.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px;">
+                <p>Best regards,</p>
+                <p><strong>The BASP Team</strong></p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
   return emailWithNodemailer({ email, subject, html });
 }

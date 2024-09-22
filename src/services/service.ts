@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 export function createService({
   name,
   description,
@@ -11,6 +9,7 @@ export function createService({
   description: string;
   image: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.services.create({
     data: {
       name,
@@ -29,6 +28,7 @@ export function getServices({
   skip: number;
   name?: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.services.findMany({
     take,
     skip,
@@ -52,6 +52,7 @@ export function getServices({
 }
 
 export function countServices({ name }: { name?: string }) {
+  const prisma = new PrismaClient();
   return prisma.services.count({
     where: {
       name: {
@@ -73,6 +74,7 @@ export function updateService(
     image?: string;
   }
 ) {
+  const prisma = new PrismaClient();
   return prisma.services.update({
     where: {
       id,
@@ -86,6 +88,7 @@ export function updateService(
 }
 
 export function deleteService(id: string) {
+  const prisma = new PrismaClient();
   return prisma.services.update({
     where: {
       id,
@@ -97,6 +100,7 @@ export function deleteService(id: string) {
 }
 
 export function getServiceById(id: string) {
+  const prisma = new PrismaClient();
   return prisma.services.findUnique({
     where: {
       id,

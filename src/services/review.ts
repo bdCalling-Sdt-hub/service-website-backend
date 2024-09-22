@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
 
 export function createReview({
   businessId,
@@ -13,6 +12,7 @@ export function createReview({
   rating: number;
   message: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.reviews.create({
     data: {
       businessId,
@@ -32,6 +32,7 @@ export function getReviews({
   skip: number;
   businessId?: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.reviews.findMany({
     take: limit,
     skip,
@@ -59,6 +60,7 @@ export function getReviews({
 }
 
 export function countReviews({ businessId }: { businessId?: string }) {
+  const prisma = new PrismaClient();
   return prisma.reviews.count({
     where: {
       businessId,
@@ -67,6 +69,7 @@ export function countReviews({ businessId }: { businessId?: string }) {
 }
 
 export function overallRating({ businessId }: { businessId: string }) {
+const prisma = new PrismaClient();
   return prisma.reviews.aggregate({
     where: {
       businessId,
@@ -78,6 +81,7 @@ export function overallRating({ businessId }: { businessId: string }) {
 }
 
 export function countTotalStar(businessId: string) {
+const prisma = new PrismaClient();
   return prisma.reviews.aggregate({
     where: {
       businessId,
@@ -89,6 +93,7 @@ export function countTotalStar(businessId: string) {
 }
 
 export function totalStartByGroup(businessId: string) {
+const prisma = new PrismaClient();
   return prisma.reviews.groupBy({
     by: ["rating"],
     where: {

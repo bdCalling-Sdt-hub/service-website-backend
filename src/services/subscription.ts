@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 export function createSubscription({
   name,
   minimumStart,
@@ -15,6 +13,7 @@ export function createSubscription({
   priceId: string;
   benefits: string[];
 }) {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.create({
     data: {
       name,
@@ -33,6 +32,7 @@ export function getSubscriptions({
   limit: number;
   skip: number;
 }) {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.findMany({
     take: limit,
     skip,
@@ -46,6 +46,7 @@ export function getSubscriptions({
 }
 
 export function getSubscriptionById(id: string) {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.findUnique({
     where: {
       id,
@@ -54,6 +55,7 @@ export function getSubscriptionById(id: string) {
 }
 
 export function countSubscriptions() {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.count({
     where: {
       isDeleted: false,
@@ -75,6 +77,7 @@ export function updateSubscription(
     benefits?: string[];
   }
 ) {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.update({
     where: {
       id,
@@ -89,6 +92,7 @@ export function updateSubscription(
 }
 
 export function deleteSubscription(id: string) {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.update({
     where: {
       id,
@@ -100,6 +104,7 @@ export function deleteSubscription(id: string) {
 }
 
 export function getDefaultSubscription() {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.findFirst({
     where: {
       minimumStart: undefined,
@@ -109,6 +114,7 @@ export function getDefaultSubscription() {
 }
 
 export function getSubscriptionByPriceId(priceId: string) {
+  const prisma = new PrismaClient();
   return prisma.subscriptions.findFirst({
     where: {
       priceId,

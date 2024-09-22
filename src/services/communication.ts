@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 export function createCommunication({
   userId,
   businessId,
@@ -13,6 +11,8 @@ export function createCommunication({
   message?: string;
   type: "CALL" | "MESSAGE";
 }) {
+  const prisma = new PrismaClient();
+  
   return prisma.communications.create({
     data: {
       userId,
@@ -32,6 +32,8 @@ export function getCommunications({
   skip: number;
   businessId?: string;
 }) {
+  const prisma = new PrismaClient();
+  
   return prisma.communications.findMany({
     take: limit,
     skip,
@@ -66,10 +68,14 @@ export function getCommunications({
 }
 
 export function countCommunications(businessId?: string) {
+  const prisma = new PrismaClient();
+  
   return prisma.communications.count({ where: { businessId } });
 }
 
 export function getCommunicationById(id: string) {
+  const prisma = new PrismaClient();
+  
   return prisma.communications.findUnique({
     where: { id },
     include: {
@@ -106,6 +112,8 @@ export function updateCommunication({
   newStatus: "SENDED" | "REVIEWED";
   userId: string;
 }) {
+  const prisma = new PrismaClient();
+  
   return prisma.communications.updateMany({
     where: { businessId, status, userId },
     data: {
@@ -121,6 +129,8 @@ export function getLastCommunication({
   businessId: string;
   userId?: string;
 }) {
+  const prisma = new PrismaClient();
+  
   return prisma.communications.findFirst({
     where: { businessId, userId },
     orderBy: {

@@ -6,14 +6,16 @@ import {
   createBusiness,
   getBusinessById,
   getBusinesses,
-  getBusinessReport,
+  businessReport,
   updateBusiness,
+  businessCommunications,
 } from "../services/business";
 import {
   businessReportValidation,
   createBusinessValidation,
   getBusinessesValidation,
   getBusinessValidation,
+  sendReportValidation,
   updateBusinessValidation,
 } from "../validations/business";
 import { getServiceById } from "../services/service";
@@ -21,6 +23,7 @@ import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { createCheckoutSession, createCustomer } from "../services/stripe";
 import { getDefaultSubscription } from "../services/subscription";
+import { sendMonthlyReportEmail } from "../services/mail";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
@@ -302,7 +305,7 @@ export async function businessReportController(
       workStatus,
     } = businessReportValidation(request);
 
-    const report = await getBusinessReport({
+    const report = await businessReport({
       startDate,
       endDate,
       businessName,
@@ -321,5 +324,62 @@ export async function businessReportController(
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export async function sendReportController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { startDate, endDate } = sendReportValidation(request);
+
+    sendMails({ startDate, endDate });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Start sending report",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function sendMails({
+  startDate,
+  endDate,
+  skip = 0,
+}: {
+  startDate: Date;
+  endDate: Date;
+  skip?: number;
+}) {
+  const report = await businessCommunications({
+    startDate,
+    endDate,
+    skip,
+    take: 5,
+  });
+
+  if (!report.length) return;
+
+  for (const business of report) {
+    sendMonthlyReportEmail({
+      email: business.user.email,
+      businessOwnerName: business.user.firstName + " " + business.user.lastName,
+      endDate,
+      startDate,
+      communications: business.Communications.map((communication) => ({
+        name:
+          communication.user?.firstName && communication.user.lastName
+            ? communication.user.firstName + " " + communication.user.lastName
+            : "Anonymous",
+        email: communication.user?.email ?? "Anonymous",
+        type: communication.type,
+        createdAt: communication.createdAt,
+      })),
+    });
   }
 }

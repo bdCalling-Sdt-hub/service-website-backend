@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
 
 export function createPortfolio({
   name,
@@ -11,6 +10,7 @@ export function createPortfolio({
   image: string;
   businessId: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.portfolios.create({
     data: {
       name,
@@ -29,6 +29,7 @@ export function getPortfolios({
   skip: number;
   businessId: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.portfolios.findMany({
     take: limit,
     skip,
@@ -42,10 +43,12 @@ export function getPortfolios({
 }
 
 export function countPortfolios(businessId: string) {
+  const prisma = new PrismaClient();
   return prisma.portfolios.count({ where: { businessId } });
 }
 
 export function deletePortfolio(id: string) {
+  const prisma = new PrismaClient();
   return prisma.portfolios.delete({
     where: {
       id,
@@ -55,6 +58,7 @@ export function deletePortfolio(id: string) {
 
 
 export function getPortfolioById(id: string) {
+  const prisma = new PrismaClient();
   return prisma.portfolios.findUnique({
     where: {
       id,

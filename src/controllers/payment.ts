@@ -4,8 +4,10 @@ import {
   createPaymentValidation,
   getPaymentChartValidation,
   getPaymentsValidation,
+  paymentReportValidation,
 } from "../validations/payment";
 import {
+  calculateTotalEarnings,
   countPayments,
   createPayment,
   getPayments,
@@ -402,3 +404,38 @@ export async function createCheckoutSessionController(
   }
 }
 
+export async function paymentReportController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { startDate, endDate, businessId } = paymentReportValidation(request);
+
+    const payments = await getPayments({
+      startDate,
+      endDate,
+      businessId,
+      limit: 100,
+      skip: 0,
+    });
+
+    const totalAmount = await calculateTotalEarnings({
+      businessId,
+      startDate,
+      endDate,
+    });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Payment report fetched",
+      data: {
+        payments,
+        totalAmount: totalAmount._sum.amount ?? 0,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}

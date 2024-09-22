@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 export function createUser({
   firstName,
   lastName,
@@ -17,6 +15,7 @@ export function createUser({
   password: string;
   mobile?: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.users.create({
     data: {
       firstName,
@@ -33,6 +32,7 @@ export function createUser({
 }
 
 export function getUserByEmail(email: string) {
+  const prisma = new PrismaClient();
   return prisma.users.findUnique({
     where: {
       email,
@@ -70,6 +70,7 @@ export function getUserByEmail(email: string) {
 }
 
 export function getUserById(id: string, takePassword = false) {
+  const prisma = new PrismaClient();
   return prisma.users.findUnique({
     where: {
       id,
@@ -134,6 +135,7 @@ export function updateUserById(
     password?: string;
   }
 ) {
+  const prisma = new PrismaClient();
   return prisma.users.update({
     where: {
       id,
@@ -160,6 +162,7 @@ export function updateUserById(
 }
 
 export function getAdmin() {
+  const prisma = new PrismaClient();
   return prisma.users.findFirst({
     where: {
       type: "ADMIN",
@@ -182,6 +185,7 @@ export function getUsers({
   endDate?: Date;
   name?: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.users.findMany({
     take: limit,
     skip,
@@ -213,6 +217,7 @@ export function countUsers({
   endDate?: Date;
   name?: string;
 }) {
+  const prisma = new PrismaClient();
   return prisma.users.count({
     where: {
       type,
@@ -228,6 +233,7 @@ export function countUsers({
 }
 
 export function deleteUserById(id: string) {
+  const prisma = new PrismaClient();
   return prisma.users.update({
     where: {
       id,
