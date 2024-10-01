@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -14,7 +14,7 @@ enum UserType {
 }
 
 model Users {
-  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  id             String           @id @default(cuid())
   firstName      String
   lastName       String
   email          String           @unique
@@ -34,16 +34,16 @@ model Users {
 }
 
 model Notifications {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid())
   message   String
-  userId    String   @db.ObjectId
+  userId    String
   user      Users    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
 
 model OTPs {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
+  id        String   @id @default(cuid())
+  userId    String
   user      Users    @relation(fields: [userId], references: [id])
   code      String
   expiredAt DateTime
@@ -53,11 +53,11 @@ model OTPs {
 }
 
 model Subscriptions {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  id           String     @id @default(cuid())
   name         String
   price        Float
   minimumStart Int?
-  benefits     String[]
+  benefits     Json
   priceId      String
   isDeleted    Boolean    @default(false)
   createdAt    DateTime   @default(now())
@@ -66,8 +66,8 @@ model Subscriptions {
 }
 
 model Businesses {
-  id                String           @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String           @unique @db.ObjectId
+  id                String           @id @default(cuid())
+  userId            String           @unique
   user              Users            @relation(fields: [userId], references: [id])
   name              String
   phone             String?
@@ -79,15 +79,17 @@ model Businesses {
   suburb            String
   state             String
   postalCode        String
-  coordinates       Float[]
-  services          String[]
+  // coordinates       Float[]
+  latitude          Float
+  longitude         Float
+  services          Json?
   website           String?
   facebook          String?
   instagram         String?
   about             String?
   priorityIndex     Int              @default(0)
   subscriptionEndAt DateTime?
-  mainServiceId     String           @db.ObjectId
+  mainServiceId     String
   mainService       Services         @relation(fields: [mainServiceId], references: [id])
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
@@ -96,11 +98,11 @@ model Businesses {
   payments          Payments[]
   Communications    Communications[]
 
-  @@index([coordinates], map: "coordinates_2dsphere")
+  // @@index([coordinates], map: "coordinates_2dsphere")
 }
 
 model Services {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  id          String       @id @default(cuid())
   name        String       @unique
   description String
   image       String
@@ -111,21 +113,21 @@ model Services {
 }
 
 model Payments {
-  id             String        @id @default(auto()) @map("_id") @db.ObjectId
-  businessId     String        @db.ObjectId
+  id             String        @id @default(cuid())
+  businessId     String
   business       Businesses    @relation(fields: [businessId], references: [id])
   amount         Float
   transactionId  String
   expireAt       DateTime
-  subscriptionId String        @db.ObjectId
+  subscriptionId String
   subscription   Subscriptions @relation(fields: [subscriptionId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 }
 
 model Portfolios {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  businessId String     @db.ObjectId
+  id         String     @id @default(cuid())
+  businessId String
   business   Businesses @relation(fields: [businessId], references: [id])
   name       String
   image      String
@@ -134,10 +136,10 @@ model Portfolios {
 }
 
 model Reviews {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  businessId String     @db.ObjectId
+  id         String     @id @default(cuid())
+  businessId String
   business   Businesses @relation(fields: [businessId], references: [id])
-  userId     String     @db.ObjectId
+  userId     String
   user       Users      @relation(fields: [userId], references: [id])
   rating     Int
   message    String
@@ -146,7 +148,7 @@ model Reviews {
 }
 
 model AppData {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid())
   about     String
   privacy   String
   terms     String
@@ -166,20 +168,20 @@ enum CommunicationStatus {
 }
 
 model Communications {
-  id         String              @id @default(auto()) @map("_id") @db.ObjectId
+  id         String              @id @default(cuid())
   type       CommunicationType
   status     CommunicationStatus @default(PENDING)
   message    String?
-  businessId String              @db.ObjectId
+  businessId String
   business   Businesses          @relation(fields: [businessId], references: [id])
-  userId     String?             @db.ObjectId
+  userId     String?
   user       Users?              @relation(fields: [userId], references: [id])
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt
 }
 
 model Suburbs {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id        String @id @default(cuid())
   name      String
   postcode  String
   latitude  Float

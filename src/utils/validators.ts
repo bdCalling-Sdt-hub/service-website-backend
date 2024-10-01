@@ -14,6 +14,6 @@ export function validateEmail(email: string) {
 }
 
 export function isValidObjectId(id: string): boolean {
-    const objectIdPattern = /^[a-fA-F0-9]{24}$/;
+    const objectIdPattern = /^c[a-z0-9]{24}$/;
     return objectIdPattern.test(id);
   }

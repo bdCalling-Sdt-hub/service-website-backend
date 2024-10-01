@@ -243,3 +243,23 @@ export function deleteUserById(id: string) {
     },
   });
 }
+
+export function createAdmin({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
+  const prisma = new PrismaClient();
+  return prisma.users.create({
+    data: {
+      email,
+      firstName: "Mr.",
+      lastName: "Admin",
+      password,
+      type: "ADMIN",
+      isVerified: true,
+    },
+  });
+}

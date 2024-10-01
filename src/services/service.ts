@@ -35,7 +35,7 @@ export function getServices({
     where: {
       name: {
         startsWith: name,
-        mode: "insensitive",
+        // mode: "insensitive",
       },
       isDeleted: false,
     },
@@ -46,7 +46,7 @@ export function getServices({
       image: true,
     },
     orderBy: {
-      createdAt: "desc",
+      name: "asc",
     },
   });
 }

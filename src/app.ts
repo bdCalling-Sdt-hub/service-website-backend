@@ -6,6 +6,8 @@ import cors from "cors";
 import morgan from "morgan";
 import suburbs from "./suburbs.json";
 import { createSuburbs, getSuburbs } from "./services/suburb";
+import { createAdmin, getAdmin } from "./services/user";
+import { hashPassword } from "./services/hash";
 
 const app = express();
 
@@ -39,8 +41,7 @@ app.use(
         message: error.message,
       });
     } else {
-      const randomMessage = "Internal Server Error";
-      // errorMessages[Math.floor(Math.random() * errorMessages.length)];
+      const randomMessage = "Internal Server Error"; // errorMessages[Math.floor(Math.random() * errorMessages.length)];
 
       return responseBuilder(response, {
         ok: false,
@@ -64,6 +65,15 @@ getSuburbs({ limit: 1, skip: 0 }).then((data) => {
     createSuburbs(suburbs).then(() => {
       console.log("Suburbs created");
     });
+  }
+});
+
+getAdmin().then(async (admin) => {
+  if (!admin) {
+    createAdmin({
+      email: "admin@gmail.com",
+      password: await hashPassword("123456"),
+    }).then(() => console.log("Admin created"));
   }
 });
 

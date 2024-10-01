@@ -71,6 +71,16 @@ export function createBusinessValidation(request: Request): {
   if (body.state.trim().length === 0)
     throw error("State should not be empty", 400);
 
+  if (!body.latitude) throw error("Latitude is required", 400);
+
+  if (!body.longitude) throw error("Longitude is required", 400);
+
+  if (typeof body.latitude !== "number")
+    throw error("Latitude should be a number", 400);
+
+  if (typeof body.longitude !== "number")
+    throw error("Longitude should be a number", 400);
+
   if (body.cancelUrl && typeof body.cancelUrl !== "string")
     throw error("Cancel URL should be a string", 400);
 
@@ -79,12 +89,6 @@ export function createBusinessValidation(request: Request): {
 
   if (body.license && typeof body.license !== "string")
     throw error("License should be a string", 400);
-
-  if (!body.latitude || typeof body.latitude !== "number")
-    throw error("Latitude should be a number", 400);
-
-  if (!body.longitude || typeof body.longitude !== "number")
-    throw error("Longitude should be a number", 400);
 
   return {
     abn: body.abn,

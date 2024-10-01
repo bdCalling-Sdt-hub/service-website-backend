@@ -44,7 +44,9 @@ export function createBusiness({
       userId,
       mainServiceId,
       license,
-      coordinates: [longitude, latitude],
+      // coordinates: [longitude, latitude],
+      latitude,
+      longitude,
     },
   });
 }
@@ -72,27 +74,15 @@ export async function getBusinesses({
 
   let businessIds = undefined;
   if (latitude && longitude) {
-    const nearBusinesses = (await prisma.businesses.aggregateRaw({
-      pipeline: [
-        {
-          $geoNear: {
-            near: {
-              type: "Point",
-              coordinates: [longitude, latitude],
-            },
-            distanceField: "distance",
-            maxDistance: 10000,
-            spherical: true,
-          } as any,
-        },
-        {
-          $project: {
-            _id: 1,
-          },
-        },
-      ],
-    })) as any;
-    businessIds = nearBusinesses.map((business: any) => business._id.$oid);
+    const businesses = (await prisma.$queryRawUnsafe(
+      `SELECT id FROM Businesses WHERE (6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 100000`
+    )) as [{ id: string }];
+
+    businessIds = businesses.map((business: any) => business.id);
+  }
+
+  if (businessIds && businessIds.length === 0) {
+    return [];
   }
 
   return prisma.businesses.findMany({
@@ -101,7 +91,7 @@ export async function getBusinesses({
     where: {
       name: {
         startsWith: name,
-        mode: "insensitive",
+        // mode: "insensitive",
       },
       mainServiceId: serviceId,
       id: {
@@ -171,58 +161,37 @@ export async function countBusinesses({
 }) {
   const prisma = new PrismaClient();
 
-  const pipeline: any[] = [];
+  const query: string[] = [];
 
   if (latitude && longitude) {
-    pipeline.push({
-      $geoNear: {
-        near: {
-          type: "Point",
-          coordinates: [longitude, latitude],
-        },
-        distanceField: "distance",
-        maxDistance: 10000,
-        spherical: true,
-      },
-    });
+    query.push(
+      `(6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 1000`
+    );
   }
 
-  if (name || serviceId || (startDate && endDate)) {
-    const matchCondition: any = {};
-
-    if (name) {
-      matchCondition.name = {
-        $regex: `^${name}`,
-        $options: "i",
-      };
-    }
-
-    if (serviceId) {
-      matchCondition.mainServiceId = serviceId;
-    }
-
-    if (startDate && endDate) {
-      matchCondition.createdAt = {
-        $gte: startDate,
-        $lte: endDate,
-      };
-    }
-
-    pipeline.push({
-      $match: matchCondition,
-    });
+  if (name) {
+    query.push(`name LIKE '${name}%'`);
   }
 
-  // Add $count stage
-  pipeline.push({
-    $count: "businessesCount",
-  });
+  if (serviceId) {
+    query.push(`mainServiceId = '${serviceId}'`);
+  }
 
-  const businesses = (await prisma.businesses.aggregateRaw({
-    pipeline,
-  })) as any;
+  if (startDate && endDate) {
+    query.push(
+      `createdAt >= '${startDate.toISOString()}' AND createdAt <= '${endDate.toISOString()}'`
+    );
+  }
 
-  return businesses[0]?.businessesCount ?? 0;
+  const queryStr =
+    `SELECT COUNT(*) AS businessesCount FROM Businesses ` +
+    (query.length > 0 ? `WHERE ${query.join(" AND ")}` : "");
+
+  const count = (await prisma.$queryRawUnsafe(queryStr)) as [
+    { businessesCount: BigInt }
+  ];
+
+  return Number(count[0].businessesCount);
 }
 
 export function updateBusiness(
@@ -293,7 +262,9 @@ export function updateBusiness(
       state,
       suburb,
       postalCode,
-      coordinates: latitude && longitude ? [longitude, latitude] : undefined,
+      // coordinates: latitude && longitude ? [longitude, latitude] : undefined,
+      latitude,
+      longitude,
     },
   });
 }
@@ -462,9 +433,9 @@ export function businessCommunications({
             },
           },
         },
-        orderBy:{
-          createdAt: "desc"
-        }
+        orderBy: {
+          createdAt: "desc",
+        },
       },
     },
   });
