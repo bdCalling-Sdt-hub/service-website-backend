@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+const prisma = new PrismaClient();
 
 export function createSuburbs(
   data: {
@@ -9,7 +9,7 @@ export function createSuburbs(
     longitude: number;
   }[]
 ) {
-const prisma = new PrismaClient();
+
   return prisma.suburbs.createMany({
     data,
   });
@@ -24,7 +24,7 @@ export function getSuburbs({
   skip: number;
   postcode?: string;
 }) {
-const prisma = new PrismaClient();
+
   return prisma.suburbs.findMany({
     where: {
       postcode:{
@@ -37,7 +37,7 @@ const prisma = new PrismaClient();
 }
 
 export function countSuburbs(postcode?: string) {
-const prisma = new PrismaClient();
+
   return prisma.suburbs.count({
     where: {
       postcode:{

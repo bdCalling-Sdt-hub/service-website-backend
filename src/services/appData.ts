@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+const prisma = new PrismaClient();
 
 export function createAppData({
   about,
@@ -10,7 +10,7 @@ export function createAppData({
   privacy: string;
   terms: string;
 }) {
-  const prisma = new PrismaClient();
+  
 
   return prisma.appData.create({
     data: {
@@ -22,7 +22,7 @@ export function createAppData({
 }
 
 export function getAppData() {
-const prisma = new PrismaClient();
+
 
   return prisma.appData.findFirst({
     select: { about: true, privacy: true, terms: true },
@@ -34,7 +34,7 @@ export async function updateAppData(data: {
   privacy?: string;
   terms?: string;
 }) {
-  const prisma = new PrismaClient();
+  
   
   const appData = await prisma.appData.findFirst();
 

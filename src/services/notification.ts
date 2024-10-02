@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+const prisma = new PrismaClient();
 
 export function createNotification({
   userId,
@@ -8,7 +8,7 @@ export function createNotification({
   userId: string;
   message: string;
 }) {
-  const prisma = new PrismaClient();
+  
   return prisma.notifications.create({
     data: {
       userId,
@@ -22,7 +22,7 @@ export function getNotificationsByUserId(
   limit: number,
   skip: number
 ) {
-  const prisma = new PrismaClient();
+  
   return prisma.notifications.findMany({
     where: {
       userId,
@@ -36,7 +36,7 @@ export function getNotificationsByUserId(
 }
 
 export function countNotifications(userId?: string) {
-  const prisma = new PrismaClient();
+  
   return prisma.notifications.count({
     where: {
       userId,

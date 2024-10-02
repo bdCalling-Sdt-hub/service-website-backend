@@ -20,7 +20,7 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
         if (allowedRoles.includes("OPTIONAL")) next();
         return responseBuilder(response, {
           ok: false,
-          statusCode: 400,
+          statusCode: 401,
           message: "Authorization token is required",
         });
       }
@@ -28,7 +28,7 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
       if (!bearerToken.startsWith("Bearer ")) {
         return responseBuilder(response, {
           ok: false,
-          statusCode: 400,
+          statusCode: 401,
           message: "Invalid token format",
         });
       }
@@ -40,7 +40,7 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
       if (!tokenData)
         return responseBuilder(response, {
           ok: false,
-          statusCode: 400,
+          statusCode: 401,
           message: "Invalid token",
         });
 
@@ -49,7 +49,7 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
       if (!user) {
         return responseBuilder(response, {
           ok: false,
-          statusCode: 404,
+          statusCode: 401,
           message: "User not found",
         });
       }
@@ -57,7 +57,7 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
       if (user.isDeleted) {
         return responseBuilder(response, {
           ok: false,
-          statusCode: 404,
+          statusCode: 401,
           message: "your account has been blocked",
         });
       }
@@ -69,7 +69,7 @@ export default function authenticate(...allowedRoles: UserTypes[]) {
       ) {
         return responseBuilder(response, {
           ok: false,
-          statusCode: 403,
+          statusCode: 401,
           message: "Only " + allowedRoles.join(", ") + " can access this route",
         });
       }

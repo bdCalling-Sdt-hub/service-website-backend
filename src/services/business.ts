@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+const prisma = new PrismaClient();
 export function createBusiness({
   userId,
   name,
@@ -29,7 +29,7 @@ export function createBusiness({
   longitude: number;
   license?: string;
 }) {
-  const prisma = new PrismaClient();
+  
 
   return prisma.businesses.create({
     data: {
@@ -70,12 +70,12 @@ export async function getBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
-  const prisma = new PrismaClient();
+  
 
   let businessIds = undefined;
   if (latitude && longitude) {
     const businesses = (await prisma.$queryRawUnsafe(
-      `SELECT id FROM Businesses WHERE (6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 100000`
+      `SELECT id FROM Businesses WHERE (6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 10000`
     )) as [{ id: string }];
 
     businessIds = businesses.map((business: any) => business.id);
@@ -159,13 +159,13 @@ export async function countBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
-  const prisma = new PrismaClient();
+  
 
   const query: string[] = [];
 
   if (latitude && longitude) {
     query.push(
-      `(6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 1000`
+      `(6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 10000`
     );
   }
 
@@ -238,7 +238,7 @@ export function updateBusiness(
     longitude?: number;
   }
 ) {
-  const prisma = new PrismaClient();
+  
 
   return prisma.businesses.update({
     where: {
@@ -270,7 +270,7 @@ export function updateBusiness(
 }
 
 export function getBusinessById(id: string) {
-  const prisma = new PrismaClient();
+  
 
   return prisma.businesses.findUnique({
     where: {
@@ -293,7 +293,7 @@ export function getBusinessById(id: string) {
 }
 
 export function increasePriorityIndex(id: string) {
-  const prisma = new PrismaClient();
+  
 
   return prisma.businesses.update({
     where: {
@@ -326,7 +326,7 @@ export function businessReport({
   workStatus?: boolean;
   subscriptionId?: string;
 }) {
-  const prisma = new PrismaClient();
+  
 
   return prisma.businesses.findMany({
     where: {
@@ -404,7 +404,7 @@ export function businessCommunications({
   take: number;
   skip: number;
 }) {
-  const prisma = new PrismaClient();
+  
 
   return prisma.businesses.findMany({
     take,
