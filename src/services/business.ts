@@ -29,8 +29,6 @@ export function createBusiness({
   longitude: number;
   license?: string;
 }) {
-  
-
   return prisma.businesses.create({
     data: {
       abn,
@@ -70,12 +68,17 @@ export async function getBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
-  
-
   let businessIds = undefined;
   if (latitude && longitude) {
     const businesses = (await prisma.$queryRawUnsafe(
-      `SELECT id FROM Businesses WHERE (6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 10000`
+      `SELECT id 
+      FROM Businesses 
+      WHERE (
+      6371 * ACOS(
+        COS(RADIANS(${latitude})) * COS(RADIANS(latitude)) * 
+        COS(RADIANS(longitude) - RADIANS(${longitude})) + 
+        SIN(RADIANS(${latitude})) * SIN(RADIANS(latitude))
+      )) < 10000`
     )) as [{ id: string }];
 
     businessIds = businesses.map((business: any) => business.id);
@@ -89,13 +92,16 @@ export async function getBusinesses({
     take: limit,
     skip,
     where: {
+      id: {
+        in: businessIds,
+      },
+      mainServiceId: serviceId,
+      subscriptionEndAt: {
+        gte: new Date(),
+      },
       name: {
         startsWith: name,
         // mode: "insensitive",
-      },
-      mainServiceId: serviceId,
-      id: {
-        in: businessIds,
       },
       createdAt: {
         gte: startDate,
@@ -159,8 +165,6 @@ export async function countBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
-  
-
   const query: string[] = [];
 
   if (latitude && longitude) {
@@ -238,8 +242,6 @@ export function updateBusiness(
     longitude?: number;
   }
 ) {
-  
-
   return prisma.businesses.update({
     where: {
       id,
@@ -270,8 +272,6 @@ export function updateBusiness(
 }
 
 export function getBusinessById(id: string) {
-  
-
   return prisma.businesses.findUnique({
     where: {
       id,
@@ -293,8 +293,6 @@ export function getBusinessById(id: string) {
 }
 
 export function increasePriorityIndex(id: string) {
-  
-
   return prisma.businesses.update({
     where: {
       id,
@@ -326,8 +324,6 @@ export function businessReport({
   workStatus?: boolean;
   subscriptionId?: string;
 }) {
-  
-
   return prisma.businesses.findMany({
     where: {
       name: businessName,
@@ -404,8 +400,6 @@ export function businessCommunications({
   take: number;
   skip: number;
 }) {
-  
-
   return prisma.businesses.findMany({
     take,
     skip,
