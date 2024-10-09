@@ -2,10 +2,11 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql
+    image: mysql:latest
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: my_database  # Optional: create a default database
     ports:
       - "3306:3306"
     volumes:
@@ -17,8 +18,8 @@ services:
   backend:
     container_name: backend
     build:
-      context: ./
-      dockerfile: Dockerfile # Ensure you have a Dockerfile in your backend folder
+      context: ./  # Ensure you are in the right directory for Dockerfile
+      dockerfile: Dockerfile
     depends_on:
       - mysql
     ports:
@@ -26,8 +27,7 @@ services:
     volumes:
       - ./:/usr/src/app
     working_dir: /usr/src/app
-    
-    command: npm run start
+    command: sh -c "npx prisma migrate dev --name push && npm run build && npm run start"  # Ensure app starts after migrations
     networks:
       - mynetwork
     restart: always

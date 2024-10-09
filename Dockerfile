@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+FROM node:20
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -13,9 +13,11 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+# Build the application
+RUN npm run build
+
 # Expose the port that the application runs on
 EXPOSE 9000
 
-RUN npx prisma migrate dev --name push && npm run build
-
+# Command to run the application
 CMD ["npm", "run", "start"]
