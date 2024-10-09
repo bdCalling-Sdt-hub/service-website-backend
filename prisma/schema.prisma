@@ -86,7 +86,11 @@ model Businesses {
   website           String?
   facebook          String?
   instagram         String?
-  about             String?
+  about             String?          @db.LongText
+  accountNumber     String?
+  accountName       String?
+  bankName          String?
+  bsbNumber         String?
   priorityIndex     Int              @default(0)
   subscriptionEndAt DateTime?
   mainServiceId     String

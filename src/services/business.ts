@@ -88,7 +88,7 @@ export async function getBusinesses({
     return [];
   }
 
-  return prisma.businesses.findMany({
+  return await prisma.businesses.findMany({
     take: limit,
     skip,
     where: {
@@ -111,7 +111,24 @@ export async function getBusinesses({
     orderBy: {
       priorityIndex: "asc",
     },
-    include: {
+    select: {
+      id: true,
+      about: true,
+      address: true,
+      facebook: true,
+      instagram: true,
+      mainServiceId: true,
+      name: true,
+      mobile: true,
+      phone: true,
+      postalCode: true,
+      services: true,
+      suburb: true,
+      state: true,
+      openHour: true,
+      userId: true,
+      website: true,
+      createdAt: true,
       mainService: {
         select: {
           name: true,
@@ -220,6 +237,10 @@ export function updateBusiness(
     postalCode,
     latitude,
     longitude,
+    accountName,
+    accountNumber,
+    bankName,
+    bsbNumber,
   }: {
     abn?: number;
     mobile?: string;
@@ -240,6 +261,10 @@ export function updateBusiness(
     postalCode?: string;
     latitude?: number;
     longitude?: number;
+    accountNumber?: string;
+    accountName?: string;
+    bankName?: string;
+    bsbNumber?: string;
   }
 ) {
   return prisma.businesses.update({
@@ -264,9 +289,12 @@ export function updateBusiness(
       state,
       suburb,
       postalCode,
-      // coordinates: latitude && longitude ? [longitude, latitude] : undefined,
       latitude,
       longitude,
+      accountName,
+      accountNumber,
+      bankName,
+      bsbNumber,
     },
   });
 }
@@ -276,7 +304,24 @@ export function getBusinessById(id: string) {
     where: {
       id,
     },
-    include: {
+    select: {
+      id: true,
+      about: true,
+      address: true,
+      facebook: true,
+      instagram: true,
+      mainServiceId: true,
+      name: true,
+      mobile: true,
+      phone: true,
+      postalCode: true,
+      services: true,
+      suburb: true,
+      state: true,
+      openHour: true,
+      userId: true,
+      website: true,
+      createdAt: true,
       mainService: {
         select: {
           name: true,
@@ -288,6 +333,32 @@ export function getBusinessById(id: string) {
           email: true,
         },
       },
+      _count: {
+        select: {
+          reviews: {
+            where: {
+              rating: 5,
+            },
+          },
+        },
+      },
+      payments: {
+        select: {
+          subscription: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
+        },
+        take: 1,
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+      portfolios:{
+        take: 5,
+      }
     },
   });
 }

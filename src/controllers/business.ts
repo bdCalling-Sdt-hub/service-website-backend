@@ -213,6 +213,10 @@ export async function updateBusinessController(
       suburb,
       latitude,
       longitude,
+      accountName,
+      accountNumber,
+      bsbNumber,
+      bankName,
     } = updateBusinessValidation(request);
 
     if (businessId !== request.user.business.id) {
@@ -246,6 +250,10 @@ export async function updateBusinessController(
       suburb,
       latitude,
       longitude,
+      accountName,
+      accountNumber,
+      bsbNumber,
+      bankName,
     });
 
     return responseBuilder(response, {

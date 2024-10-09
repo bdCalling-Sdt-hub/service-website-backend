@@ -185,6 +185,10 @@ export function updateBusinessValidation(request: Request): {
   latitude?: number;
   longitude?: number;
   services?: string[];
+  accountNumber?: string;
+  accountName?: string;
+  bankName?: string;
+  bsbNumber?: string;
 } {
   const params = request.params;
   const body = request.body;
@@ -258,6 +262,18 @@ export function updateBusinessValidation(request: Request): {
   if (body.longitude && typeof body.longitude !== "number")
     throw error("Longitude should be a number", 400);
 
+  if(body.accountNumber && typeof body.accountNumber !== "string")
+    throw error("Account Number should be a string", 400);
+
+  if(body.accountName && typeof body.accountName !== "string")
+    throw error("Account Name should be a string", 400);
+
+  if(body.bankName && typeof body.bankName !== "string")
+    throw error("Bank Name should be a string", 400);
+
+  if(body.bsbNumber && typeof body.bsbNumber !== "string")
+    throw error("BSB Number should be a string", 400);
+
   if (
     !body.abn &&
     !body.name &&
@@ -276,7 +292,11 @@ export function updateBusinessValidation(request: Request): {
     !body.state &&
     !body.suburb &&
     !body.latitude &&
-    !body.longitude
+    !body.longitude &&
+    !body.accountNumber &&
+    !body.accountName &&
+    !body.bankName &&
+    !body.bsbNumber
   ) {
     throw error("No valid data to update", 400);
   }
@@ -301,6 +321,10 @@ export function updateBusinessValidation(request: Request): {
     abn: body.abn,
     latitude: body.latitude,
     longitude: body.longitude,
+    accountNumber: body.accountNumber,
+    accountName: body.accountName,
+    bankName: body.bankName,
+    bsbNumber: body.bsbNumber,
   };
 }
 

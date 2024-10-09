@@ -1,6 +1,13 @@
 import nodemailer from "nodemailer";
 import "dotenv/config";
 
+const frontendUrl = process.env.FRONTEND_URL;
+
+if (!frontendUrl) {
+  console.error("FRONTEND_URL is required in .env");
+  process.exit(1);
+}
+
 const user = process.env.SMTP_USERNAME;
 const pass = process.env.SMTP_PASSWORD;
 
@@ -92,7 +99,7 @@ export function sendReviewEmail({
                 <p>Thank you for using <strong>BASP</strong> to connect with ${businessName}. We hope you were satisfied with the service provided!</p>
                 <p>Your feedback is incredibly important to us and helps other customers make informed decisions. We would greatly appreciate it if you could take a moment to share your thoughts about your experience with ${businessName}.</p>
                 
-                    <a href="/review/${id}" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    <a href="${frontendUrl}/review/${id}" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
                         Leave a Review
                     </a>
                 <p>Thank you for your time and feedback. If you have any additional comments or suggestions, please feel free to reach out to us.</p>
