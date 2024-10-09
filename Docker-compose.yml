@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mynetwork
+    restart: always
+
+  backend:
+    container_name: backend
+    build:
+      context: ./
+      dockerfile: Dockerfile # Ensure you have a Dockerfile in your backend folder
+    depends_on:
+      - mysql
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app
+    
+    command: npm run start
+    networks:
+      - mynetwork
+    restart: always
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  mysql_data:

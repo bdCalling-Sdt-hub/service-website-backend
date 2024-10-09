@@ -96,9 +96,9 @@ export async function getBusinesses({
         in: businessIds,
       },
       mainServiceId: serviceId,
-      subscriptionEndAt: {
-        gte: new Date(),
-      },
+      // subscriptionEndAt: {
+      //   gte: new Date(),
+      // },
       name: {
         startsWith: name,
         // mode: "insensitive",
