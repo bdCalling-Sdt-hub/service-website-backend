@@ -5,6 +5,7 @@ import {
   getPaymentChartValidation,
   getPaymentsValidation,
   paymentReportValidation,
+  upgradePlanValidation,
 } from "../validations/payment";
 import {
   calculateTotalEarnings,
@@ -27,8 +28,10 @@ import {
   getCustomers,
   getPriceById,
   getSubscriptionByCustomerId,
+  updateSubscription,
   // getSubscriptionByUserId,
 } from "../services/stripe";
+import { updateAppData } from "../services/appData";
 
 export async function createPaymentController(
   request: Request,
@@ -434,6 +437,70 @@ export async function paymentReportController(
         payments,
         totalAmount: totalAmount._sum.amount ?? 0,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function upgradePlanController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const user = request.user;
+    const { subscriptionId } = upgradePlanValidation(request);
+
+    if (!user.business?.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Register as a business to upgrade your plan",
+      });
+    }
+
+    const subscription = await getSubscriptionById(subscriptionId);
+
+    if (!subscription) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Subscription not found",
+      });
+    }
+
+    const existingCustomers = await getCustomers(user.email);
+
+    if (existingCustomers.data.length === 0) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Subscribe to a plan first",
+      });
+    }
+
+    const customer = existingCustomers.data[0];
+
+    const subscriptions = await getSubscriptionByCustomerId(customer.id);
+
+    if (subscriptions.data.length === 0) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Subscribe to a plan first",
+      });
+    }
+
+    await updateSubscription({
+      priceId: subscription.priceId,
+      stripeSubscriptionId: subscriptions.data[0].id,
+    });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Plan upgraded successfully",
     });
   } catch (error) {
     next(error);

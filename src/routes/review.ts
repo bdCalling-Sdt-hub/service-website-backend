@@ -8,10 +8,7 @@ import {
 
 const router = express.Router();
 
-router
-  .route("/")
-  .get(getReviewsController)
-  .post(authenticate("CUSTOMER", "PROVIDER"), createReviewController);
+router.route("/").get(getReviewsController).post(createReviewController);
 
 router.get("/all", authenticate("ADMIN"), getAllReviewsController);
 

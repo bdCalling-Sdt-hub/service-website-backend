@@ -179,3 +179,22 @@ export function paymentReportValidation(request: Request) {
     businessId: query.businessId,
   };
 }
+
+
+export function upgradePlanValidation(request: Request): {
+  subscriptionId: string;
+} {
+  const body = request.body;
+
+  if (!body.subscriptionId) {
+    throw error("subscription Id is required", 400);
+  }
+
+  if (!isValidObjectId(body.subscriptionId)) {
+    throw error("subscription Id should be a valid ObjectId", 400);
+  }
+
+  return {
+    subscriptionId: body.subscriptionId,
+  };
+}

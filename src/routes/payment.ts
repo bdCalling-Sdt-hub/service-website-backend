@@ -6,6 +6,7 @@ import {
   getPaymentsController,
   getTotalEarningsController,
   paymentReportController,
+  upgradePlanController,
 } from "../controllers/payment";
 import authenticate from "../middlewares/authenticate";
 
@@ -13,7 +14,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(authenticate("PROVIDER"), createPaymentController)
+  .post(authenticate("PROVIDER"), upgradePlanController)
   .get(authenticate("ADMIN", "PROVIDER"), getPaymentsController);
 
 router.post(

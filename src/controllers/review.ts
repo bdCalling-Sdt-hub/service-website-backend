@@ -25,7 +25,6 @@ export async function createReviewController(
   next: NextFunction
 ) {
   try {
-    const user = request.user;
     const { rating, message, communicationId } =
       createReviewValidation(request);
 
@@ -39,11 +38,11 @@ export async function createReviewController(
       });
     }
 
-    if (user.id !== communication.userId) {
+    if (!communication.userId) {
       return responseBuilder(response, {
         ok: false,
         statusCode: 403,
-        message: "You are not allowed to review this communication",
+        message: "This communication is not for review",
       });
     }
 
@@ -65,14 +64,14 @@ export async function createReviewController(
 
     const review = await createReview({
       businessId: communication.businessId,
-      userId: user.id,
+      userId: communication.userId,
       rating,
       message,
     });
 
     await updateCommunication({
       businessId: communication.businessId,
-      userId: user.id,
+      userId: communication.userId,
       status: "SENDED",
       newStatus: "REVIEWED",
     });

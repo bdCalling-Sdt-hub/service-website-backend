@@ -100,8 +100,8 @@ export function createProduct(name: string) {
   return stripe.products.create({ name });
 }
 
-export function getSubscriptionByCustomerId(userId: string) {
-  return stripe.subscriptions.list({ customer: userId });
+export function getSubscriptionByCustomerId(customerId: string) {
+  return stripe.subscriptions.list({ customer: customerId });
 }
 
 export function eventConstructor(body: Buffer | string, signature: string) {
@@ -118,4 +118,21 @@ export function getCustomerById(id: string) {
 
 export function cancelSubscription(id: string) {
   return stripe.subscriptions.cancel(id);
+}
+
+export function updateSubscription({
+  stripeSubscriptionId,
+  priceId,
+}: {
+  stripeSubscriptionId: string;
+  priceId: string;
+}) {
+  return stripe.subscriptions.update(stripeSubscriptionId, {
+    items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+  });
 }

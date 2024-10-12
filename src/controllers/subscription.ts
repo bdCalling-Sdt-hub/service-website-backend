@@ -15,20 +15,9 @@ import {
 } from "../services/subscription";
 import paginationBuilder from "../utils/paginationBuilder";
 import responseBuilder from "../utils/responseBuilder";
-import Stripe from "stripe";
-import dotenv from "dotenv";
 import { createPrice, createProduct } from "../services/stripe";
 import { getLastPaymentByBusinessId } from "../services/payment";
 
-dotenv.config();
-
-const stripe_secret_key = process.env.STRIPE_SECRET_KEY;
-
-if (!stripe_secret_key) {
-  throw new Error("Stripe secret key is not provided");
-}
-
-const stripe = new Stripe(stripe_secret_key);
 
 export async function createSubscriptionController(
   request: Request,
@@ -51,7 +40,7 @@ export async function createSubscriptionController(
       minimumStart,
     });
 
-    await createSubscription({
+    const subscription = await createSubscription({
       name,
       minimumStart,
       price,
@@ -63,11 +52,7 @@ export async function createSubscriptionController(
       ok: true,
       statusCode: 201,
       message: "Subscription created",
-      data: {
-        id: priceData.id,
-        ...priceData.metadata,
-        benefits: JSON.parse(priceData.metadata.benefits),
-      },
+      data: subscription,
     });
   } catch (error) {
     next(error);

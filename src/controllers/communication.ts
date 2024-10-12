@@ -17,7 +17,7 @@ import {
 } from "../services/communication";
 import { sendReviewEmail } from "../services/mail";
 import { getUserById } from "../services/user";
-import { increasePriorityIndex } from "../services/business";
+import { getBusinessById, increasePriorityIndex } from "../services/business";
 
 export async function createCommunicationController(
   request: Request,
@@ -27,6 +27,16 @@ export async function createCommunicationController(
   try {
     const { message, businessId, type, userId } =
       createCommunicationValidation(request);
+
+    const business = await getBusinessById(businessId);
+
+    if (!business) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Business not found",
+      });
+    }
 
     let user;
 
