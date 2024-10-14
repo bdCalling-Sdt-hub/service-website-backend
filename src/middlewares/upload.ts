@@ -14,8 +14,8 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) || 20971520; // 20 MB
-const allowedFileTypes = ["jpg", "jpeg", "png"];
- 
+const allowedFileTypes = ["jpg", "jpeg", "png", "jfif"];
+
 const storage: StorageEngine = multer.diskStorage({
   destination: UPLOAD_DIR,
   filename: (
@@ -29,7 +29,7 @@ const storage: StorageEngine = multer.diskStorage({
       ""
     )}${extName}`;
 
-    req.body.image = fileName; 
+    req.body.image = fileName;
 
     cb(null, fileName);
   },

@@ -72,7 +72,7 @@ export async function getBusinesses({
   if (latitude && longitude) {
     const businesses = (await prisma.$queryRawUnsafe(
       `SELECT id 
-      FROM Businesses 
+      FROM Businesses  
       WHERE (
       6371 * ACOS(
         COS(RADIANS(${latitude})) * COS(RADIANS(latitude)) * 
@@ -356,9 +356,9 @@ export function getBusinessById(id: string) {
           createdAt: "desc",
         },
       },
-      portfolios:{
+      portfolios: {
         take: 5,
-      }
+      },
     },
   });
 }

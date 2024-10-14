@@ -23,6 +23,16 @@ export async function createServiceController(
   try {
     const { name, description, image } = createServiceValidation(request);
 
+    const existService = await getServices({ skip: 0, take: 1, name });
+
+    if (existService.length > 0) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "Service already exists with this name",
+      });
+    }
+
     const service = await createService({
       name,
       description,
