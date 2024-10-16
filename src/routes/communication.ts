@@ -16,7 +16,7 @@ router
 
 router
   .route("/:id")
-  .get(authenticate(), getSingleCommunicationController)
+  .get(getSingleCommunicationController)
   .post(authenticate("ADMIN"), updateCommunicationController);
 
 export default router;
