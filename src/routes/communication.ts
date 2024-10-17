@@ -20,3 +20,5 @@ router
   .post(authenticate("ADMIN"), updateCommunicationController);
 
 export default router;
+
+

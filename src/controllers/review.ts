@@ -25,7 +25,7 @@ export async function createReviewController(
   next: NextFunction
 ) {
   try {
-    const { rating, message, communicationId } =
+    const { rating, message, communicationId, discount } =
       createReviewValidation(request);
 
     const communication = await getCommunicationById(communicationId);
@@ -67,6 +67,7 @@ export async function createReviewController(
       userId: communication.userId,
       rating,
       message,
+      discount,
     });
 
     await updateCommunication({
@@ -159,7 +160,7 @@ export async function getTotalStarController(
       ok: true,
       statusCode: 200,
       message: "Total star",
-      data: totalReviews._sum.rating ?? 0,
+      data: totalReviews,
     });
   } catch (error) {
     next(error);
@@ -198,7 +199,7 @@ export async function getAllReviewsController(
       ok: true,
       statusCode: 200,
       message: "Reviews found",
-      data: reviews,  
+      data: reviews,
       pagination,
     });
   } catch (error) {

@@ -32,6 +32,7 @@ import {
   // getSubscriptionByUserId,
 } from "../services/stripe";
 import { updateAppData } from "../services/appData";
+import { countTotalStar } from "../services/review";
 
 export async function createPaymentController(
   request: Request,
@@ -351,6 +352,20 @@ export async function createCheckoutSessionController(
         ok: false,
         statusCode: 404,
         message: "Subscription not found",
+      });
+    }
+
+    if (
+      subscription.minimumStart &&
+      subscription.minimumStart > (await countTotalStar(user.business.id))
+    ) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message:
+          "You need to have at least " +
+          subscription.minimumStart +
+          " stars to subscribe to this plan",
       });
     }
 

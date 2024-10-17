@@ -47,6 +47,7 @@ const fileFilter = (
       error(`Only ${allowedFileTypes.join(", ")} files are allowed`, 400)
     );
   }
+
   cb(null, true);
 };
 

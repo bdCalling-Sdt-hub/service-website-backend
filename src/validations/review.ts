@@ -6,6 +6,7 @@ export function createReviewValidation(request: Request): {
   communicationId: string;
   rating: number;
   message: string;
+  discount: number;
 } {
   const body = request.body;
 
@@ -19,6 +20,10 @@ export function createReviewValidation(request: Request): {
 
   if (!body.message) {
     throw error("message is required", 400);
+  }
+
+  if (!body.discount && body.discount !== 0) {
+    throw error("discount is required", 400);
   }
 
   if (typeof body.rating !== "number") {
@@ -45,10 +50,24 @@ export function createReviewValidation(request: Request): {
     throw error("communicationId is invalid", 400);
   }
 
+  if (typeof body.discount !== "number") {
+    throw error("discount must be a number", 400);
+  }
+
+  if (
+    body.discount !== 0 &&
+    body.discount !== 5 &&
+    body.discount !== 10 &&
+    body.discount !== 15
+  ) {
+    throw error("discount must be 0, 5, 10 or 15", 400);
+  }
+
   return {
     rating: body.rating,
     message: body.message,
     communicationId: body.communicationId,
+    discount: body.discount,
   };
 }
 

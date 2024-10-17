@@ -6,19 +6,21 @@ export function createReview({
   userId,
   rating,
   message,
+  discount,
 }: {
   businessId: string;
   userId: string;
   rating: number;
   message: string;
+  discount: number;
 }) {
-  
   return prisma.reviews.create({
     data: {
       businessId,
       userId,
       rating,
       message,
+      discount,
     },
   });
 }
@@ -32,7 +34,6 @@ export function getReviews({
   skip: number;
   businessId?: string;
 }) {
-  
   return prisma.reviews.findMany({
     take: limit,
     skip,
@@ -60,7 +61,6 @@ export function getReviews({
 }
 
 export function countReviews({ businessId }: { businessId?: string }) {
-  
   return prisma.reviews.count({
     where: {
       businessId,
@@ -69,7 +69,6 @@ export function countReviews({ businessId }: { businessId?: string }) {
 }
 
 export function overallRating({ businessId }: { businessId: string }) {
-
   return prisma.reviews.aggregate({
     where: {
       businessId,
@@ -81,19 +80,15 @@ export function overallRating({ businessId }: { businessId: string }) {
 }
 
 export function countTotalStar(businessId: string) {
-
-  return prisma.reviews.aggregate({
+  return prisma.reviews.count({
     where: {
       businessId,
-    },
-    _sum: {
-      rating: true,
+      rating: 5,
     },
   });
 }
 
 export function totalStartByGroup(businessId: string) {
-
   return prisma.reviews.groupBy({
     by: ["rating"],
     where: {
