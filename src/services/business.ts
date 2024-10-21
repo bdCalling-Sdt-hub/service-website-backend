@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+
 export function createBusiness({
   userId,
   name,
@@ -42,7 +43,6 @@ export function createBusiness({
       userId,
       mainServiceId,
       license,
-      // coordinates: [longitude, latitude],
       latitude,
       longitude,
     },
@@ -68,103 +68,125 @@ export async function getBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
-  let businessIds = undefined;
-  if (latitude && longitude) {
-    const businesses = (await prisma.$queryRawUnsafe(
-      `SELECT id 
-      FROM Businesses  
-      WHERE (
+  const filters = [];
+
+  if (name) {
+    filters.push(`b.name LIKE '${name}%'`);
+  }
+
+  if (serviceId) {
+    filters.push(`b.mainServiceId = '${serviceId}'`);
+  }
+
+  if (startDate && endDate) {
+    filters.push(
+      `b.createdAt BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`
+    );
+  }
+
+  const businesses = (await prisma.$queryRawUnsafe(
+    `
+  SELECT 
+    b.id,
+    b.about,
+    b.address,
+    b.facebook,
+    b.instagram,
+    b.mainServiceId,
+    b.name,
+    b.mobile,
+    b.phone,
+    b.postalCode,
+    b.services,
+    b.suburb,
+    b.state,
+    b.openHour,
+    b.userId,
+    b.website,
+    b.createdAt,
+    ms.name as mainServiceName,
+    u.image as userImage,
+    u.email as userEmail,
+    
+    (SELECT SUM(CASE 
+                 WHEN r.rating = 5 THEN (r.discount / 5.0) + 1 
+                 ELSE r.discount / 5.0 
+               END)
+     FROM Reviews r 
+     WHERE r.businessId = b.id) as reviewCount,
+    (SELECT s.name 
+     FROM Payments p
+     JOIN Subscriptions s ON p.subscriptionId = s.id
+     WHERE p.businessId = b.id
+     ORDER BY p.createdAt DESC
+     LIMIT 1) as subscriptionName,
+    (SELECT s.id 
+     FROM Payments p
+     JOIN Subscriptions s ON p.subscriptionId = s.id
+     WHERE p.businessId = b.id
+     ORDER BY p.createdAt DESC
+     LIMIT 1) as subscriptionId,
+    (
       6371 * ACOS(
-        COS(RADIANS(${latitude})) * COS(RADIANS(latitude)) * 
-        COS(RADIANS(longitude) - RADIANS(${longitude})) + 
-        SIN(RADIANS(${latitude})) * SIN(RADIANS(latitude))
-      )) < 10000`
-    )) as [{ id: string }];
+        COS(RADIANS(${latitude})) * COS(RADIANS(b.latitude)) * 
+        COS(RADIANS(b.longitude) - RADIANS(${longitude})) + 
+        SIN(RADIANS(${latitude})) * SIN(RADIANS(b.latitude))
+      )
+    ) AS distance
+  FROM Businesses b
+  LEFT JOIN Services ms ON b.mainServiceId = ms.id
+  LEFT JOIN Users u ON b.userId = u.id
+  ${filters.length ? `WHERE ` + filters.join(" AND ") : ""}
+  ORDER BY distance ASC, b.priorityIndex ASC
+  LIMIT ${limit} OFFSET ${skip};
+`
+  )) as any[];
 
-    businessIds = businesses.map((business: any) => business.id);
-  }
-
-  if (businessIds && businessIds.length === 0) {
-    return [];
-  }
-
-  return await prisma.businesses.findMany({
-    take: limit,
-    skip,
-    where: {
-      id: {
-        in: businessIds,
-      },
-      mainServiceId: serviceId,
-      // subscriptionEndAt: {
-      //   gte: new Date(),
-      // },
-      name: {
-        startsWith: name,
-        // mode: "insensitive",
-      },
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    },
-    orderBy: {
-      priorityIndex: "asc",
-    },
-    select: {
-      id: true,
-      about: true,
-      address: true,
-      facebook: true,
-      instagram: true,
-      mainServiceId: true,
-      name: true,
-      mobile: true,
-      phone: true,
-      postalCode: true,
-      services: true,
-      suburb: true,
-      state: true,
-      openHour: true,
-      userId: true,
-      website: true,
-      createdAt: true,
-      mainService: {
-        select: {
-          name: true,
+  return businesses.reduce((acc, business) => {
+    return [
+      ...acc,
+      {
+        id: business.id,
+        about: business.about,
+        address: business.address,
+        facebook: business.facebook,
+        instagram: business.instagram,
+        mainServiceId: business.mainServiceId,
+        name: business.name,
+        mobile: business.mobile,
+        phone: business.phone,
+        postalCode: business.postalCode,
+        services: business.services,
+        suburb: business.suburb,
+        state: business.state,
+        openHour: business.openHour,
+        userId: business.userId,
+        website: business.website,
+        createdAt: business.createdAt,
+        mainService: {
+          name: business.mainServiceName,
         },
-      },
-      user: {
-        select: {
-          image: true,
-          email: true,
+        user: {
+          image: business.userImage,
+          email: business.userEmail,
         },
-      },
-      _count: {
-        select: {
-          reviews: {
-            where: {
-              rating: 5,
-            },
-          },
+        _count: {
+          reviews: business.reviewCount || 0,
         },
+        payments:
+          business.subscriptionName && business.subscriptionId
+            ? [
+                {
+                  subscription: {
+                    name: business.subscriptionName,
+                    id: business.subscriptionId,
+                  },
+                },
+              ]
+            : [],
       },
-      payments: {
-        select: {
-          subscription: {
-            select: {
-              name: true,
-              id: true,
-            },
-          },
-        },
-        take: 1,
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
-    },
-  });
+    ];
+  }, []);
 }
 
 export async function countBusinesses({
@@ -183,12 +205,6 @@ export async function countBusinesses({
   endDate?: Date;
 }) {
   const query: string[] = [];
-
-  if (latitude && longitude) {
-    query.push(
-      `(6371 * ACOS(COS(RADIANS(40.7128)) * COS(RADIANS(${latitude})) * COS(RADIANS(${longitude}) - RADIANS(-74.0060)) + SIN(RADIANS(40.7128)) * SIN(RADIANS(${latitude})))) < 10000`
-    );
-  }
 
   if (name) {
     query.push(`name LIKE '${name}%'`);

@@ -14,23 +14,25 @@ enum UserType {
 }
 
 model Users {
-  id             String           @id @default(cuid())
-  firstName      String
-  lastName       String
-  email          String           @unique
-  password       String
-  type           UserType
-  image          String?
-  mobile         String?
-  isDeleted      Boolean          @default(false)
-  isVerified     Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  notifications  Notifications[]
-  oTPs           OTPs[]
-  business       Businesses?
-  reviews        Reviews[]
-  Communications Communications[]
+  id              String            @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String            @unique
+  password        String
+  type            UserType
+  image           String?
+  mobile          String?
+  isDeleted       Boolean           @default(false)
+  isVerified      Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  notifications   Notifications[]
+  oTPs            OTPs[]
+  business        Businesses?
+  reviews         Reviews[]
+  Communications  Communications[]
+  Bits            Bits[]
+  JobApplications JobApplications[]
 }
 
 model Notifications {
@@ -103,6 +105,7 @@ model Businesses {
   Communications    Communications[]
 
   // @@index([coordinates], map: "coordinates_2dsphere")
+  Jobs Jobs[]
 }
 
 model Services {
@@ -114,6 +117,7 @@ model Services {
   business    Businesses[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  Bits        Bits[]
 }
 
 model Payments {
@@ -148,6 +152,7 @@ model Reviews {
   rating     Int
   discount   Int
   message    String
+  ticketNo   Int        @unique @default(autoincrement())
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
@@ -193,13 +198,47 @@ model Suburbs {
   longitude Float
 }
 
-// model Jobs {
-//   id         String     @id @default(cuid())
-//   businessId String
-//   business   Businesses @relation(fields: [businessId], references: [id])
-//   name       String
-//   description String
-//   price      Float
-//   createdAt  DateTime   @default(now())
-//   updatedAt  DateTime   @updatedAt
-// }
+enum CommunicationPreference {
+  email
+  call
+}
+
+model Bits {
+  id                      String                  @id @default(cuid())
+  userId                  String
+  user                    Users                   @relation(fields: [userId], references: [id])
+  serviceId               String
+  service                 Services                @relation(fields: [serviceId], references: [id])
+  description             String
+  image                   String?
+  latitude                Float
+  longitude               Float
+  communicationPreference CommunicationPreference
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+}
+
+model Jobs {
+  id              String            @id @default(cuid())
+  businessId      String
+  business        Businesses        @relation(fields: [businessId], references: [id])
+  title           String
+  description     String
+  email           String
+  phone           String
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  JobApplications JobApplications[]
+}
+
+model JobApplications {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Jobs     @relation(fields: [jobId], references: [id])
+  userId    String
+  user      Users    @relation(fields: [userId], references: [id])
+  resume    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -75,7 +75,11 @@ CREATE TABLE `Businesses` (
     `website` VARCHAR(191) NULL,
     `facebook` VARCHAR(191) NULL,
     `instagram` VARCHAR(191) NULL,
-    `about` VARCHAR(191) NULL,
+    `about` LONGTEXT NULL,
+    `accountNumber` VARCHAR(191) NULL,
+    `accountName` VARCHAR(191) NULL,
+    `bankName` VARCHAR(191) NULL,
+    `bsbNumber` VARCHAR(191) NULL,
     `priorityIndex` INTEGER NOT NULL DEFAULT 0,
     `subscriptionEndAt` DATETIME(3) NULL,
     `mainServiceId` VARCHAR(191) NOT NULL,
@@ -132,10 +136,13 @@ CREATE TABLE `Reviews` (
     `businessId` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
     `rating` INTEGER NOT NULL,
+    `discount` INTEGER NOT NULL,
     `message` VARCHAR(191) NOT NULL,
+    `ticketNo` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `Reviews_ticketNo_key`(`ticketNo`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -176,6 +183,49 @@ CREATE TABLE `Suburbs` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `Bits` (
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `serviceId` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `image` VARCHAR(191) NULL,
+    `latitude` DOUBLE NOT NULL,
+    `longitude` DOUBLE NOT NULL,
+    `communicationPreference` ENUM('email', 'call') NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Jobs` (
+    `id` VARCHAR(191) NOT NULL,
+    `businessId` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NOT NULL,
+    `phone` VARCHAR(191) NOT NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `JobApplications` (
+    `id` VARCHAR(191) NOT NULL,
+    `jobId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `resume` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Notifications` ADD CONSTRAINT `Notifications_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -208,3 +258,18 @@ ALTER TABLE `Communications` ADD CONSTRAINT `Communications_businessId_fkey` FOR
 
 -- AddForeignKey
 ALTER TABLE `Communications` ADD CONSTRAINT `Communications_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Bits` ADD CONSTRAINT `Bits_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Bits` ADD CONSTRAINT `Bits_serviceId_fkey` FOREIGN KEY (`serviceId`) REFERENCES `Services`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Jobs` ADD CONSTRAINT `Jobs_businessId_fkey` FOREIGN KEY (`businessId`) REFERENCES `Businesses`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `JobApplications` ADD CONSTRAINT `JobApplications_jobId_fkey` FOREIGN KEY (`jobId`) REFERENCES `Jobs`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `JobApplications` ADD CONSTRAINT `JobApplications_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
