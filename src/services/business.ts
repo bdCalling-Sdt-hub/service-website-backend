@@ -86,59 +86,53 @@ export async function getBusinesses({
 
   const businesses = (await prisma.$queryRawUnsafe(
     `
-  SELECT 
-    b.id,
-    b.about,
-    b.address,
-    b.facebook,
-    b.instagram,
-    b.mainServiceId,
-    b.name,
-    b.mobile,
-    b.phone,
-    b.postalCode,
-    b.services,
-    b.suburb,
-    b.state,
-    b.openHour,
-    b.userId,
-    b.website,
-    b.createdAt,
-    ms.name as mainServiceName,
-    u.image as userImage,
-    u.email as userEmail,
-    
-    (SELECT SUM(CASE 
-                 WHEN r.rating = 5 THEN (r.discount / 5.0) + 1 
-                 ELSE r.discount / 5.0 
-               END)
-     FROM Reviews r 
-     WHERE r.businessId = b.id) as reviewCount,
-    (SELECT s.name 
-     FROM Payments p
-     JOIN Subscriptions s ON p.subscriptionId = s.id
-     WHERE p.businessId = b.id
-     ORDER BY p.createdAt DESC
-     LIMIT 1) as subscriptionName,
-    (SELECT s.id 
-     FROM Payments p
-     JOIN Subscriptions s ON p.subscriptionId = s.id
-     WHERE p.businessId = b.id
-     ORDER BY p.createdAt DESC
-     LIMIT 1) as subscriptionId,
-    (
-      6371 * ACOS(
-        COS(RADIANS(${latitude})) * COS(RADIANS(b.latitude)) * 
-        COS(RADIANS(b.longitude) - RADIANS(${longitude})) + 
-        SIN(RADIANS(${latitude})) * SIN(RADIANS(b.latitude))
-      )
-    ) AS distance
-  FROM Businesses b
-  LEFT JOIN Services ms ON b.mainServiceId = ms.id
-  LEFT JOIN Users u ON b.userId = u.id
-  ${filters.length ? `WHERE ` + filters.join(" AND ") : ""}
-  ORDER BY distance ASC, b.priorityIndex ASC
-  LIMIT ${limit} OFFSET ${skip};
+SELECT 
+  b.id,
+  b.about,
+  b.address,
+  b.facebook,
+  b.instagram,
+  b.mainServiceId,
+  b.name,
+  b.mobile,
+  b.phone,
+  b.postalCode,
+  b.services,
+  b.suburb,
+  b.state,
+  b.openHour,
+  b.userId,
+  b.website,
+  b.createdAt,
+  ms.name as mainServiceName,
+  u.image as userImage,
+  u.email as userEmail,
+  
+  (SELECT SUM(CASE 
+               WHEN r.rating = 5 THEN (r.discount / 5.0) + 1 
+               ELSE r.discount / 5.0 
+             END)
+   FROM Reviews r 
+   WHERE r.businessId = b.id) as reviewCount,
+  (SELECT s.name 
+   FROM Payments p
+   JOIN Subscriptions s ON p.subscriptionId = s.id
+   WHERE p.businessId = b.id
+   ORDER BY p.createdAt DESC
+   LIMIT 1) as subscriptionName,
+  (SELECT s.id 
+   FROM Payments p
+   JOIN Subscriptions s ON p.subscriptionId = s.id
+   WHERE p.businessId = b.id
+   ORDER BY p.createdAt DESC
+   LIMIT 1) as subscriptionId
+  ${latitude && longitude ? `, 6371 * acos(cos(radians(${latitude})) * cos(radians(b.latitude)) * cos(radians(b.longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(b.latitude))) as distance` : ""}
+FROM Businesses b
+LEFT JOIN Services ms ON b.mainServiceId = ms.id
+LEFT JOIN Users u ON b.userId = u.id
+${filters.length ? `WHERE ` + filters.join(" AND ") : ""}
+${latitude && longitude ? `ORDER BY distance ASC, b.priorityIndex ASC` : ""}
+LIMIT ${limit} OFFSET ${skip};
 `
   )) as any[];
 

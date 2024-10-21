@@ -12,8 +12,7 @@ import reviewRouter from "./review";
 import appDataRouter from "./appData";
 import communicationRouter from "./communication";
 import suburbRouter from "./suburb";
-// import adRouter from "./ad";
-// import musicRouter from "./music";
+import bitRouter from "./bit";
 
 const router = express.Router();
 
@@ -29,6 +28,7 @@ router.use("/reviews", reviewRouter);
 router.use("/app-data", appDataRouter);
 router.use("/communications", communicationRouter);
 router.use("/suburbs", suburbRouter);
+router.use("/bits", bitRouter);
 
 // router.use("/ads", adRouter);
 // router.use("/musics", musicRouter);
