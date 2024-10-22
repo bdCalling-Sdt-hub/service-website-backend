@@ -5,6 +5,7 @@ import {
   createBusinessController,
   getBusinessController,
   getBusinessesController,
+  getTotalStar,
   sendReportController,
   updateBusinessController,
 } from "../controllers/business";
@@ -21,6 +22,8 @@ router
   .all(authenticate("ADMIN"))
   .get(businessReportController)
   .post(sendReportController);
+
+router.get("/star",authenticate("PROVIDER"), getTotalStar);
 
 router
   .route("/:id")

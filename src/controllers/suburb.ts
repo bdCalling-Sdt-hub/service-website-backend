@@ -14,18 +14,10 @@ export async function getSuburbsController(
 
     const totalSuburbs = await countSuburbs(postcode);
 
-    // const suburbs = await getSuburbs({
-    //   limit,
-    //   page,
-    //   postcode,
-    // });
-
-    const total = await countSuburbs(postcode);
-
     const pagination = paginationBuilder({
       currentPage: page,
       limit,
-      totalData: total,
+      totalData: totalSuburbs,
     });
 
     if (page > pagination.totalPage) {

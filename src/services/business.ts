@@ -70,6 +70,8 @@ export async function getBusinesses({
 }) {
   const filters = [];
 
+  filters.push(`b.subscriptionEndAt >= NOW()`);
+
   if (name) {
     filters.push(`b.name LIKE '${name}%'`);
   }
@@ -131,7 +133,7 @@ FROM Businesses b
 LEFT JOIN Services ms ON b.mainServiceId = ms.id
 LEFT JOIN Users u ON b.userId = u.id
 ${filters.length ? `WHERE ` + filters.join(" AND ") : ""}
-${latitude && longitude ? `ORDER BY distance ASC, b.priorityIndex ASC` : ""}
+ORDER BY b.priorityIndex ASC${latitude && longitude ? `, distance ASC` : ""}
 LIMIT ${limit} OFFSET ${skip};
 `
   )) as any[];
@@ -186,8 +188,6 @@ LIMIT ${limit} OFFSET ${skip};
 export async function countBusinesses({
   name,
   serviceId,
-  latitude,
-  longitude,
   endDate,
   startDate,
 }: {

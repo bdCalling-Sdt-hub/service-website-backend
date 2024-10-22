@@ -42,7 +42,7 @@ export function createBitValidation(request: Request): {
     throw error("latitude is required", 400);
   }
 
-  if (typeof body.latitude !== "number") {
+  if (isNaN(Number(body.latitude))) {
     throw error("latitude should be a number", 400);
   }
 
@@ -50,7 +50,7 @@ export function createBitValidation(request: Request): {
     throw error("longitude is required", 400);
   }
 
-  if (typeof body.longitude !== "number") {
+  if (isNaN(Number(body.longitude))) {
     throw error("longitude should be a number", 400);
   }
 
@@ -66,8 +66,8 @@ export function createBitValidation(request: Request): {
     communicationPreference: body.communicationPreference,
     description: body.description,
     image: body.image,
-    latitude: body.latitude,
-    longitude: body.longitude,
+    latitude: Number(body.latitude),
+    longitude: Number(body.longitude),
     serviceId: body.serviceId,
   };
 }

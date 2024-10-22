@@ -61,6 +61,8 @@ export function getBits({
           firstName: true,
           lastName: true,
           image: true,
+          email: true,
+          mobile: true,
         },
       },
       service: {

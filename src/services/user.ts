@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-
 export function createUser({
   firstName,
   lastName,
@@ -17,7 +16,6 @@ export function createUser({
   password: string;
   mobile?: string;
 }) {
-  
   return prisma.users.create({
     data: {
       firstName,
@@ -34,7 +32,6 @@ export function createUser({
 }
 
 export function getUserByEmail(email: string) {
-  
   return prisma.users.findUnique({
     where: {
       email,
@@ -72,7 +69,6 @@ export function getUserByEmail(email: string) {
 }
 
 export function getUserById(id: string, takePassword = false) {
-  
   return prisma.users.findUnique({
     where: {
       id,
@@ -117,6 +113,20 @@ export function getUserById(id: string, takePassword = false) {
           accountNumber: true,
           bankName: true,
           bsbNumber: true,
+          payments: {
+            where: {
+              expireAt: {
+                gte: new Date(),
+              },
+            },
+            select: {
+              subscription: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
         },
       },
     },
@@ -141,7 +151,6 @@ export function updateUserById(
     password?: string;
   }
 ) {
-  
   return prisma.users.update({
     where: {
       id,
@@ -168,7 +177,6 @@ export function updateUserById(
 }
 
 export function getAdmin() {
-  
   return prisma.users.findFirst({
     where: {
       type: "ADMIN",
@@ -191,7 +199,6 @@ export function getUsers({
   endDate?: Date;
   name?: string;
 }) {
-  
   return prisma.users.findMany({
     take: limit,
     skip,
@@ -223,7 +230,6 @@ export function countUsers({
   endDate?: Date;
   name?: string;
 }) {
-  
   return prisma.users.count({
     where: {
       type,
@@ -239,7 +245,6 @@ export function countUsers({
 }
 
 export function deleteUserById(id: string) {
-  
   return prisma.users.update({
     where: {
       id,
@@ -257,7 +262,6 @@ export function createAdmin({
   email: string;
   password: string;
 }) {
-  
   return prisma.users.create({
     data: {
       email,

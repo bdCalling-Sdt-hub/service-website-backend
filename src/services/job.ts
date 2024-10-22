@@ -28,27 +28,49 @@ export function createJob({
 export function getJobs({
   limit,
   skip,
+  createdAt = "desc",
+  latitude,
+  longitude,
   businessId,
 }: {
   limit: number;
   skip: number;
+  createdAt: "desc" | "asc";
+  latitude?: number;
+  longitude?: number;
   businessId?: string;
 }) {
   return prisma.jobs.findMany({
     take: limit,
     skip,
     where: {
+      business: {
+        latitude,
+        longitude,
+      },
       businessId,
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt,
     },
   });
 }
 
-export function countJobs({ businessId }: { businessId: string }) {
+export function countJobs({
+  businessId,
+  latitude,
+  longitude,
+}: {
+  latitude?: number;
+  longitude?: number;
+  businessId?: string;
+}) {
   return prisma.jobs.count({
     where: {
+      business: {
+        latitude,
+        longitude,
+      },
       businessId,
     },
   });

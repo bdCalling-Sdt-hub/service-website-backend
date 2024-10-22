@@ -24,6 +24,7 @@ import { JSDOM } from "jsdom";
 import { createCheckoutSession, createCustomer } from "../services/stripe";
 import { getDefaultSubscription } from "../services/subscription";
 import { sendMonthlyReportEmail } from "../services/mail";
+import { countTotalStar } from "../services/review";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
@@ -141,8 +142,6 @@ export async function getBusinessesController(
 
     const totalBusinesses = await countBusinesses({
       name,
-      latitude,
-      longitude,
       serviceId,
       startDate,
       endDate,
@@ -389,5 +388,34 @@ async function sendMails({
         createdAt: communication.createdAt,
       })),
     });
+  }
+}
+
+export async function getTotalStar(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const user = request.user;
+
+    if (!user.business.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Create a business first",
+      });
+    }
+
+    const totalStar = await countTotalStar(user.business.id);
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Total star",
+      data: { totalStar },
+    });
+  } catch (error) {
+    next(error);
   }
 }

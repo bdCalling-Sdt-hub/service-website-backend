@@ -79,13 +79,17 @@ export function overallRating({ businessId }: { businessId: string }) {
   });
 }
 
-export function countTotalStar(businessId: string) {
-  return prisma.reviews.count({
-    where: {
-      businessId,
-      rating: 5,
-    },
-  });
+export async function countTotalStar(businessId: string) {
+  const sum = (await prisma.$queryRawUnsafe(
+    `SELECT (SELECT SUM(CASE 
+                 WHEN r.rating = 5 THEN (r.discount / 5.0) + 1 
+                 ELSE r.discount / 5.0 
+               END)
+     FROM Reviews r 
+     WHERE r.businessId = '${businessId}') AS totalStar`
+  )) as [{ totalStar: null | BigInt }];
+
+  return Number(sum[0].totalStar) || 0;
 }
 
 export function totalStartByGroup(businessId: string) {
