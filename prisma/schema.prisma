@@ -81,7 +81,6 @@ model Businesses {
   suburb            String
   state             String
   postalCode        String
-  // coordinates       Float[]
   latitude          Float
   longitude         Float
   services          Json?
@@ -103,14 +102,12 @@ model Businesses {
   reviews           Reviews[]
   payments          Payments[]
   Communications    Communications[]
-
-  // @@index([coordinates], map: "coordinates_2dsphere")
   Jobs Jobs[]
 }
 
 model Services {
   id          String       @id @default(cuid())
-  name        String       @unique
+  name        String
   description String
   image       String
   isDeleted   Boolean      @default(false)

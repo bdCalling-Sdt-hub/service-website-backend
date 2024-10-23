@@ -60,6 +60,7 @@ export function countServices({ name }: { name?: string }) {
       name: {
         startsWith: name,
       },
+      isDeleted: false,
     },
   });
 }

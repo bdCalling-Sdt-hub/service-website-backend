@@ -24,7 +24,7 @@ import { JSDOM } from "jsdom";
 import { createCheckoutSession, createCustomer } from "../services/stripe";
 import { getDefaultSubscription } from "../services/subscription";
 import { sendMonthlyReportEmail } from "../services/mail";
-import { countTotalStar } from "../services/review";
+import { countTotalStar, getBestsProvidersOfLastMonth } from "../services/review";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
@@ -414,6 +414,28 @@ export async function getTotalStar(
       statusCode: 200,
       message: "Total star",
       data: { totalStar },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+export async function getBestsProviders(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const reviews = await getBestsProvidersOfLastMonth();
+
+    console.log(reviews);
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Bests providers",
+      data: reviews
     });
   } catch (error) {
     next(error);

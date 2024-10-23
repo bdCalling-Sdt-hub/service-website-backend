@@ -103,3 +103,15 @@ export function totalStartByGroup(businessId: string) {
     },
   });
 }
+
+export function getBestsProvidersOfLastMonth() {
+  return prisma.reviews.groupBy({
+    by: ["businessId"],
+    where: {
+      createdAt: {
+        gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+      },
+    },
+    
+  });
+}

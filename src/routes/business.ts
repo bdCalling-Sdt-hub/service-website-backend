@@ -3,6 +3,7 @@ import authenticate from "../middlewares/authenticate";
 import {
   businessReportController,
   createBusinessController,
+  getBestsProviders,
   getBusinessController,
   getBusinessesController,
   getTotalStar,
@@ -23,7 +24,9 @@ router
   .get(businessReportController)
   .post(sendReportController);
 
-router.get("/star",authenticate("PROVIDER"), getTotalStar);
+router.get("/star", authenticate("PROVIDER"), getTotalStar);
+
+router.get("/bests", getBestsProviders);
 
 router
   .route("/:id")
