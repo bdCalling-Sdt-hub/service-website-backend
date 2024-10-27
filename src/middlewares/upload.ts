@@ -14,7 +14,7 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) || 20971520; // 20 MB
-const allowedFileTypes = ["jpg", "jpeg", "png", "jfif"];
+let allowedFileTypes = ["jpg", "jpeg", "png", "jfif"];
 
 const storage: StorageEngine = multer.diskStorage({
   destination: UPLOAD_DIR,
@@ -40,8 +40,11 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
+  console.log(req.originalUrl);
+
   const extName = path.extname(file.originalname).toLowerCase();
   const isAllowedFileType = allowedFileTypes.includes(extName.substring(1));
+
   if (!isAllowedFileType) {
     return cb(
       error(`Only ${allowedFileTypes.join(", ")} files are allowed`, 400)

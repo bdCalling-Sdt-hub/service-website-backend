@@ -128,7 +128,11 @@ SELECT
    WHERE p.businessId = b.id
    ORDER BY p.createdAt DESC
    LIMIT 1) as subscriptionId
-  ${latitude && longitude ? `, 6371 * acos(cos(radians(${latitude})) * cos(radians(b.latitude)) * cos(radians(b.longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(b.latitude))) as distance` : ""}
+  ${
+    latitude && longitude
+      ? `, 6371 * acos(cos(radians(${latitude})) * cos(radians(b.latitude)) * cos(radians(b.longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(b.latitude))) as distance`
+      : ""
+  }
 FROM Businesses b
 LEFT JOIN Services ms ON b.mainServiceId = ms.id
 LEFT JOIN Users u ON b.userId = u.id
@@ -167,7 +171,7 @@ LIMIT ${limit} OFFSET ${skip};
           email: business.userEmail,
         },
         _count: {
-          reviews: business.reviewCount || 0,
+          reviews: Number(business.reviewCount || 0),
         },
         payments:
           business.subscriptionName && business.subscriptionId
@@ -514,4 +518,105 @@ export function businessCommunications({
       },
     },
   });
+}
+
+export async function bestsProviders(limit: number) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const businesses = (await prisma.$queryRawUnsafe(
+    `
+SELECT 
+  b.id,
+  b.about,
+  b.address,
+  b.facebook,
+  b.instagram,
+  b.mainServiceId,
+  b.name,
+  b.mobile,
+  b.phone,
+  b.postalCode,
+  b.services,
+  b.suburb,
+  b.state,
+  b.openHour,
+  b.userId,
+  b.website,
+  b.createdAt,
+  ms.name as mainServiceName,
+  u.image as userImage,
+  u.email as userEmail,
+  
+  (SELECT SUM(CASE 
+               WHEN r.rating = 5 THEN (r.discount / 5.0) + 1 
+               ELSE r.discount / 5.0 
+             END)
+   FROM Reviews r 
+   WHERE r.businessId = b.id AND r.createdAt >= '${thirtyDaysAgo.toISOString()}') as reviewCount,
+  (SELECT s.name 
+   FROM Payments p
+   JOIN Subscriptions s ON p.subscriptionId = s.id
+   WHERE p.businessId = b.id
+   ORDER BY p.createdAt DESC
+   LIMIT 1) as subscriptionName,
+  (SELECT s.id 
+   FROM Payments p
+   JOIN Subscriptions s ON p.subscriptionId = s.id
+   WHERE p.businessId = b.id
+   ORDER BY p.createdAt DESC
+   LIMIT 1) as subscriptionId
+  FROM Businesses b
+LEFT JOIN Services ms ON b.mainServiceId = ms.id
+LEFT JOIN Users u ON b.userId = u.id
+ORDER BY reviewCount DESC
+LIMIT ${limit};
+`
+  )) as any[];
+
+  return businesses.reduce((acc, business) => {
+    return [
+      ...acc,
+      {
+        id: business.id,
+        about: business.about,
+        address: business.address,
+        facebook: business.facebook,
+        instagram: business.instagram,
+        mainServiceId: business.mainServiceId,
+        name: business.name,
+        mobile: business.mobile,
+        phone: business.phone,
+        postalCode: business.postalCode,
+        services: business.services,
+        suburb: business.suburb,
+        state: business.state,
+        openHour: business.openHour,
+        userId: business.userId,
+        website: business.website,
+        createdAt: business.createdAt,
+        mainService: {
+          name: business.mainServiceName,
+        },
+        user: {
+          image: business.userImage,
+          email: business.userEmail,
+        },
+        _count: {
+          reviews: Number(business.reviewCount || 0),
+        },
+        payments:
+          business.subscriptionName && business.subscriptionId
+            ? [
+                {
+                  subscription: {
+                    name: business.subscriptionName,
+                    id: business.subscriptionId,
+                  },
+                },
+              ]
+            : [],
+      },
+    ];
+  }, []);
 }

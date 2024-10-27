@@ -9,6 +9,7 @@ import {
   businessReport,
   updateBusiness,
   businessCommunications,
+  bestsProviders,
 } from "../services/business";
 import {
   businessReportValidation,
@@ -24,7 +25,8 @@ import { JSDOM } from "jsdom";
 import { createCheckoutSession, createCustomer } from "../services/stripe";
 import { getDefaultSubscription } from "../services/subscription";
 import { sendMonthlyReportEmail } from "../services/mail";
-import { countTotalStar, getBestsProvidersOfLastMonth } from "../services/review";
+import { countTotalStar } from "../services/review";
+import { writeFileSync } from "fs";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
@@ -57,9 +59,7 @@ export async function createBusinessController(
       phone,
       latitude,
       longitude,
-      cancelUrl,
       license,
-      successUrl,
     } = createBusinessValidation(request);
 
     const service = await getServiceById(mainServiceId);
@@ -104,13 +104,13 @@ export async function createBusinessController(
     });
 
     const session = await createCheckoutSession({
-      cancelUrl,
-      successUrl,
       priceId: subscription.priceId,
       costumerId: customer.id,
       businessId: business.id,
       subscriptionId: subscription.id,
     });
+
+    writeFileSync("session.json", JSON.stringify(session));
 
     return responseBuilder(response, {
       ok: true,
@@ -422,20 +422,18 @@ export async function getTotalStar(
 
 
 export async function getBestsProviders(
-  request: Request,
+  _request: Request,
   response: Response,
   next: NextFunction
 ) {
   try {
-    const reviews = await getBestsProvidersOfLastMonth();
-
-    console.log(reviews);
+    const reviews = await bestsProviders(10);
 
     return responseBuilder(response, {
       ok: true,
       statusCode: 200,
       message: "Bests providers",
-      data: reviews
+      data: reviews,
     });
   } catch (error) {
     next(error);

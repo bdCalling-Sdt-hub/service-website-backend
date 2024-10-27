@@ -31,7 +31,6 @@ import {
   updateSubscription,
   // getSubscriptionByUserId,
 } from "../services/stripe";
-import { updateAppData } from "../services/appData";
 import { countTotalStar } from "../services/review";
 
 export async function createPaymentController(
@@ -403,8 +402,6 @@ export async function createCheckoutSessionController(
     }
 
     const session = await createCheckoutSession({
-      cancelUrl,
-      successUrl,
       priceId: price.id,
       costumerId: customer.id,
       businessId: user.business.id,

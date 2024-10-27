@@ -60,6 +60,14 @@ app.get("/health", (_: Request, response: Response) => {
   response.send("OK");
 });
 
+app.use((_: Request, response: Response) => {
+  return responseBuilder(response, {
+    ok: false,
+    statusCode: 404,
+    message: "URL not found or method not allowed",
+  });
+});
+
 getSuburbs({ limit: 1, skip: 0 }).then((data) => {
   if (data.length === 0) {
     createSuburbs(suburbs).then(() => {

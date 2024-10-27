@@ -7,9 +7,14 @@ if (!stripe_secret_key) {
 }
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const frontEndUrl = process.env.FRONTEND_URL;
 
 if (!endpointSecret) {
   throw new Error("Stripe webhook secret is not provided");
+}
+
+if (!frontEndUrl) {
+  throw new Error("Frontend URL is not provided");
 }
 
 const stripe = new Stripe(stripe_secret_key);
@@ -17,21 +22,17 @@ const stripe = new Stripe(stripe_secret_key);
 export function createCheckoutSession({
   priceId,
   costumerId,
-  successUrl,
-  cancelUrl,
   businessId,
   subscriptionId,
 }: {
   priceId: string;
   costumerId: string;
-  successUrl: string;
-  cancelUrl: string;
   businessId: string;
   subscriptionId: string;
 }) {
   return stripe.checkout.sessions.create({
-    success_url: successUrl,
-    cancel_url: cancelUrl,
+    success_url: `${frontEndUrl}/dashboard`,
+    cancel_url: `${frontEndUrl}/cancel`,
     payment_method_types: ["au_becs_debit"],
     mode: "subscription",
     billing_address_collection: "auto",

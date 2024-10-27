@@ -15,8 +15,6 @@ export function createBusinessValidation(request: Request): {
   postalCode: string;
   latitude: number;
   longitude: number;
-  cancelUrl: string;
-  successUrl: string;
 } {
   const body = request.body;
 
@@ -81,12 +79,6 @@ export function createBusinessValidation(request: Request): {
   if (typeof body.longitude !== "number")
     throw error("Longitude should be a number", 400);
 
-  if (body.cancelUrl && typeof body.cancelUrl !== "string")
-    throw error("Cancel URL should be a string", 400);
-
-  if (body.successUrl && typeof body.successUrl !== "string")
-    throw error("Success URL should be a string", 400);
-
   if (body.license && typeof body.license !== "string")
     throw error("License should be a string", 400);
 
@@ -100,8 +92,6 @@ export function createBusinessValidation(request: Request): {
     postalCode: body.postalCode,
     state: body.state,
     phone: body.phone,
-    cancelUrl: body.cancelUrl,
-    successUrl: body.successUrl,
     license: body.license,
     latitude: body.latitude,
     longitude: body.longitude,
