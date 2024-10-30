@@ -6,7 +6,7 @@ import { createPayment } from "./src/services/payment";
 import { updateBusiness } from "./src/services/business";
 import { sendInvoiceEmail } from "./src/services/mail";
 
-const PORT = 9000;
+const PORT = process.env.PORT || 9000;
 
 const server = http.createServer();
 
@@ -31,7 +31,7 @@ server.on("request", (req, res) => {
 
         if (event.type !== "invoice.payment_succeeded") {
           res.statusCode = 400;
-          return res.end("Webhook Error");
+          return res.end("invalid event type");
         }
 
         const priceId = (event.data.object as any).lines.data[0].price.id;
@@ -40,7 +40,7 @@ server.on("request", (req, res) => {
 
         if (!subscription) {
           res.statusCode = 400;
-          return res.end("Webhook Error");
+          return res.end("subscription not found");
         }
 
         const customerId = (event.data.object as any).customer;

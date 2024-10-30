@@ -12,6 +12,12 @@ import {
   getJobApplicationsValidation,
 } from "../validations/jobApplication";
 import { getJobById } from "../services/job";
+import { sendJobApplicationNotification } from "../services/mail";
+
+const backendUrl = process.env.BACKEND_URL;
+if (!backendUrl) {
+  throw new Error("BACKEND_URL is not defined.");
+}
 
 export async function createJobApplicationController(
   request: Request,
@@ -23,6 +29,16 @@ export async function createJobApplicationController(
 
     const { jobId, resume } = createJobApplicationValidation(request);
 
+    const job = await getJobById(jobId);
+
+    if (!job) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Job not found",
+      });
+    }
+
     const isJobApplicationExist = await getJobApplicationByUserIdAndJobId({
       userId: user.id,
       jobId,
@@ -32,7 +48,7 @@ export async function createJobApplicationController(
       return responseBuilder(response, {
         ok: false,
         statusCode: 400,
-        message: "You have already applied for this job",
+        message: "You have already applied for this job.",
       });
     }
 
@@ -42,10 +58,17 @@ export async function createJobApplicationController(
       resume,
     });
 
+    sendJobApplicationNotification(
+      job.email,
+      user.firstName + " " + user.lastName,
+      job.title,
+      backendUrl + "/" + jobApplication.resume
+    );
+
     return responseBuilder(response, {
       ok: true,
       statusCode: 201,
-      message: "Job application created",
+      message: "Job application submitted.",
       data: jobApplication,
     });
   } catch (error) {

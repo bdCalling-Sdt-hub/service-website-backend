@@ -75,7 +75,7 @@ export function getJobsValidation(request: Request): {
 
   if (limit < 1) limit = 1;
 
-  if (query.businessId && isValidObjectId(query.businessId as string)) {
+  if (query.businessId && !isValidObjectId(query.businessId as string)) {
     throw error("Invalid business id", 400);
   } else {
     businessId = query.businessId as string;
@@ -109,5 +109,21 @@ export function getJobsValidation(request: Request): {
     longitude,
     title: (query.title as string) || undefined,
     createdAt: (query.createdAt as "desc" | "asc") || "desc",
+  };
+}
+
+
+export function deleteJobValidation(request: Request): {
+  jobId: string;
+} {
+  const params = request.params;
+
+  if (!params.jobId) throw error("Job id is required", 400);
+
+  if (!isValidObjectId(params.jobId))
+    throw error("Invalid job id", 400);
+
+  return {
+    jobId: params.jobId,
   };
 }

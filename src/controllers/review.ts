@@ -18,6 +18,7 @@ import {
   getCommunicationById,
   updateCommunication,
 } from "../services/communication";
+import { sendTicketNumberEmail } from "../services/mail";
 
 export async function createReviewController(
   request: Request,
@@ -38,7 +39,7 @@ export async function createReviewController(
       });
     }
 
-    if (!communication.userId) {
+    if (!communication.userId || !communication.user) {
       return responseBuilder(response, {
         ok: false,
         statusCode: 403,
@@ -76,6 +77,12 @@ export async function createReviewController(
       status: "SENDED",
       newStatus: "REVIEWED",
     });
+
+    sendTicketNumberEmail(
+      communication.user?.email,
+      review.ticketNo.toString(),
+      communication.user?.firstName + " " + communication.user?.lastName
+    );
 
     return responseBuilder(response, {
       ok: true,

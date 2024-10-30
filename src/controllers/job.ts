@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import responseBuilder from "../utils/responseBuilder";
 import paginationBuilder from "../utils/paginationBuilder";
-import { countJobs, createJob, getJobs } from "../services/job";
+import { countJobs, createJob, deleteJob, getJobById, getJobs } from "../services/job";
 import { createJobValidation, getJobsValidation } from "../validations/job";
 
 export async function createJobController(
@@ -88,6 +88,46 @@ export async function getJobsController(
       message: "Jobs found",
       data: jobs,
       pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteJobController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const user = request.user;
+
+    const { jobId } = request.params;
+
+    const job = await getJobById(jobId);
+
+    if (!job) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Job not found",
+      });
+    }
+
+    if (job.businessId !== user?.business?.id) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 403,
+        message: "You are not authorized to delete this job",
+      });
+    }
+
+    await deleteJob(jobId);
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Job deleted",
     });
   } catch (error) {
     next(error);

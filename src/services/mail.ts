@@ -285,3 +285,87 @@ export function sendMonthlyReportEmail({
 </html>`;
   return emailWithNodemailer({ email, subject, html });
 }
+
+export function sendTicketNumberEmail(
+  email: string,
+  ticketNumber: string,
+  userName: string
+) {
+  const subject = "Your Ticket Confirmation";
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <table style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;">
+        <tr>
+            <td style="text-align: center;">
+                <h2 style="color: #333333;">Thank You for Your Feedback!</h2>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px; color: #333333;">
+                <p>Dear ${userName},</p>
+                <p>We appreciate your review and value your insights. As a token of acknowledgment, here’s your unique ticket number for reference:</p>
+                <p style="font-size: 24px; font-weight: bold; margin: 20px 0; color: #007BFF;">${ticketNumber}</p>
+                <p>This ticket number can be used for any future inquiries or follow-ups related to your review.</p>
+                <p>If you have any questions or require further assistance, please don’t hesitate to contact our support team.</p>
+                <p>Thank you for choosing <strong>BASP</strong>.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center; padding: 20px;">
+                <p>Best regards,</p>
+                <p><strong>The BASP Team</strong></p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+  return emailWithNodemailer({ email, subject, html });
+}
+
+export function sendJobApplicationNotification(email: string, applicantName: string, jobTitle: string, resumeLink: string) {
+  const subject = `New Application for ${jobTitle}`;
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Job Application</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <table style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;">
+        <tr>
+            <td style="text-align: center;">
+                <h2 style="color: #333333;">New Job Application Received</h2>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px; color: #333333;">
+                <p>Dear Hiring Manager,</p>
+                <p>We wanted to inform you that <strong>${applicantName}</strong> has applied for the position of <strong>${jobTitle}</strong>.</p>
+                <p>The applicant's resume is available below:</p>
+                <p style="text-align: center; margin: 20px 0;">
+                    <a href="${resumeLink}" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        View Resume
+                    </a>
+                </p>
+                <p>If you have any questions or need additional information, please feel free to reach out to our support team.</p>
+                <p>Thank you for using <strong>BASP</strong> for your recruitment needs.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center; padding: 20px;">
+                <p>Best regards,</p>
+                <p><strong>The BASP Team</strong></p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+  return emailWithNodemailer({ email, subject, html });
+}

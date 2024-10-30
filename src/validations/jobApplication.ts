@@ -10,19 +10,16 @@ export function createJobApplicationValidation(request: Request): {
 
   if (!body.jobId) throw error("Job id is required", 400);
 
-  if (!body.resume) throw error("Resume is required", 400);
+  if (!request.file?.filename) throw error("Resume is required", 400);
 
   if (typeof body.jobId !== "string")
     throw error("Job id should be a string", 400);
 
   if (!isValidObjectId(body.jobId)) throw error("Job id is not valid", 400);
 
-  if (typeof body.resume !== "string")
-    throw error("Resume should be a string", 400);
-
   return {
     jobId: body.jobId,
-    resume: body.resume,
+    resume: request.file?.filename,
   };
 }
 
@@ -33,15 +30,16 @@ export function getJobApplicationsValidation(request: Request): {
 } {
   const query = request.query;
 
-  if (!query.limit) throw error("Limit is required", 400);
+  let page = parseInt(query.page as string) || 1;
 
-  if (!query.page) throw error("Page is required", 400);
+  if (page < 1) page = 1;
 
-  if (typeof query.limit !== "string")
-    throw error("Limit should be a number", 400);
+  let limit = parseInt(query.limit as string) || 10;
 
-  if (typeof query.page !== "string")
-    throw error("Page should be a number", 400);
+  if (limit > 100) limit = 100;
+
+  if (limit < 1) limit = 1;
+
 
   if (!query.jobId) throw error("Job id is required", 400);
 
@@ -51,8 +49,8 @@ export function getJobApplicationsValidation(request: Request): {
   if (!isValidObjectId(query.jobId)) throw error("Job id is not valid", 400);
 
   return {
-    limit: parseInt(query.limit),
-    page: parseInt(query.page),
+    limit,
+    page,
     jobId: query.jobId,
   };
 }

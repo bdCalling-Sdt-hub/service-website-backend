@@ -46,11 +46,11 @@ export function getJobs({
     take: limit,
     skip,
     where: {
+      ...(businessId && { businessId }),
       business: {
         latitude,
         longitude,
       },
-      businessId,
       title: {
         contains: title,
       },
@@ -58,19 +58,19 @@ export function getJobs({
     orderBy: {
       createdAt,
     },
-    include:{
+    include: {
       business: {
         select: {
           name: true,
           address: true,
-          user:{
-            select:{
+          user: {
+            select: {
               image: true,
-            }
-          }
-        }
-      }
-    }
+            },
+          },
+        },
+      },
+    },
   });
 }
 
@@ -99,11 +99,25 @@ export function countJobs({
   });
 }
 
-
 export function getJobById(id: string) {
   return prisma.jobs.findFirst({
     where: {
       id,
     },
   });
+}
+
+export function deleteJob(id: string) {
+  return prisma.$transaction([
+    prisma.jobApplications.deleteMany({
+      where: {
+        jobId: id,
+      },
+    }),
+    prisma.jobs.delete({
+      where: {
+        id,
+      },
+    }),
+  ]);
 }

@@ -40,7 +40,9 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  console.log(req.originalUrl);
+  if (req.originalUrl === "/job-applications") {
+    allowedFileTypes = ["pdf", "doc", "docx"];
+  }
 
   const extName = path.extname(file.originalname).toLowerCase();
   const isAllowedFileType = allowedFileTypes.includes(extName.substring(1));

@@ -42,7 +42,9 @@ export function getJobApplications({
         select: {
           firstName: true,
           lastName: true,
+          mobile: true,
           image: true,
+          email: true,
         },
       },
     },

@@ -14,7 +14,7 @@ router
   .post(
     authenticate("CUSTOMER"),
     upload.single("resume"),
-    createJobApplicationController
+    createJobApplicationController 
   );
 
 export default router;

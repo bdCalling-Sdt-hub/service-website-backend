@@ -24,6 +24,7 @@ model Users {
   mobile          String?
   isDeleted       Boolean           @default(false)
   isVerified      Boolean           @default(false)
+  isUnsubscribed  Boolean           @default(false)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   notifications   Notifications[]
@@ -102,7 +103,7 @@ model Businesses {
   reviews           Reviews[]
   payments          Payments[]
   Communications    Communications[]
-  Jobs Jobs[]
+  Jobs              Jobs[]
 }
 
 model Services {
@@ -220,7 +221,7 @@ model Jobs {
   businessId      String
   business        Businesses        @relation(fields: [businessId], references: [id])
   title           String
-  description     String
+  description     String            @db.LongText
   email           String
   phone           String
   isActive        Boolean           @default(true)
@@ -241,4 +242,3 @@ model JobApplications {
 
   @@unique([jobId, userId])
 }
-
