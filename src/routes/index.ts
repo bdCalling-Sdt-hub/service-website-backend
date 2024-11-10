@@ -15,6 +15,7 @@ import suburbRouter from "./suburb";
 import bitRouter from "./bit";
 import jobRouter from "./job";
 import jobApplicationRouter from "./jobApplication";
+import promotionRouter from "./promotion";
 
 const router = express.Router();
 
@@ -33,8 +34,6 @@ router.use("/suburbs", suburbRouter);
 router.use("/bits", bitRouter);
 router.use("/jobs", jobRouter);
 router.use("/job-applications", jobApplicationRouter);
-
-// router.use("/ads", adRouter);
-// router.use("/musics", musicRouter);
+router.use("/promotions", promotionRouter);
 
 export default router;

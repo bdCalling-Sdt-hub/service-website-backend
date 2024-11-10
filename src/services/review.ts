@@ -43,7 +43,11 @@ export function getReviews({
     orderBy: {
       createdAt: "desc",
     },
-    include: {
+    select:{
+      id: true,
+      rating: true,
+      message: true,
+      createdAt: true,
       user: {
         select: {
           firstName: true,
@@ -51,12 +55,12 @@ export function getReviews({
           image: true,
         },
       },
-      business: {
-        select: {
+      business:{
+        select:{
           name: true,
-        },
-      },
-    },
+        }
+      }
+    }
   });
 }
 

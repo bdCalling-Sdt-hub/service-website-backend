@@ -55,6 +55,8 @@ export function getUserByEmail(email: string) {
           postalCode: true,
           state: true,
           services: true,
+          latitude: true,
+          longitude: true,
           mainServiceId: true,
           mainService: {
             select: {
@@ -103,6 +105,8 @@ export function getUserById(id: string, takePassword = false) {
           state: true,
           services: true,
           mainServiceId: true,
+          latitude: true,
+          longitude: true, 
           mainService: {
             select: {
               name: true,

@@ -216,14 +216,14 @@ export function updateBusinessValidation(request: Request): {
   if (body.services && !Array.isArray(body.services))
     throw error("Services should be an array", 400);
 
-  if (body.services && body.services.length === 0)
-    throw error("Services should not be empty", 400);
-
   if (
     body.services &&
     body.services.some((service: unknown) => typeof service !== "string")
   )
     throw error("Services should be an array of strings", 400);
+
+  if (body.services && body.services.some((service: string) => !service.trim()))
+    throw error("Services should not contain empty strings", 400);
 
   if (body.abn && typeof body.abn !== "number")
     throw error("ABN should be a number", 400);
@@ -252,16 +252,16 @@ export function updateBusinessValidation(request: Request): {
   if (body.longitude && typeof body.longitude !== "number")
     throw error("Longitude should be a number", 400);
 
-  if(body.accountNumber && typeof body.accountNumber !== "string")
+  if (body.accountNumber && typeof body.accountNumber !== "string")
     throw error("Account Number should be a string", 400);
 
-  if(body.accountName && typeof body.accountName !== "string")
+  if (body.accountName && typeof body.accountName !== "string")
     throw error("Account Name should be a string", 400);
 
-  if(body.bankName && typeof body.bankName !== "string")
+  if (body.bankName && typeof body.bankName !== "string")
     throw error("Bank Name should be a string", 400);
 
-  if(body.bsbNumber && typeof body.bsbNumber !== "string")
+  if (body.bsbNumber && typeof body.bsbNumber !== "string")
     throw error("BSB Number should be a string", 400);
 
   if (

@@ -53,6 +53,7 @@ export function getCommunications({
           lastName: true,
           image: true,
           mobile: true,
+          email: true,
         },
       },
       business: {

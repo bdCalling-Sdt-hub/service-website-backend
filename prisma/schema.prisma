@@ -104,6 +104,7 @@ model Businesses {
   payments          Payments[]
   Communications    Communications[]
   Jobs              Jobs[]
+  Promotions        Promotions[]
 }
 
 model Services {
@@ -241,4 +242,17 @@ model JobApplications {
   updatedAt DateTime @updatedAt
 
   @@unique([jobId, userId])
+}
+
+model Promotions {
+  id         String     @id @default(cuid())
+  businessId String
+  business   Businesses @relation(fields: [businessId], references: [id])
+  discount   Int
+  title      String
+  startAt    DateTime
+  endAt      DateTime
+  isVerified Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }

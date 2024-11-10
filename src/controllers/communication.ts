@@ -40,7 +40,16 @@ export async function createCommunicationController(
 
     let user;
 
-    if (userId) user = await getUserById(userId);
+    if (userId) {
+      if (business.userId === userId) {
+        return responseBuilder(response, {
+          ok: false,
+          statusCode: 400,
+          message: "You can't send a message to yourself",
+        });
+      }
+      user = await getUserById(userId);
+    }
 
     if (type === "MESSAGE" && !user?.id) {
       return responseBuilder(response, {

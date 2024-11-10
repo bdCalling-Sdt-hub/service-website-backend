@@ -26,7 +26,6 @@ import { createCheckoutSession, createCustomer } from "../services/stripe";
 import { getDefaultSubscription } from "../services/subscription";
 import { sendMonthlyReportEmail } from "../services/mail";
 import { countTotalStar } from "../services/review";
-import { writeFileSync } from "fs";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);
@@ -109,8 +108,6 @@ export async function createBusinessController(
       businessId: business.id,
       subscriptionId: subscription.id,
     });
-
-    writeFileSync("session.json", JSON.stringify(session));
 
     return responseBuilder(response, {
       ok: true,
@@ -427,7 +424,7 @@ export async function getBestsProviders(
   next: NextFunction
 ) {
   try {
-    const reviews = await bestsProviders(10);
+    const reviews = await bestsProviders(3);
 
     return responseBuilder(response, {
       ok: true,
