@@ -3,26 +3,16 @@ import error from "../utils/error";
 import { isValidObjectId } from "../utils/validators";
 
 export function createPortfolioValidation(request: Request): {
-  name: string;
   image: string;
 } {
   const body = request.body;
 
-  if (!body.name) throw error("Name is required", 400);
-
   if (!body.image) throw error("Image is required", 400);
-
-  if (typeof body.name !== "string")
-    throw error("Name should be a string", 400);
 
   if (typeof body.image !== "string")
     throw error("Image should be a string", 400);
-
-  if (body.name.trim().length === 0)
-    throw error("Name should not be empty", 400);
-
+  
   return {
-    name: body.name,
     image: body.image,
   };
 }

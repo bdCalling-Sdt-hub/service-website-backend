@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import responseBuilder from "../utils/responseBuilder";
 import paginationBuilder from "../utils/paginationBuilder";
 import { countJobs, createJob, deleteJob, getJobById, getJobs } from "../services/job";
-import { createJobValidation, getJobsValidation } from "../validations/job";
+import { createJobValidation, deleteJobValidation, getJobsValidation } from "../validations/job";
 
 export async function createJobController(
   request: Request,
@@ -102,7 +102,7 @@ export async function deleteJobController(
   try {
     const user = request.user;
 
-    const { jobId } = request.params;
+    const { jobId } = deleteJobValidation(request);
 
     const job = await getJobById(jobId);
 

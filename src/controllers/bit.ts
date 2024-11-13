@@ -85,6 +85,7 @@ export async function getBitsController(
       statusCode: 200,
       message: "Bits fetched",
       data: bits,
+      pagination
     });
   } catch (error) {
     next(error);

@@ -14,7 +14,7 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) || 20971520; // 20 MB
-let allowedFileTypes = ["jpg", "jpeg", "png", "jfif"];
+
 
 const storage: StorageEngine = multer.diskStorage({
   destination: UPLOAD_DIR,
@@ -40,6 +40,8 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
+  let allowedFileTypes = ["jpg", "jpeg", "png", "jfif"];
+  
   if (req.originalUrl === "/job-applications") {
     allowedFileTypes = ["pdf", "doc", "docx"];
   }

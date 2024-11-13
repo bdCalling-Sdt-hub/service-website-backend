@@ -118,12 +118,12 @@ export function deleteJobValidation(request: Request): {
 } {
   const params = request.params;
 
-  if (!params.jobId) throw error("Job id is required", 400);
+  if (!params.id) throw error("Job id is required", 400);
 
-  if (!isValidObjectId(params.jobId))
+  if (!isValidObjectId(params.id))
     throw error("Invalid job id", 400);
 
   return {
-    jobId: params.jobId,
+    jobId: params.id,
   };
 }

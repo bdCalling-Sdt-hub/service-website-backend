@@ -23,7 +23,7 @@ export async function createPortfolioController(
   try {
     const user = request.user;
 
-    const { name, image } = createPortfolioValidation(request);
+    const { image } = createPortfolioValidation(request);
 
     if (!user.business) {
       return responseBuilder(response, {
@@ -46,7 +46,6 @@ export async function createPortfolioController(
     const portfolio = await createPortfolio({
       businessId: user.business.id,
       image,
-      name,
     });
 
     return responseBuilder(response, {
