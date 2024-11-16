@@ -142,6 +142,8 @@ export async function getBusinessesController(
       serviceId,
       startDate,
       endDate,
+      latitude,
+      longitude,
     });
 
     const pagination = paginationBuilder({

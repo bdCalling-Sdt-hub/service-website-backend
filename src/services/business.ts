@@ -137,6 +137,11 @@ FROM Businesses b
 LEFT JOIN Services ms ON b.mainServiceId = ms.id
 LEFT JOIN Users u ON b.userId = u.id
 ${filters.length ? `WHERE ` + filters.join(" AND ") : ""}
+${
+  latitude && longitude
+    ? `HAVING distance <= 25`
+    : ""
+}
 ORDER BY b.priorityIndex ASC${latitude && longitude ? `, distance ASC` : ""}
 LIMIT ${limit} OFFSET ${skip};
 `
@@ -163,6 +168,7 @@ LIMIT ${limit} OFFSET ${skip};
         userId: business.userId,
         website: business.website,
         createdAt: business.createdAt,
+        distance: business.distance,
         mainService: {
           name: business.mainServiceName,
         },
@@ -194,6 +200,8 @@ export async function countBusinesses({
   serviceId,
   endDate,
   startDate,
+  latitude,
+  longitude,
 }: {
   name?: string;
   serviceId?: string;
@@ -202,7 +210,7 @@ export async function countBusinesses({
   startDate?: Date;
   endDate?: Date;
 }) {
-  const query: string[] = [];
+  const query: string[] = [`subscriptionEndAt >= NOW()`];
 
   if (name) {
     query.push(`name LIKE '${name}%'`);
@@ -215,6 +223,12 @@ export async function countBusinesses({
   if (startDate && endDate) {
     query.push(
       `createdAt >= '${startDate.toISOString()}' AND createdAt <= '${endDate.toISOString()}'`
+    );
+  }
+
+  if(latitude && longitude) {
+    query.push(
+      `6371 * acos(cos(radians(${latitude})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(latitude))) <= 25`
     );
   }
 

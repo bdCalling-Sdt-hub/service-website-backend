@@ -11,8 +11,6 @@ export function createCommunication({
   message?: string;
   type: "CALL" | "MESSAGE";
 }) {
-  
-  
   return prisma.communications.create({
     data: {
       userId,
@@ -32,8 +30,6 @@ export function getCommunications({
   skip: number;
   businessId?: string;
 }) {
-  
-  
   return prisma.communications.findMany({
     take: limit,
     skip,
@@ -69,14 +65,19 @@ export function getCommunications({
 }
 
 export function countCommunications(businessId?: string) {
-  
-  
-  return prisma.communications.count({ where: { businessId } });
+  return prisma.communications.count({
+    where: {
+      businessId,
+      status: businessId
+        ? undefined
+        : {
+            not: "REVIEWED",
+          },
+    },
+  });
 }
 
 export function getCommunicationById(id: string) {
-  
-  
   return prisma.communications.findUnique({
     where: { id },
     include: {
@@ -113,8 +114,6 @@ export function updateCommunication({
   newStatus: "SENDED" | "REVIEWED";
   userId: string;
 }) {
-  
-  
   return prisma.communications.updateMany({
     where: { businessId, status, userId },
     data: {
@@ -130,8 +129,6 @@ export function getLastCommunication({
   businessId: string;
   userId?: string;
 }) {
-  
-  
   return prisma.communications.findFirst({
     where: { businessId, userId },
     orderBy: {
