@@ -12,11 +12,16 @@ import {
   changePasswordValidation,
   getUsersValidation,
   deleteUserValidation,
+  unsubscribeValidation,
 } from "../validations/user";
 import responseBuilder from "../utils/responseBuilder";
 import { comparePassword, hashPassword } from "../services/hash";
 import paginationBuilder from "../utils/paginationBuilder";
-import { cancelSubscription, getCustomers, getSubscriptionByCustomerId } from "../services/stripe";
+import {
+  cancelSubscription,
+  getCustomers,
+  getSubscriptionByCustomerId,
+} from "../services/stripe";
 import { updateBusiness } from "../services/business";
 
 // export async function getUserController(
@@ -241,6 +246,44 @@ export async function deleteUserController(
       ok: true,
       statusCode: 200,
       message: "User deleted",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function unsubscribeController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { userId } = unsubscribeValidation(request);
+
+    const user = await getUserById(userId);
+
+    if (!user) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "User not found",
+      });
+    }
+
+    if (user.business) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 400,
+        message: "service provider can't unsubscribe",
+      });
+    }
+
+    await updateUserById(userId, { unsubscribe: true });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Unsubscribed",
     });
   } catch (error) {
     next(error);

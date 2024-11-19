@@ -22,6 +22,7 @@ model Users {
   type            UserType
   image           String?
   mobile          String?
+  unsubscribe     Boolean           @default(false)
   isDeleted       Boolean           @default(false)
   isVerified      Boolean           @default(false)
   isUnsubscribed  Boolean           @default(false)

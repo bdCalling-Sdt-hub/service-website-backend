@@ -48,9 +48,9 @@ export function getBits({
     take: limit,
     skip,
     where: {
-      serviceId,
-      latitude,
-      longitude,
+      // serviceId,
+      // latitude,
+      // longitude,
     },
     orderBy: {
       createdAt: "desc",
@@ -84,10 +84,10 @@ export function countBits({
   longitude?: number;
 }) {
   return prisma.bits.count({
-    where: {
-      serviceId,
-      latitude,
-      longitude,
-    },
+    // where: {
+    //   serviceId,
+    //   latitude,
+    //   longitude,
+    // },
   });
 }

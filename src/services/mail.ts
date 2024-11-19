@@ -72,11 +72,13 @@ export function sendReviewEmail({
   userName,
   businessName,
   id,
+  userId,
 }: {
   email: string;
   userName: string;
   businessName: string;
   id: string;
+  userId: string;
 }) {
   const subject = "We Value Your Feedback!";
   const html = `<!DOCTYPE html>
@@ -99,17 +101,26 @@ export function sendReviewEmail({
                 <p>Thank you for using <strong>BASP</strong> to connect with ${businessName}. We hope you were satisfied with the service provided!</p>
                 <p>Your feedback is incredibly important to us and helps other customers make informed decisions. We would greatly appreciate it if you could take a moment to share your thoughts about your experience with ${businessName}.</p>
                 
-                    <a href="${frontendUrl}/review/${id}" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                        Leave a Review
-                    </a>
+                <a href="${frontendUrl}/review/${id}" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Leave a Review
+                </a>
+                
                 <p>Thank you for your time and feedback. If you have any additional comments or suggestions, please feel free to reach out to us.</p>
                 <p>Best regards,</p>
                 <p><strong>The BASP Team</strong></p>
             </td>
         </tr>
+        <tr>
+            <td style="text-align: center; padding: 20px; border-top: 1px solid #dddddd;">
+                <a href="${frontendUrl}/unsubscribe?id=${userId}" style="font-size: 14px; color: #666666; text-decoration: none;">
+                    Unsubscribe
+                </a>
+            </td>
+        </tr>
     </table>
 </body>
-</html>`;
+</html>
+`;
   return emailWithNodemailer({ email, subject, html });
 }
 
@@ -289,7 +300,8 @@ export function sendMonthlyReportEmail({
 export function sendTicketNumberEmail(
   email: string,
   ticketNumber: string,
-  userName: string
+  userName: string,
+  userId: string
 ) {
   const subject = "Your Ticket Confirmation";
   const html = `<!DOCTYPE html>
@@ -322,13 +334,24 @@ export function sendTicketNumberEmail(
                 <p><strong>The BASP Team</strong></p>
             </td>
         </tr>
+        <tr>
+            <td style="text-align: center; padding: 20px; border-top: 1px solid #dddddd;">
+                <a href="${frontendUrl}/unsubscribe?id=${userId}" style="font-size: 14px; color: #666666; text-decoration: none;">Unsubscribe</a>
+            </td>
+        </tr>
     </table>
 </body>
-</html>`;
+</html>
+`;
   return emailWithNodemailer({ email, subject, html });
 }
 
-export function sendJobApplicationNotification(email: string, applicantName: string, jobTitle: string, resumeLink: string) {
+export function sendJobApplicationNotification(
+  email: string,
+  applicantName: string,
+  jobTitle: string,
+  resumeLink: string
+) {
   const subject = `New Application for ${jobTitle}`;
   const html = `<!DOCTYPE html>
 <html lang="en">

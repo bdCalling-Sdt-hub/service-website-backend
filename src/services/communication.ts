@@ -86,6 +86,7 @@ export function getCommunicationById(id: string) {
           email: true,
           firstName: true,
           lastName: true,
+          unsubscribe: true,
         },
       },
       business: {

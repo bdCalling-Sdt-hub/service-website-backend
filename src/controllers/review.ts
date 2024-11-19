@@ -78,11 +78,14 @@ export async function createReviewController(
       newStatus: "REVIEWED",
     });
 
-    sendTicketNumberEmail(
-      communication.user?.email,
-      review.ticketNo.toString(),
-      communication.user?.firstName + " " + communication.user?.lastName
-    );
+    if (!communication.user.unsubscribe) {
+      sendTicketNumberEmail(
+        communication.user?.email,
+        review.ticketNo.toString(),
+        communication.user?.firstName + " " + communication.user?.lastName,
+        communication.userId
+      );
+    }
 
     return responseBuilder(response, {
       ok: true,

@@ -106,7 +106,7 @@ export function getUserById(id: string, takePassword = false) {
           services: true,
           mainServiceId: true,
           latitude: true,
-          longitude: true, 
+          longitude: true,
           mainService: {
             select: {
               name: true,
@@ -146,6 +146,7 @@ export function updateUserById(
     mobile,
     isVerified,
     password,
+    unsubscribe,
   }: {
     image?: string;
     firstName?: string;
@@ -153,6 +154,7 @@ export function updateUserById(
     mobile?: string;
     isVerified?: boolean;
     password?: string;
+    unsubscribe?: boolean;
   }
 ) {
   return prisma.users.update({
@@ -166,6 +168,7 @@ export function updateUserById(
       mobile,
       isVerified,
       password,
+      unsubscribe,
     },
     select: {
       id: true,

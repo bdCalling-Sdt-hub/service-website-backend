@@ -163,11 +163,20 @@ export async function updateCommunicationController(
       });
     }
 
+    if (communication.user.unsubscribe) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 403,
+        message: "User is unsubscribed",
+      });
+    }
+
     await sendReviewEmail({
       businessName: communication.business.name,
       userName: communication.user?.firstName,
       email: communication.user.email,
       id: communication.id,
+      userId: communication.userId,
     });
 
     await updateCommunication({

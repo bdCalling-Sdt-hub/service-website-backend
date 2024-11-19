@@ -165,3 +165,20 @@ export function deleteUserValidation(request: Request): {
     userId,
   };
 }
+
+
+export function unsubscribeValidation(request: Request): {
+  userId: string;
+} {
+  const userId = request.params.userId;
+
+  if (!userId) {
+    throw error("User ID is required", 400);
+  }
+
+  if (!isValidObjectId(userId)) throw error("Invalid user ID", 400);
+
+  return {
+    userId,
+  };
+}

@@ -5,6 +5,7 @@ import {
   getUsersController,
   getTotalCustomerAndProviderController,
   deleteUserController,
+  unsubscribeController,
 } from "../controllers/user";
 import upload from "../middlewares/upload";
 import authenticate from "../middlewares/authenticate";
@@ -24,5 +25,7 @@ router
   .put(authenticate(), upload.single("image"), updateUserController)
   .patch(authenticate(), changePasswordController)
   .delete(authenticate("ADMIN"), deleteUserController);
+
+router.get("/:userId/unsubscribe", unsubscribeController);
 
 export default router;
