@@ -5,12 +5,17 @@ import {
   deletePromotion,
   getPromotionById,
   countPromotions,
-  getPromotions,
+  getPromotion,
+  countTotalPromotions,
+  getAllPromotions,
+  approvePromotion,
 } from "../services/promotion";
 import responseBuilder from "../utils/responseBuilder";
 import {
+  approvePromotionValidation,
   createPromotionValidation,
   deletePromotionValidation,
+  getAllPromotionsValidation,
   getPromotionValidation,
 } from "../validations/promotion";
 import paginationBuilder from "../utils/paginationBuilder";
@@ -120,16 +125,43 @@ export async function getPromotionsController(
       });
     }
 
-    const { limit, page } = getPromotionValidation(request);
-
-    const totalPromotions = await countPromotions({
+    const promotion = await getPromotion({
       businessId: user.business.id,
     });
 
+    if (!promotion) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "not any running promotion",
+      });
+    }
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Promotions fetched successfully",
+      data: promotion,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getAllPromotionsController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { page, limit } = getAllPromotionsValidation(request);
+
+    const totalPromotions = await countTotalPromotions();
+
     const pagination = paginationBuilder({
       currentPage: page,
-      limit,
       totalData: totalPromotions,
+      limit,
     });
 
     if (page > pagination.totalPage) {
@@ -142,10 +174,9 @@ export async function getPromotionsController(
 
     const skip = (page - 1) * limit;
 
-    const promotions = await getPromotions({
-      limit,
+    const promotions = await getAllPromotions({
       skip,
-      businessId: user.business.id,
+      take: limit,
     });
 
     return responseBuilder(response, {
@@ -154,6 +185,36 @@ export async function getPromotionsController(
       message: "Promotions fetched successfully",
       data: promotions,
       pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function approvePromotionController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = approvePromotionValidation(request);
+
+    const promotion = await getPromotionById(id);
+
+    if (!promotion) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Promotion not found",
+      });
+    }
+
+    await approvePromotion(id);
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Promotion approved successfully",
     });
   } catch (error) {
     next(error);

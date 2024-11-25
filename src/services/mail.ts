@@ -392,3 +392,66 @@ export function sendJobApplicationNotification(
 </html>`;
   return emailWithNodemailer({ email, subject, html });
 }
+
+export function sendPromotionEmail({
+  email,
+  promotionTitle,
+  discount,
+  startAt,
+  endAt,
+  businessName,
+  promotionUrl
+}: {
+  email: string;
+  promotionTitle: string;
+  discount: number;
+  startAt: Date;
+  endAt: Date;
+  businessName: string;
+  promotionUrl: string;
+}) {
+  const subject = `Exciting New Promotion at ${businessName}!`;
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exclusive Promotion Just for You!</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <table style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;">
+        <tr>
+            <td style="text-align: center;">
+                <h2 style="color: #333333;">Exclusive Offer Just for You!</h2>
+                <p style="font-size: 18px; color: #007BFF;">Get ready to save big at <strong>${businessName}</strong>!</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px; color: #333333;">
+                <p>We are excited to announce a limited-time promotion:</p>
+                <h3 style="font-size: 24px; color: #007BFF;">${promotionTitle}</h3>
+                <p style="font-size: 20px; font-weight: bold; color: #FF6347;">${discount}% OFF</p>
+                <p>This promotion is available from <strong>${startAt.toLocaleDateString()}</strong> to <strong>${endAt.toLocaleDateString()}</strong>.</p>
+                <p>Don’t miss out on this amazing deal! Click below to get started:</p>
+                <p style="text-align: center; margin: 20px 0;">
+                    <a href="${promotionUrl}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        Claim Your Discount
+                    </a>
+                </p>
+                <p>If you have any questions or need assistance, feel free to reach out to us. We’re here to help!</p>
+                <p>Thank you for being a valued customer at <strong>${businessName}</strong>.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center; padding: 20px;">
+                <p>Best regards,</p>
+                <p><strong>The ${businessName} Team</strong></p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+`;
+
+  return emailWithNodemailer({ email, subject, html });
+}

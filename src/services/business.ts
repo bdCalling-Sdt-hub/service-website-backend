@@ -127,7 +127,23 @@ SELECT
    JOIN Subscriptions s ON p.subscriptionId = s.id
    WHERE p.businessId = b.id
    ORDER BY p.createdAt DESC
-   LIMIT 1) as subscriptionId
+   LIMIT 1) as subscriptionId,
+  (SELECT p.title
+   FROM Promotions p
+   WHERE p.businessId = b.id
+     AND p.startAt <= NOW()
+     AND p.endAt >= NOW()
+     AND p.isVerified = true
+   ORDER BY p.createdAt DESC
+   LIMIT 1) as promotionTitle,
+  (SELECT p.discount
+   FROM Promotions p
+   WHERE p.businessId = b.id
+     AND p.startAt <= NOW()
+     AND p.endAt >= NOW()
+     AND p.isVerified = true
+   ORDER BY p.createdAt DESC
+   LIMIT 1) as promotionDiscount
   ${
     latitude && longitude
       ? `, 6371 * acos(cos(radians(${latitude})) * cos(radians(b.latitude)) * cos(radians(b.longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(b.latitude))) as distance`
@@ -190,10 +206,17 @@ LIMIT ${limit} OFFSET ${skip};
                 },
               ]
             : [],
+        promotion: business.promotionTitle
+          ? {
+              title: business.promotionTitle,
+              discount: business.promotionDiscount,
+            }
+          : null,
       },
     ];
   }, []);
 }
+
 
 export async function countBusinesses({
   name,

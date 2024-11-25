@@ -131,6 +131,20 @@ export function getUserById(id: string, takePassword = false) {
             },
             take: 1,
           },
+          Promotions: {
+            where: {
+              endAt: {
+                gte: new Date(),
+              },
+              startAt: {
+                lte: new Date(),
+              },
+            },
+            take: 1,
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
         },
       },
     },

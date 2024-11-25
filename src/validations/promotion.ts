@@ -73,7 +73,7 @@ export function deletePromotionValidation(request: Request): {
     throw error("Promotion id is required", 400);
   }
 
-  if (isValidObjectId(params.id)) {
+  if (!isValidObjectId(params.id)) {
     throw error("Invalid promotion id", 400);
   }
 
@@ -101,5 +101,45 @@ export function getPromotionValidation(request: Request): {
   return {
     page,
     limit,
+  };
+}
+
+export function getAllPromotionsValidation(request: Request): {
+  page: number;
+  limit: number;
+} {
+  const query = request.query;
+
+  let page = parseInt(query.page as string) || 1;
+
+  if (page < 1) page = 1;
+
+  let limit = parseInt(query.limit as string) || 10;
+
+  if (limit > 100) limit = 100;
+
+  if (limit < 1) limit = 1;
+
+  return {
+    page,
+    limit,
+  };
+}
+
+export function approvePromotionValidation(request: Request): {
+  id: string;
+} {
+  const params = request.params;
+
+  if (!params.id) {
+    throw error("Promotion id is required", 400);
+  }
+
+  if (!isValidObjectId(params.id)) {
+    throw error("Invalid promotion id", 400);
+  }
+
+  return {
+    id: params.id,
   };
 }

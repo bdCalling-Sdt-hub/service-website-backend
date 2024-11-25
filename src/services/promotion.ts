@@ -60,23 +60,13 @@ export function getPromotionById(id: string) {
   });
 }
 
-export function getPromotions({
-  limit,
-  skip,
-  businessId,
-}: {
-  limit: number;
-  skip: number;
-  businessId?: string;
-}) {
-  return prisma.promotions.findMany({
-    take: limit,
-    skip,
+export function getPromotion({ businessId }: { businessId?: string }) {
+  return prisma.promotions.findFirst({
     where: {
       businessId,
     },
     orderBy: {
-      createdAt: "desc",
+      endAt: "desc",
     },
   });
 }
@@ -85,6 +75,47 @@ export function countPromotions({ businessId }: { businessId?: string }) {
   return prisma.promotions.count({
     where: {
       businessId,
+    },
+  });
+}
+
+export function getAllPromotions({
+  skip,
+  take,
+}: {
+  skip: number;
+  take: number;
+}) {
+  return prisma.promotions.findMany({
+    skip,
+    take,
+    orderBy: {
+      createdAt: "desc",
+    },
+    where: {
+      isVerified: false,
+    },
+    include: {
+      business: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+}
+
+export function countTotalPromotions() {
+  return prisma.promotions.count();
+}
+
+export function approvePromotion(id: string) {
+  return prisma.promotions.update({
+    where: {
+      id,
+    },
+    data: {
+      isVerified: true,
     },
   });
 }
