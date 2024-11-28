@@ -293,28 +293,28 @@ export function updateBusinessValidation(request: Request): {
 
   return {
     businessId: params.id,
-    name: body.name,
-    mobile: body.mobile,
-    phone: body.phone,
-    about: body.about,
-    license: body.license,
-    openHour: body.openHour,
-    website: body.website,
-    facebook: body.facebook,
-    instagram: body.instagram,
-    services: body.services,
-    address: body.address,
-    mainServiceId: body.mainServiceId,
-    postalCode: body.postalCode,
-    state: body.state,
-    suburb: body.suburb,
-    abn: body.abn,
-    latitude: body.latitude,
-    longitude: body.longitude,
-    accountNumber: body.accountNumber,
-    accountName: body.accountName,
-    bankName: body.bankName,
-    bsbNumber: body.bsbNumber,
+    name: body.name || undefined,
+    mobile: body.mobile || undefined,
+    phone: body.phone || undefined,
+    about: body.about || undefined,
+    license: body.license || undefined,
+    openHour: body.openHour || undefined,
+    website: body.website || undefined,
+    facebook: body.facebook || undefined,
+    instagram: body.instagram || undefined,
+    services: body.services || undefined,
+    address: body.address || undefined,
+    mainServiceId: body.mainServiceId || undefined,
+    postalCode: body.postalCode || undefined,
+    state: body.state || undefined,
+    suburb: body.suburb || undefined,
+    abn: body.abn || undefined,
+    latitude: body.latitude || undefined,
+    longitude: body.longitude || undefined,
+    accountNumber: body.accountNumber || undefined,
+    accountName: body.accountName || undefined,
+    bankName: body.bankName || undefined,
+    bsbNumber: body.bsbNumber || undefined,
   };
 }
 
@@ -366,10 +366,14 @@ export function businessReportValidation(request: Request): {
   if (query.suburb && typeof query.suburb !== "string")
     throw error("Suburb should be a string", 400);
 
-  if (query.active && typeof query.active !== "boolean")
+  if (query.active && query.active !== "true" && query.active !== "false")
     throw error("Active should be a boolean", 400);
 
-  if (query.workStatus && typeof query.workStatus !== "boolean")
+  if (
+    query.workStatus &&
+    query.workStatus !== "true" &&
+    query.workStatus !== "false"
+  )
     throw error("Work Status should be a boolean", 400);
 
   if (query.subscriptionId && typeof query.subscriptionId !== "string")

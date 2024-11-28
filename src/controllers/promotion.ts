@@ -130,10 +130,12 @@ export async function getPromotionsController(
     });
 
     if (!promotion) {
-      return responseBuilder(response, {
+      return response.status(404).json({
         ok: false,
         statusCode: 404,
-        message: "not any running promotion",
+        message: "Promotion not found",
+        data: null,
+        pagination: {},
       });
     }
 

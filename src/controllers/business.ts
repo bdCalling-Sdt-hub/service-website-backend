@@ -229,6 +229,18 @@ export async function updateBusinessController(
 
     if (about) cleanAbout = purify.sanitize(about);
 
+    if (mainServiceId) {
+      const service = await getServiceById(mainServiceId);
+
+      if (!service) {
+        return responseBuilder(response, {
+          ok: false,
+          statusCode: 404,
+          message: "Service not found",
+        });
+      }    
+    }
+
     const business = await updateBusiness(businessId, {
       abn,
       about: cleanAbout,
@@ -418,7 +430,6 @@ export async function getTotalStar(
     next(error);
   }
 }
-
 
 export async function getBestsProviders(
   _request: Request,
