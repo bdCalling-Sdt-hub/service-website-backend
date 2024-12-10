@@ -35,6 +35,7 @@ model Users {
   Communications  Communications[]
   Bits            Bits[]
   JobApplications JobApplications[]
+  Referrals       Referrals[]
 }
 
 model Notifications {
@@ -106,6 +107,7 @@ model Businesses {
   Communications    Communications[]
   Jobs              Jobs[]
   Promotions        Promotions[]
+  Referrals         Referrals[]
 }
 
 model Services {
@@ -253,6 +255,19 @@ model Promotions {
   startAt    DateTime
   endAt      DateTime
   isVerified Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Referrals {
+  id         String     @id @default(cuid())
+  userId     String
+  user       Users      @relation(fields: [userId], references: [id])
+  businessId String
+  business   Businesses @relation(fields: [businessId], references: [id])
+  name       String
+  email      String
+  phone      String
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }

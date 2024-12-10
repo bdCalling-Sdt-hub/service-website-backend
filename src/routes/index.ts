@@ -16,6 +16,7 @@ import bitRouter from "./bit";
 import jobRouter from "./job";
 import jobApplicationRouter from "./jobApplication";
 import promotionRouter from "./promotion";
+import referralRouter from "./referrals";
 
 const router = express.Router();
 
@@ -35,5 +36,6 @@ router.use("/bits", bitRouter);
 router.use("/jobs", jobRouter);
 router.use("/job-applications", jobApplicationRouter);
 router.use("/promotions", promotionRouter);
+router.use("/referrals", referralRouter);
 
 export default router;

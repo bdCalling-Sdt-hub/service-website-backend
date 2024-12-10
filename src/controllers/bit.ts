@@ -33,7 +33,7 @@ export async function createBitController(
     return responseBuilder(response, {
       ok: true,
       statusCode: 201,
-      message: "Bit created",
+      message: "Bid created",
       data: bit,
     });
   } catch (error) {
@@ -83,11 +83,11 @@ export async function getBitsController(
     return responseBuilder(response, {
       ok: true,
       statusCode: 200,
-      message: "Bits fetched",
+      message: "Bids fetched",
       data: bits,
       pagination
     });
   } catch (error) {
     next(error);
   }
-}
+}   

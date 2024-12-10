@@ -153,12 +153,12 @@ FROM Businesses b
 LEFT JOIN Services ms ON b.mainServiceId = ms.id
 LEFT JOIN Users u ON b.userId = u.id
 ${filters.length ? `WHERE ` + filters.join(" AND ") : ""}
-${
-  latitude && longitude
-    ? `HAVING distance <= 25`
-    : ""
-}
-ORDER BY b.priorityIndex ASC${latitude && longitude ? `, distance ASC` : ""}
+${latitude && longitude ? `HAVING distance <= 25` : ""}
+ORDER BY ${
+      latitude && longitude
+        ? `distance*b.priorityIndex ASC`
+        : "b.priorityIndex ASC"
+    }
 LIMIT ${limit} OFFSET ${skip};
 `
   )) as any[];
@@ -217,7 +217,6 @@ LIMIT ${limit} OFFSET ${skip};
   }, []);
 }
 
-
 export async function countBusinesses({
   name,
   serviceId,
@@ -249,7 +248,7 @@ export async function countBusinesses({
     );
   }
 
-  if(latitude && longitude) {
+  if (latitude && longitude) {
     query.push(
       `6371 * acos(cos(radians(${latitude})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${longitude})) + sin(radians(${latitude})) * sin(radians(latitude))) <= 25`
     );
