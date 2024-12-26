@@ -4,6 +4,7 @@ import {
   countReferrals,
   createReferral,
   getReferrals,
+  getRefers,
 } from "../services/referrals";
 import {
   createReferralValidation,
@@ -11,6 +12,7 @@ import {
 } from "../validations/referals";
 import { getBusinessById } from "../services/business";
 import paginationBuilder from "../utils/paginationBuilder";
+import { countUsers } from "../services/user";
 
 export async function createReferralController(
   request: Request,
@@ -97,6 +99,48 @@ export async function getReferralsController(
       statusCode: 200,
       message: "Referrals fetched",
       data: referrals,
+      pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getRefersController(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const totalUsers = await countUsers({});
+    const { limit, page } = getReferralsValidation(request);
+
+    const pagination = paginationBuilder({
+      currentPage: page,
+      limit,
+      totalData: totalUsers,
+    });
+
+    if (page > pagination.totalPage) {
+      return responseBuilder(response, {
+        ok: false,
+        statusCode: 404,
+        message: "Page not found",
+      });
+    }
+
+    const skip = (page - 1) * limit;
+
+    const users = await getRefers({
+      limit,
+      skip,
+    });
+
+    return responseBuilder(response, {
+      ok: true,
+      statusCode: 200,
+      message: "Users fetched",
+      data: users,
       pagination,
     });
   } catch (error) {

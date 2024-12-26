@@ -181,7 +181,7 @@ export function sendInvoiceEmail(email: string, invoiceUrl: string) {
         <tr>
             <td style="padding: 20px; color: #333333;">
                 <p>Dear Customer,</p>
-                <p>We appreciate your prompt payment for [service/product]. We are pleased to inform you that your payment has been successfully processed.</p>
+                <p>We appreciate your prompt payment for service. We are pleased to inform you that your payment has been successfully processed.</p>
                 <p>For your records, you can view and download your invoice by clicking the link below:</p>
                 <p>
                     <a href="${invoiceUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">

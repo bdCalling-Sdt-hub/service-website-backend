@@ -62,3 +62,26 @@ export function countReferrals(businessId: string) {
     },
   });
 }
+
+export function getRefers({ skip, limit }: { skip: number; limit: number }) {
+  return prisma.users.findMany({
+    take: limit,
+    skip,
+    orderBy: {
+      Referrals: {
+        _count: "desc",
+      },
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      _count: {
+        select: {
+          Referrals: true,
+        },
+      },
+    },
+  });
+}
