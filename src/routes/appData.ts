@@ -2,6 +2,7 @@ import express from "express";
 import authenticate from "../middlewares/authenticate";
 import {
   getAppDataController,
+  getHTMLController,
   updateAppDataController,
 } from "../controllers/appData";
 
@@ -12,8 +13,6 @@ router
   .get(getAppDataController)
   .put(authenticate("ADMIN"), updateAppDataController);
 
-router.get("/about.html")
-router.get("/privacy.html")
-router.get("/terms.html")
+  router.get("/:page",getHTMLController)
 
 export default router;

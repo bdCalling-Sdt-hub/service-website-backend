@@ -32,3 +32,21 @@ export function updateAppDataValidation(request: Request): {
     terms: body.terms,
   };
 }
+
+export function getHTMLValidation(request: Request): {
+  page: "privacy.html" | "terms.html" | "about.html";
+} {
+  const page = request.params.page;
+
+  if (
+    page !== "privacy.html" &&
+    page !== "terms.html" &&
+    page !== "about.html"
+  ) {
+    throw error("Invalid Url", 404);
+  }
+
+  return {
+    page,
+  };
+}
