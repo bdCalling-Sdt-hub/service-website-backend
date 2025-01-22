@@ -160,9 +160,9 @@ model Reviews {
 
 model AppData {
   id        String   @id @default(cuid())
-  about     String
-  privacy   String
-  terms     String
+  about     String   @db.LongText
+  privacy   String   @db.LongText
+  terms     String   @db.LongText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
