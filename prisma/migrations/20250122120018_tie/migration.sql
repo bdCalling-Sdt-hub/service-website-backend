@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `AppData` MODIFY `about` LONGTEXT NOT NULL,
+    MODIFY `privacy` LONGTEXT NOT NULL,
+    MODIFY `terms` LONGTEXT NOT NULL;
