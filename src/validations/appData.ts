@@ -8,7 +8,9 @@ export function updateAppDataValidation(request: Request): {
 } {
   const body = request.body;
 
-  if (Object.keys(body).length === 0) throw error("No data provided", 400);
+  if(!body.about && !body.privacy && !body.terms) {
+    throw error("No valid data provided to update", 400);
+  }
 
   if (body?.about && typeof body.about !== "string") {
     throw error("About must be a string", 400);
