@@ -14,7 +14,7 @@ router
   .get(getAppDataController)
   .put(authenticate("ADMIN"), updateAppDataController);
 
-  router.get("/:page",getHTMLController)
-  router.get("/privacy-policy.html",privacyPolicy)
+router.get("/privacy-policy.html", privacyPolicy);
+router.get("/:page", getHTMLController);
 
 export default router;
